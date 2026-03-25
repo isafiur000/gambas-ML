@@ -1,0 +1,48 @@
+' Gambas class file
+
+Private $url As String
+
+Public Sub _new()
+
+  $url = CGI["REQUEST_URI"]
+
+End
+
+''Testing: curl http://localhost/cgi-bin/web_api?'"model":"MLTest","args":"23.22,Male,2.43"'
+Private Sub PrintValues()
+
+  Dim yy As String
+  Dim xcoll As Collection
+
+  Dim xmodel As String
+  Dim xargs As String
+  Dim xargLst As String[]
+  Dim xval As String
+
+  If InStr($url, "?") > 0 Then
+    yy = Split($url, "?")[1]
+    If yy Then
+      xcoll = JSON.Decode(UnBase64(yy))
+
+      xmodel = xcoll["model"]
+      xargs = xcoll["args"]
+      xargLst = Split(xargs, ",")
+
+      xval = ExecuteScript(xmodel, xargLst)
+      Print CStr(xval)
+    Endif
+  Endif
+
+End
+
+Private Function ExecuteScript(xModel As String, argsLst As String[]) As String
+
+  Dim xScript As String
+  Dim xval As String
+
+  xScript = "/etc" &/ Application.Name &/ xModel &/ "script.py"
+
+  Shell "python3 " & xScript & Space(1) & argsLst.Join(Space(1)) To xval
+  Return xval
+
+End

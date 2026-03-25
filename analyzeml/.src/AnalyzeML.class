@@ -1,0 +1,49 @@
+' Gambas class file
+
+Export
+Inherits UserContainer
+
+Public Const _Properties As String = "*,Picture,ShowTitle=True,Border=True,FileType,Headers,FilePath"
+Public Const _Group As String = "View"
+
+Property FileType As String
+Property Headers As String[]
+Property FilePath As String
+
+Private $hPyTerminal As FmPythonTerminal
+
+Public Sub _new()
+
+  $hPyTerminal = New FmPythonTerminal(Me) As "PyTerminal"
+
+End
+
+Private Function FileType_Read() As String
+
+End
+
+Private Sub FileType_Write(Value As String)
+
+  $hPyTerminal.SetFileType(Value)
+
+End
+
+Private Function Headers_Read() As String[]
+
+End
+
+Private Sub Headers_Write(Value As String[])
+
+  $hPyTerminal.SetHeaderColumns(Value)
+
+End
+
+Private Function FilePath_Read() As String
+
+End
+
+Private Sub FilePath_Write(Value As String)
+
+  $hPyTerminal.SetFilePath(Value)
+
+End

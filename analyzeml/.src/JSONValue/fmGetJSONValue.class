@@ -1,0 +1,164 @@
+' Gambas class file
+
+Private aRowPanel As New Object[50]
+Private aNameLabel As New Object[50]
+Private aValueBox As New Object[50]
+Private aLineText As New Object[50]
+Private aAreaText As New Object[50]
+Private aSpacing As New Object[50]
+
+Private $sVar As Variant[]
+Private $ShowNull As Boolean
+Private $sValue As String
+
+Public Sub Run(sVariant As Variant[], ShowNull As Boolean) As String
+
+  $sVar = sVariant
+  $ShowNull = ShowNull
+  If Me.ShowModal() Then Return $sValue
+
+End
+
+Public Sub Form_Open()
+
+  LoadFormData()
+
+End
+
+Private Sub LoadFormData()
+
+  Dim i As Integer
+
+  For i = 0 To $sVar.Count - 1
+    If i < 49 Then
+      aRowPanel[i] = New HBox(Frame1)
+      aNameLabel[i] = New TextLabel(aRowPanel[i]) As "NameLabel"
+      If $sVar[i][1] = "Number" Then
+        aValueBox[i] = New ValueBox(aRowPanel[i]) As "ValueGroup"
+      Else If $sVar[i][1] = "MultiLine" Then
+        aAreaText[i] = New TextArea(aRowPanel[i]) As "TextAreaGroup"
+      Else If $sVar[i][1] = "String" Then
+        aLineText[i] = New TextBox(aRowPanel[i]) As "TextLineGroup"
+      Endif
+      aSpacing[i] = New Separator(Frame1)
+    Endif
+  Next
+  DIsplayTextForm()
+
+End
+
+Private Sub DIsplayTextForm()
+
+  Dim i As Integer
+  Dim AppFactor As String
+
+  AppFactor = 1
+
+  For i = 0 To $sVar.Count - 1
+    If i < 49 Then
+
+      With aRowPanel[i]
+        If $sVar[i][1] = "MultiLine" Then
+          .Height = 100
+        Else
+          .Height = 25
+        Endif
+        .Width = Frame1.Width
+      End With
+
+      With aNameLabel[i]
+        .Width = 250 * AppFactor
+        .Height = 25
+        .Text = $sVar[i][0]
+        .Tag = i
+      End With
+
+      If $sVar[i][1] = "Number" Then
+        With aValueBox[i]
+          .Expand = True
+          .Height = 25
+          If $sVar[i].Count = 3 Then
+            .Value = CFloat($sVar[i][2])
+          Else
+            .Value = 0
+          Endif
+          .Tag = i
+        End With
+      Else If $sVar[i][1] = "MultiLine" Then
+        With aAreaText[i]
+          .Expand = True
+          .Height = 100
+          If $sVar[i].Count = 3 Then
+            .Text = $sVar[i][2]
+          Else
+            .Text = ""
+          Endif
+          .Tag = i
+        End With
+      Else If $sVar[i][1] = "String" Then
+        With aLineText[i]
+          .Expand = True
+          .Height = 25
+          If $sVar[i].Count = 3 Then
+            .Text = $sVar[i][2]
+          Else
+            .Text = ""
+          Endif
+          .Tag = i
+        End With
+      Endif
+
+      With aSpacing[i]
+        .Height = 15 * AppFactor
+      End With
+
+    Endif
+  Next
+
+End
+
+Public Sub btnBrOK_Click()
+
+  Dim i As Integer
+  Dim sColl As Collection
+
+  sColl = New Collection
+  For i = 0 To $sVar.Count - 1
+    If i < 49 Then
+      If $ShowNull = True Then
+        If aValueBox[i] Then
+          If aValueBox[i].Value Then
+            sColl.Add(aValueBox[i].Value, aNameLabel[i].Text)
+          Else
+            sColl.Add(0, aNameLabel[i].Text)
+          Endif
+        Else If aAreaText[i] And If aAreaText[i].Text Then
+          sColl.Add(aAreaText[i].Text, aNameLabel[i].Text)
+        Else If aLineText[i] And If aLineText[i].Text Then
+          sColl.Add(aLineText[i].Text, aNameLabel[i].Text)
+        Endif
+
+      Else
+        If aValueBox[i] And If aValueBox[i].Value Then
+          sColl.Add(aValueBox[i].Value, aNameLabel[i].Text)
+        Else If aAreaText[i] And If aAreaText[i].Text Then
+          sColl.Add(aAreaText[i].Text, aNameLabel[i].Text)
+        Else If aLineText[i] And If aLineText[i].Text Then
+          sColl.Add(aLineText[i].Text, aNameLabel[i].Text)
+        Endif
+
+      Endif
+    Endif
+  Next
+
+  $sValue = JSON.Encode(sColl)
+  Wait
+  Me.Close(True)
+
+End
+
+Public Sub btnclose_Click()
+
+  Me.Close()
+
+End

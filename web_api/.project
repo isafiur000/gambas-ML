@@ -1,0 +1,20 @@
+# Gambas Project File 3.0
+Startup=Main
+Version=0.0.1
+Component=gb.util.web
+Component=gb.web
+Description="ML Models integration"
+TabSize=2
+Language=en_US
+Maintainer=Safiur Rahman
+Address=isafiur000@gmail.com
+Url=https://ml.safiur.com.np/
+License=General Public License
+PackageName=web_api-0.0.1
+CreateEachDirectory=1
+Packager=1
+Systems=ubuntu
+Menus=ubuntu:"Applications/Data Management"
+Groups=ubuntu:"devel"
+ExtraFiles=ubuntu:"MLTest\t/etc/web_api"
+usehttpserver=1

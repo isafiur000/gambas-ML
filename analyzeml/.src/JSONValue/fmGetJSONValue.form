@@ -1,0 +1,29 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,72,64)
+  Text = ("Input Form")
+  { ScrollView1 ScrollView
+    MoveScaled(1,1,70,57)
+    Arrangement = Arrange.Vertical
+    { Frame1 Panel
+      MoveScaled(0,0,69,44)
+      Arrangement = Arrange.Vertical
+      AutoResize = True
+    }
+  }
+  { Panel1 Panel
+    MoveScaled(1,58,70,5)
+    { btnBrOK Button
+      MoveScaled(44,1,12,3.5)
+      ToolTip = ("[Ctrl+S] to save")
+      Text = Shortcut(("Save"), "S")
+      Picture = Picture["icon:/small/apply"]
+    }
+    { btnclose Button
+      MoveScaled(57,1,12,3.5)
+      ToolTip = ("Close")
+      Text = ("Close")
+    }
+  }
+}

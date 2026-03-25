@@ -1,0 +1,11 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,140,86)
+  Expand = True
+  Arrangement = Arrange.Vertical
+  { AnalyzeML1 AnalyzeML
+    MoveScaled(0,0,89,49)
+    Expand = True
+  }
+}

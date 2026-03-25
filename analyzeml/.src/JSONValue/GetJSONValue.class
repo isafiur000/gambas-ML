@@ -1,0 +1,7 @@
+' Gambas class file
+
+Static Public Sub _call(sVariant As Variant[], ShowNull As Boolean) As String                              ''
+
+  Return fmGetJSONValue.Run(sVariant, ShowNull)
+
+End

@@ -1,0 +1,73 @@
+' Gambas module file
+
+Private Function GetFacterValue(cmd As String) As String
+
+  Dim yy As String
+  Dim xx As String
+  Dim arcmd As String[]
+
+  arcmd = ["facter", cmd]
+  If System.Exist("facter") = True Then
+    Exec arcmd To xx
+    If xx Then
+      yy = Trim(xx)
+    Else
+      yy = ""
+    Endif
+  Else
+    InstallSelectedApplication(["facter"])
+  Endif
+
+  Return yy
+
+End
+
+Public Function DistributionOSName() As String
+
+  Return GetFacterValue("operatingsystem")
+
+End
+
+Public Sub InstallSelectedApplication(AppList As String[])
+
+  Dim xlist As String[]
+  Dim hForm As FmTerminal
+  ' Dim sPass As String
+
+  If AppList Then
+    If AppList.Count Then
+      If UCase(DistributionOSName()) = "UBUNTU" Then
+
+        xlist = ["sudo", "apt-get", "--no-install-recommends", "install"]
+        xlist.Insert(AppList)
+        hForm = New FmTerminal("Exec", xlist)
+        hForm.ShowModal
+
+      Endif
+    Endif
+  Endif
+
+End
+
+Public Function DistributionVendor() As String
+
+  Dim xx As String
+  Dim yy As String
+  Dim zz As String
+
+  xx = DistributionOSName()
+  yy = GetFacterValue("operatingsystemrelease")
+
+  zz = xx & yy
+  Return zz
+
+End
+
+Public Function GetNowString() As String
+
+  Dim xx As String
+
+  xx = Format(Now(), "yymmddhhhnnssuu")
+  Return xx
+
+End
