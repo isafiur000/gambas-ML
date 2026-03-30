@@ -1,7 +1,7 @@
 # Gambas Project File 3.0
 Title=analyzeml
 Startup=Form1
-Version=0.1.0
+Version=3.19.2
 Component=gb.term
 Component=gb.image
 Component=gb.qt5
@@ -18,7 +18,7 @@ Address=isafiur000@gmail.com
 Url=http://ml.safiur.com.np
 License=General Public License
 Prefix=1
-PackageName=gambas3-gb-analyzeml-0.1.0
+PackageName=gambas3-gb-analyzeml-3.19.2
 CreateEachDirectory=1
 Packager=1
 Systems=ubuntu

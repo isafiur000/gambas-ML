@@ -33,7 +33,7 @@
           Border = False
         }
         { Panel6 Panel
-          MoveScaled(1,10,23,11)
+          MoveScaled(1,10,23,14)
           { rbregression RadioButton
             MoveScaled(1,1,21,3)
             Text = ("Regression")
@@ -46,6 +46,10 @@
           { rbunsupervis RadioButton
             MoveScaled(1,7,21,3)
             Text = ("Unsupervised")
+          }
+          { rbnlp RadioButton
+            MoveScaled(1,10,21,3)
+            Text = ("NLP")
           }
         }
       }
@@ -348,23 +352,23 @@
         { Panel23 Panel
           MoveScaled(0,0,44,3.5)
           { chkPCA CheckBox
-            MoveScaled(0.5,0,15,3)
+            MoveScaled(0.5,0.5,15,3)
             Text = ("PCA")
           }
         }
         { pnlpca Panel
-          MoveScaled(0,4,43,5)
+          MoveScaled(0,4,43,4)
           { lblnullmethod3 Label
-            MoveScaled(1,1,9,3)
+            MoveScaled(1,0.5,9,3)
             Border = Border.Plain
             Text = ("Variance")
           }
           { txtpca ValueBox
-            MoveScaled(11,1,8,3)
+            MoveScaled(11,0.5,8,3)
             Text = ("0.95")
           }
           { btnpca Button
-            MoveScaled(30,1,12,3)
+            MoveScaled(30,0.5,12,3)
             Text = ("Exec")
           }
         }
@@ -391,15 +395,15 @@
         Text = ("Bagging")
       }
       { Label12 Label
-        MoveScaled(1,6,7,3)
+        MoveScaled(1,5,7,3)
         Border = Border.Plain
         Text = ("Model")
       }
       { cmbmodel ComboBox
-        MoveScaled(9,6,33,3)
+        MoveScaled(9,5,33,3)
       }
       { pnlmodel Panel
-        MoveScaled(1,10,41,23)
+        MoveScaled(1,9,41,23)
         Arrangement = Arrange.Vertical
         { pnlone Panel
           MoveScaled(0,0,40,3.5)
@@ -460,7 +464,7 @@
         { Panel25 Panel
           MoveScaled(0,18,40,3.5)
           { btnsavemodel Button
-            MoveScaled(29,0,10,3)
+            MoveScaled(25,0,14,3)
             Enabled = False
             Text = ("Model")
           }
@@ -470,7 +474,7 @@
             Text = ("Dump")
           }
           { btnsaveProcess Button
-            MoveScaled(13,0,16,3)
+            MoveScaled(9,0,16,3)
             Enabled = False
             Text = ("PreProcessing")
           }
@@ -555,7 +559,7 @@
         MoveScaled(17,1,26,3)
       }
       { Button1 Button
-        MoveScaled(1,30,21,3.5)
+        MoveScaled(17,5,25,4)
         Text = ("Dump Outputs")
       }
       Index = 0

@@ -1,6 +1,6 @@
 [Component]
-Key=analyzeml
-Version=0.1.0
+Key=gb.analyzeml
+Version=3.19.2
 State=2
 Needs=Form
 Requires=gb.form.terminal,gb.form,gb.qt5,gb.util,gb.util.web,gb.term,gb.image

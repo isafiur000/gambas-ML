@@ -75,6 +75,7 @@ Public Sub btndatainstall_Click()
   xList.Add("python3-matplotlib")
   xList.Add("python3-seaborn")
   xList.Add("python3-graphviz")
+  xList.Add("python3-nltk")
   modMain.InstallSelectedApplication(xList)
 
 End
@@ -138,7 +139,7 @@ End
 Public Sub Button1_Click()
 
   If Dialog.SelectDirectory() Then Return
-  File.Save(Dialog.Path &/ "ipython.txt", TerminalView1.Text)
+  File.Save(Dialog.Path &/ "ipython" & modMain.GetNowString() & ".txt", TerminalView1.Text)
 
 End
 
@@ -1263,8 +1264,15 @@ Public Sub btnpredict_Click()
         End Select
         cmdLst.Add("prediction = predict_val[0]")
         cmdLst.Add("print('Predicted Value = ', prediction)")
+        If $cateyStr Then
+          cmdLst.Add("predicted_value_label = caty_pipeline.inverse_transform(prediction.reshape(1, -1))")
+          cmdLst.Add("predicted_label = predicted_value_label[0][0]")
+          cmdLst.Add("print('Predicted Label = ', predicted_label)")
+        Else
+          cmdLst.Add("predicted_label = prediction")
+        Endif
         TerminalInputList(cmdLst)
-        txtpredict.Text = GetIpythonOutput("f'{prediction}'")
+        txtpredict.Text = GetIpythonOutput("f'{predicted_label}'")
 
       Endif
 
