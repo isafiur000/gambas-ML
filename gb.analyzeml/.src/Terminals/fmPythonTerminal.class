@@ -230,6 +230,7 @@ Private Sub GetModelList() As String[]
     xlst.Add("Linear SVR")
     xlst.Add("Nonlinear SVR")
     xlst.Add("DecisionTree Regression")
+    xlst.Add("RandomForest Regression")
     valtrain.Value = 80
     valtrain.Enabled = True
     pnlregress.Visible = True
@@ -242,6 +243,7 @@ Private Sub GetModelList() As String[]
     xlst.Add("Linear SVC")
     xlst.Add("Nonlinear SVC")
     xlst.Add("DecisionTree Classifier")
+    xlst.Add("RandomForest Classifier")
     valtrain.Value = 80
     valtrain.Enabled = True
     pnlregress.Visible = False
@@ -787,6 +789,13 @@ Public Sub cmbmodel_Click()
       pnlone.Visible = True
       lblmodelone.Text = "max_depth"
       txtmodelone.Text = "2"
+    Case "RandomForest Regression"
+      pnlone.Visible = True
+      lblmodelone.Text = "n_estimators"
+      txtmodelone.Text = "100"
+      pnltwo.Visible = True
+      lblmodel2two.Text = "max_depth"
+      txtmodeltwo.Text = "2"
     Case "Dummy Classifier"
     Case "SGD Classifier"
     Case "KNeighbors Classifier"
@@ -805,6 +814,13 @@ Public Sub cmbmodel_Click()
       pnlone.Visible = True
       lblmodelone.Text = "max_depth"
       txtmodelone.Text = "2"
+    Case "RandomForest Classifier"
+      pnlone.Visible = True
+      lblmodelone.Text = "n_estimators"
+      txtmodelone.Text = "100"
+      pnltwo.Visible = True
+      lblmodel2two.Text = "max_depth"
+      txtmodeltwo.Text = "2"
     Case "KMeans Clustering"
       pnlone.Visible = True
       lblmodelone.Text = "n_clusters"
@@ -882,8 +898,12 @@ Public Sub btnmodeltrain_Click()
           cmdLst.Add("svm_reg.fit(X_train, Y_train)")
         Case "DecisionTree Regression"
           cmdLst.Add("from sklearn.tree import DecisionTreeRegressor")
-          cmdLst.Add(Subst("tree_reg = DecisionTreeRegressor(max_depth = 2, random_state = 42)", Trim(txtmodelone.Text)))
+          cmdLst.Add(Subst("tree_reg = DecisionTreeRegressor(max_depth = &1, random_state = 42)", Trim(txtmodelone.Text)))
           cmdLst.Add("tree_reg.fit(X_train, Y_train)")
+        Case "RandomForest Regression"
+          cmdLst.Add("from sklearn.ensemble import RandomForestRegressor")
+          cmdLst.Add(Subst("rf_reg = RandomForestRegressor(n_estimators = &1, max_depth = &2, random_state = 42)", Trim(txtmodelone.Text), Trim(txtmodeltwo.Text)))
+          cmdLst.Add("rf_reg.fit(X_train, Y_train)")
       End Select
 
     Else If rbclass.Value = True Then
@@ -914,6 +934,7 @@ Public Sub btnmodeltrain_Click()
             cmdLst.Add("from sklearn.tree import DecisionTreeClassifier")
             cmdLst.Add(Subst("tree_clf = BaggingClassifier(DecisionTreeClassifier(max_depth = &1, random_state = 42))", Trim(txtmodelone.Text)))
             cmdLst.Add("tree_clf.fit(X_train, Y_train)")
+            ' Case "RandomForest Classifier"
         End Select
       Else
         Select cmbmodel.Text
@@ -941,6 +962,10 @@ Public Sub btnmodeltrain_Click()
             cmdLst.Add("from sklearn.tree import DecisionTreeClassifier")
             cmdLst.Add(Subst("tree_clf = DecisionTreeClassifier(max_depth = &1, random_state = 42)", Trim(txtmodelone.Text)))
             cmdLst.Add("tree_clf.fit(X_train, Y_train)")
+          Case "RandomForest Classifier"
+            cmdLst.Add("from sklearn.ensemble import RandomForestClassifier")
+            cmdLst.Add(Subst("rf_clf = RandomForestClassifier(n_estimators = &1, max_depth = &2, random_state = 42)", Trim(txtmodelone.Text), Trim(txtmodeltwo.Text)))
+            cmdLst.Add("rf_clf.fit(X_train, Y_train)")
         End Select
       Endif
 
@@ -995,6 +1020,8 @@ Public Sub btnsavemodel_Click()
         cmdLst.Add("joblib.dump(svm_reg, '" & xpath & "')")
       Case "DecisionTree Regression"
         cmdLst.Add("joblib.dump(tree_reg, '" & xpath & "')")
+      Case "RandomForest Regression"
+        cmdLst.Add("joblib.dump(rf_reg, '" & xpath & "')")
       Case "Dummy Classifier"
         cmdLst.Add("joblib.dump(dummy_clf, '" & xpath & "')")
       Case "SGD Classifier"
@@ -1007,6 +1034,8 @@ Public Sub btnsavemodel_Click()
         cmdLst.Add("joblib.dump(svm_clf, '" & xpath & "')")
       Case "DecisionTree Classifier"
         cmdLst.Add("joblib.dump(tree_clf, '" & xpath & "')")
+      Case "RandomForest Classifier"
+        cmdLst.Add("joblib.dump(rf_clf, '" & xpath & "')")
       Case "KMeans Clustering"
         cmdLst.Add("joblib.dump(kmeans, '" & xpath & "')")
       Case "DBSCAN"
@@ -1062,6 +1091,8 @@ Public Sub btnevaluate_Click()
         TerminalInput("reg_model = svm_reg")
       Case "DecisionTree Regression"
         TerminalInput("reg_model = tree_reg")
+      Case "RandomForest Regression"
+        TerminalInput("rf_reg = tree_reg")
     End Select
 
     If chkaccuracy.Value = True Then
@@ -1083,6 +1114,8 @@ Public Sub btnevaluate_Click()
         cmdLst.Add("clf_model = svm_clf")
       Case "DecisionTree Classifier"
         cmdLst.Add("clf_model = tree_clf")
+      Case "RandomForest Classifier"
+        cmdLst.Add("clf_model = rf_clf")
     End Select
     cmdLst.Add("from sklearn.model_selection import cross_val_predict")
     cmdLst.Add("y_train_pred = cross_val_predict(clf_model, X_train, Y_train)")
@@ -1177,6 +1210,9 @@ Public Sub btnshowscatterplot_Click()
         cmdLst.Add(Subst("dot_data = tree.export_graphviz(tree_clf, out_file='" & $imgPath & "', feature_names = list(X_data.columns))", $imgPath))
       Endif
       TerminalInputList(cmdLst)
+
+    Case "RandomForest Regression", "RandomForest Classifier"
+
   End Select
 
 End
@@ -1241,6 +1277,8 @@ Public Sub btnpredict_Click()
             cmdLst.Add("predict_val = svm_reg.predict(X_input)")
           Case "DecisionTree Regression"
             cmdLst.Add("predict_val = tree_reg.predict(X_input)")
+          Case "RandomForest Regression"
+            cmdLst.Add("predict_val = rf_reg.predict(X_input)")
         End Select
         cmdLst.Add("prediction = predict_val[0]")
         cmdLst.Add("print('Predicted Value = ', prediction)")
@@ -1261,6 +1299,8 @@ Public Sub btnpredict_Click()
             cmdLst.Add("predict_val = svm_clf.predict(X_input)")
           Case "DecisionTree Classifier"
             cmdLst.Add("predict_val = tree_clf.predict(X_input)")
+          Case "RandomForest Classifier"
+            cmdLst.Add("predict_val = rf_clf.predict(X_input)")
         End Select
         cmdLst.Add("prediction = predict_val[0]")
         cmdLst.Add("print('Predicted Value = ', prediction)")

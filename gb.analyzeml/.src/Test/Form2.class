@@ -1,0 +1,9 @@
+' Gambas class file
+
+Public Sub Form_Open()
+
+  AnalyzeNLP1.FileType = "CSV"
+  AnalyzeNLP1.Headers = ["EncID", "Name", "Age", "Gender", "Bilirubin Total", "Bilirubin Direct"]
+  AnalyzeNLP1.FilePath = User.Home &/ "/Project/SISHGAMBAS/ML/data.csv"
+
+End

@@ -33,7 +33,7 @@
           Border = False
         }
         { Panel6 Panel
-          MoveScaled(1,10,23,14)
+          MoveScaled(1,10,23,11)
           { rbregression RadioButton
             MoveScaled(1,1,21,3)
             Text = ("Regression")
@@ -46,10 +46,6 @@
           { rbunsupervis RadioButton
             MoveScaled(1,7,21,3)
             Text = ("Unsupervised")
-          }
-          { rbnlp RadioButton
-            MoveScaled(1,10,21,3)
-            Text = ("NLP")
           }
         }
       }

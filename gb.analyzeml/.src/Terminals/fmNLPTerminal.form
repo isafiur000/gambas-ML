@@ -1,0 +1,53 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,122,80)
+  Expand = True
+  Text = ("Python3 Terminal")
+  Arrangement = Arrange.Vertical
+  { Panel1 Panel
+    MoveScaled(0,0,121,76)
+    Expand = True
+    Arrangement = Arrange.Vertical
+    { Wizard1 Wizard
+      MoveScaled(0,0,120,44)
+      Expand = True
+      Count = 2
+      Index = 0
+      Text = ("Feature Selection")
+      { Panel5 Panel
+        MoveScaled(0,0,25,34)
+        Border = Border.Plain
+        { btndatainit Button
+          MoveScaled(1,1,23,3.5)
+          Text = ("Initialize")
+        }
+        { btndataload Button
+          MoveScaled(1,5,23,3.5)
+          Enabled = False
+          Text = ("Load Data")
+        }
+        { btndatainstall Button
+          MoveScaled(1,30,23,3.5)
+          Text = ("Install Libs")
+          Border = False
+        }
+      }
+      Index = 1
+      Text = ("Processing of Categorical Columns")
+      Index = 0
+    }
+    { Panel4 Panel
+      MoveScaled(-1,44,121,30)
+      Expand = True
+      Arrangement = Arrange.Vertical
+      { TerminalView1 TerminalView
+        MoveScaled(2,3,85,24)
+        Background = Color.White
+        Foreground = Color.Black
+        Expand = True
+        Blink = True
+      }
+    }
+  }
+}
