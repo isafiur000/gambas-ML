@@ -10,8 +10,7 @@
     Expand = True
     Arrangement = Arrange.Vertical
     { Wizard1 Wizard
-      MoveScaled(0,0,120,44)
-      Expand = True
+      MoveScaled(0,1,120,44)
       Count = 7
       Index = 0
       Text = ("Feature Selection")
@@ -386,23 +385,19 @@
       }
       Index = 4
       Text = ("Model Training")
-      { chkbagging CheckBox
-        MoveScaled(1,1,22,3)
-        Text = ("Bagging")
-      }
       { Label12 Label
-        MoveScaled(1,5,7,3)
+        MoveScaled(1,0.5,7,3)
         Border = Border.Plain
         Text = ("Model")
       }
       { cmbmodel ComboBox
-        MoveScaled(9,5,33,3)
+        MoveScaled(9,0.5,33,3)
       }
       { pnlmodel Panel
-        MoveScaled(1,9,41,23)
+        MoveScaled(1,4,45,30)
         Arrangement = Arrange.Vertical
         { pnlone Panel
-          MoveScaled(0,0,40,3.5)
+          MoveScaled(0,0,45,3.5)
           Visible = False
           { txtmodelone TextBox
             MoveScaled(22,0,17,3)
@@ -412,21 +407,27 @@
             Border = Border.Plain
             Text = ("Param")
           }
+          { chkfirst CheckBox
+            MoveScaled(40,0,3,3)
+          }
         }
         { pnltwo Panel
-          MoveScaled(0,3.5,40,3.5)
+          MoveScaled(0,3.5,45,3.5)
           Visible = False
           { txtmodeltwo TextBox
             MoveScaled(22,0,17,3)
           }
-          { lblmodel2two Label
+          { lblmodeltwo Label
             MoveScaled(0,0,21,3)
             Border = Border.Plain
             Text = ("Param")
           }
+          { chksecond CheckBox
+            MoveScaled(40,0,3,3)
+          }
         }
         { pnlthree Panel
-          MoveScaled(0,7,40,3.5)
+          MoveScaled(0,7,45,3.5)
           Visible = False
           { txtmodelthree TextBox
             MoveScaled(22,0,17,3)
@@ -436,9 +437,12 @@
             Border = Border.Plain
             Text = ("Param")
           }
+          { chkthird CheckBox
+            MoveScaled(40,0,3,3)
+          }
         }
         { pnlfour Panel
-          MoveScaled(0,10.5,40,3.5)
+          MoveScaled(0,10.5,45,3.5)
           Visible = False
           { txtmodelfour TextBox
             MoveScaled(22,0,17,3)
@@ -448,32 +452,80 @@
             Border = Border.Plain
             Text = ("Param")
           }
+          { chkfour CheckBox
+            MoveScaled(40,0,3,3)
+          }
+        }
+        { pnlfive Panel
+          MoveScaled(0,14,45,3.5)
+          Visible = False
+          { txtmodelfive TextBox
+            MoveScaled(22,0,17,3)
+          }
+          { lblmodelfive Label
+            MoveScaled(0,0,21,3)
+            Border = Border.Plain
+            Text = ("Param")
+          }
+          { chkfive CheckBox
+            MoveScaled(40,0,3,3)
+          }
+        }
+        { pnlsix Panel
+          MoveScaled(0,17.5,45,3.5)
+          Visible = False
+          { txtmodelsix TextBox
+            MoveScaled(22,0,17,3)
+          }
+          { lblmodelsix Label
+            MoveScaled(0,0,21,3)
+            Border = Border.Plain
+            Text = ("Param")
+          }
+          { chksix CheckBox
+            MoveScaled(40,0,3,3)
+          }
+        }
+        { pnlseven Panel
+          MoveScaled(0,21,45,3.5)
+          Visible = False
+          { txtmodelseven TextBox
+            MoveScaled(22,0,17,3)
+          }
+          { lblmodelseven Label
+            MoveScaled(0,0,21,3)
+            Border = Border.Plain
+            Text = ("Param")
+          }
+          { chkseven CheckBox
+            MoveScaled(40,0,3,3)
+          }
         }
         { Panel10 Panel
-          MoveScaled(0,14,40,3.5)
+          MoveScaled(0,25,45,3.5)
           { btnmodeltrain Button
             MoveScaled(22,0,17,3)
             Enabled = False
             Text = ("Train")
           }
+          { chkbagging CheckBox
+            MoveScaled(0,0,18,3)
+            Text = ("Bagging")
+          }
         }
-        { Panel25 Panel
-          MoveScaled(0,18,40,3.5)
-          { btnsavemodel Button
-            MoveScaled(25,0,14,3)
-            Enabled = False
-            Text = ("Model")
-          }
-          { lblmodelfour3 Label
-            MoveScaled(0,0,8,3)
-            Border = Border.Plain
-            Text = ("Dump")
-          }
-          { btnsaveProcess Button
-            MoveScaled(9,0,16,3)
-            Enabled = False
-            Text = ("PreProcessing")
-          }
+      }
+      { Frame2 Frame
+        MoveScaled(50,1,18,11)
+        Text = ("Dump Model")
+        { btnsaveProcess Button
+          MoveScaled(1,3,16,3)
+          Enabled = False
+          Text = ("PreProcessing")
+        }
+        { btnsavemodel Button
+          MoveScaled(1,7,16,3)
+          Enabled = False
+          Text = ("Model")
         }
       }
       Index = 5
@@ -500,7 +552,7 @@
             MoveScaled(1,4,27,3)
             Text = ("Precision, Recall, F1 Score")
           }
-          { lblmodelfour2 Label
+          { lblaverage Label
             MoveScaled(1,7.5,10,3)
             Border = Border.Plain
             Text = ("Average")

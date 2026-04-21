@@ -11,7 +11,6 @@
     Arrangement = Arrange.Vertical
     { Wizard1 Wizard
       MoveScaled(0,0,120,44)
-      Expand = True
       Count = 2
       Index = 0
       Text = ("Feature Selection")

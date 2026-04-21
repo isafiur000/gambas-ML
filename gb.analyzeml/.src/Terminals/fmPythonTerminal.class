@@ -226,7 +226,6 @@ Private Sub GetModelList() As String[]
     xlst.Add("Ridge Regression")
     xlst.Add("Lasso Regression")
     xlst.Add("ElasticNet Regression")
-    xlst.Add("Logistic Regression")
     xlst.Add("Linear SVR")
     xlst.Add("Nonlinear SVR")
     xlst.Add("DecisionTree Regression")
@@ -238,6 +237,7 @@ Private Sub GetModelList() As String[]
     pnlunsuper.Visible = False
   Else If rbclass.Value = True Then
     xlst.Add("Dummy Classifier")
+    xlst.Add("Logistic Regression")
     xlst.Add("SGD Classifier")
     xlst.Add("KNeighbors Classifier")
     xlst.Add("Linear SVC")
@@ -745,100 +745,148 @@ End
 
 Public Sub cmbmodel_Click()
 
+  Dim xparamLst As String[]
+
   HideAll()
   Select cmbmodel.Text
     Case "Linear Regression"
+      xparamLst = New String[]
     Case "SGD Regression"
-      pnlone.Visible = True
-      lblmodelone.Text = "max_iter"
-      txtmodelone.Text = "1000"
-      pnltwo.Visible = True
-      lblmodel2two.Text = "n_iter_no_change"
-      txtmodeltwo.Text = "100"
+      xparamLst = ["random_state:42", "max_iter:1000", "n_iter_no_change:100", "tol:1e-5", "penalty:None", "eta0:0.01"]
     Case "Ridge Regression"
-      pnlone.Visible = True
-      lblmodelone.Text = "alpha"
-      txtmodelone.Text = "0.1"
+      xparamLst = ["alpha:0.1", "solver:'cholesky'"]
     Case "Lasso Regression"
-      pnlone.Visible = True
-      lblmodelone.Text = "alpha"
-      txtmodelone.Text = "0.1"
+      xparamLst = ["alpha:0.1"]
     Case "ElasticNet Regression"
-      pnlone.Visible = True
-      lblmodelone.Text = "alpha"
-      txtmodelone.Text = "0.1"
-      pnltwo.Visible = True
-      lblmodel2two.Text = "l1_ratio"
-      txtmodeltwo.Text = "0.5"
+      xparamLst = ["alpha:0.1", "l1_ratio:0.5"]
     Case "Logistic Regression"
+      xparamLst = ["random_state:42"]
     Case "Linear SVR"
-      pnlone.Visible = True
-      lblmodelone.Text = "epsilon"
-      txtmodelone.Text = "0.5"
+      xparamLst = ["random_state:42", "epsilon:0.5"]
     Case "Nonlinear SVR"
-      pnlone.Visible = True
-      lblmodelone.Text = "epsilon"
-      txtmodelone.Text = "0.1"
-      pnltwo.Visible = True
-      lblmodel2two.Text = "degree"
-      txtmodeltwo.Text = "2"
-      pnlthree.Visible = True
-      lblmodelthree.Text = "C Value"
-      txtmodelthree.Text = "0.01"
+      xparamLst = ["kernel:'poly'", "epsilon:0.1", "degree:2", "C:0.01"]
     Case "DecisionTree Regression"
-      pnlone.Visible = True
-      lblmodelone.Text = "max_depth"
-      txtmodelone.Text = "2"
+      xparamLst = ["random_state:42", "max_depth:2"]
     Case "RandomForest Regression"
-      pnlone.Visible = True
-      lblmodelone.Text = "n_estimators"
-      txtmodelone.Text = "100"
-      pnltwo.Visible = True
-      lblmodel2two.Text = "max_depth"
-      txtmodeltwo.Text = "2"
+      xparamLst = ["random_state:42", "n_estimators:100", "max_depth:2"]
     Case "Dummy Classifier"
+      xparamLst = New String[]
     Case "SGD Classifier"
+      xparamLst = ["random_state:42"]
     Case "KNeighbors Classifier"
+      xparamLst = New String[]
     Case "Linear SVC"
-      pnltwo.Visible = True
-      lblmodel2two.Text = "C Value"
-      txtmodeltwo.Text = "1"
+      xparamLst = ["random_state:42", "C:1"]
     Case "Nonlinear SVC"
-      pnlone.Visible = True
-      lblmodelone.Text = "degree"
-      txtmodelone.Text = "3"
-      pnltwo.Visible = True
-      lblmodel2two.Text = "C Value"
-      txtmodeltwo.Text = "5"
+      xparamLst = ["kernel:'poly'", "coef0:1", "degree:3", "C:5"]
     Case "DecisionTree Classifier"
-      pnlone.Visible = True
-      lblmodelone.Text = "max_depth"
-      txtmodelone.Text = "2"
+      xparamLst = ["random_state:42", "max_depth:2"]
     Case "RandomForest Classifier"
-      pnlone.Visible = True
-      lblmodelone.Text = "n_estimators"
-      txtmodelone.Text = "100"
-      pnltwo.Visible = True
-      lblmodel2two.Text = "max_depth"
-      txtmodeltwo.Text = "2"
+      xparamLst = ["random_state:42", "n_estimators:100", "max_depth:2"]
     Case "KMeans Clustering"
-      pnlone.Visible = True
-      lblmodelone.Text = "n_clusters"
-      txtmodelone.Text = "3"
+      xparamLst = ["random_state:42", "n_clusters:3"]
     Case "DBSCAN"
-      pnlone.Visible = True
-      lblmodelone.Text = "min_samples"
-      txtmodelone.Text = "5"
-      pnltwo.Visible = True
-      lblmodel2two.Text = "eps"
-      txtmodeltwo.Text = "0.05"
+      xparamLst = ["min_samples:5", "eps:0.05"]
   End Select
+
+  ShowHyperParams(xparamLst)
+
+End
+
+Private Sub ShowHyperParams(sParamList As String[])
+
+  Dim sInt As Integer
+
+  sInt = sParamList.Count
+  If sInt > 0 Then
+    pnlone.Visible = True
+    lblmodelone.Text = Split(sParamList[0], ":")[0]
+    txtmodelone.Text = Split(sParamList[0], ":")[1]
+    chkfirst.Value = True
+  Endif
+  If sInt > 1 Then
+    pnltwo.Visible = True
+    lblmodeltwo.Text = Split(sParamList[1], ":")[0]
+    txtmodeltwo.Text = Split(sParamList[1], ":")[1]
+    chksecond.Value = True
+  Endif
+  If sInt > 2 Then
+    pnlthree.Visible = True
+    lblmodelthree.Text = Split(sParamList[2], ":")[0]
+    txtmodelthree.Text = Split(sParamList[2], ":")[1]
+    chkthird.Value = True
+  Endif
+  If sInt > 3 Then
+    pnlfour.Visible = True
+    lblmodelfour.Text = Split(sParamList[3], ":")[0]
+    txtmodelfour.Text = Split(sParamList[3], ":")[1]
+    chkfour.Value = True
+  Endif
+  If sInt > 4 Then
+    pnlfive.Visible = True
+    lblmodelfive.Text = Split(sParamList[4], ":")[0]
+    txtmodelfive.Text = Split(sParamList[4], ":")[1]
+    chkfive.Value = True
+  Endif
+  If sInt > 5 Then
+    pnlsix.Visible = True
+    lblmodelsix.Text = Split(sParamList[5], ":")[0]
+    txtmodelsix.Text = Split(sParamList[5], ":")[1]
+    chksix.Value = True
+  Endif
+  If sInt > 6 Then
+    pnlseven.Visible = True
+    lblmodelseven.Text = Split(sParamList[6], ":")[0]
+    txtmodelseven.Text = Split(sParamList[6], ":")[1]
+    chkseven.Value = True
+  Endif
+
+End
+
+Private Function GetParameterList() As String[]
+
+  Dim sColl As String[]
+
+  sColl = New String[]
+  If chkfirst.Value = True Then
+    sColl.Add(Trim(lblmodelone.Text) & " = " & Trim(txtmodelone.Text))
+  Endif
+  If chksecond.Value = True Then
+    sColl.Add(Trim(lblmodeltwo.Text) & " = " & Trim(txtmodeltwo.Text))
+  Endif
+  If chkthird.Value = True Then
+    sColl.Add(Trim(lblmodelthree.Text) & " = " & Trim(txtmodelthree.Text))
+  Endif
+  If chkfour.Value = True Then
+    sColl.Add(Trim(lblmodelfour.Text) & " = " & Trim(txtmodelfour.Text))
+  Endif
+  If chkfive.Value = True Then
+    sColl.Add(Trim(lblmodelfive.Text) & " = " & Trim(txtmodelfive.Text))
+  Endif
+  If chksix.Value = True Then
+    sColl.Add(Trim(lblmodelsix.Text) & " = " & Trim(txtmodelsix.Text))
+  Endif
+  If chkseven.Value = True Then
+    sColl.Add(Trim(lblmodelseven.Text) & " = " & Trim(txtmodelseven.Text))
+  Endif
+
+  Return sColl
 
 End
 
 Public Sub btnmodeltrain_Click()
 
   Dim cmdLst As New String[]
+
+  Dim xParams As String
+  Dim xPLst As String[]
+
+  xPLst = GetParameterList()
+  If xPLst.Count Then
+    xParams = xPLst.Join(", ")
+  Else
+    xParams = ""
+  Endif
 
   If cmbmodel.Text Then
     If txtdeptype.Text = "object" Then
@@ -854,85 +902,84 @@ Public Sub btnmodeltrain_Click()
       Select cmbmodel.Text
         Case "Linear Regression"
           cmdLst.Add("from sklearn.linear_model import LinearRegression")
-          cmdLst.Add("lin_reg = LinearRegression()")
+          cmdLst.Add(Subst("lin_reg = LinearRegression(&1)", xParams))
           cmdLst.Add("lin_reg.fit(X_train, Y_train)")
           cmdLst.Add("lin_reg.intercept_")
           cmdLst.Add("lin_reg.coef_")
         Case "SGD Regression"
           cmdLst.Add("from sklearn.linear_model import SGDRegressor")
-          cmdLst.Add(Subst("sgd_reg = SGDRegressor(max_iter = &1, tol = 1e-5, penalty = None, eta0 = 0.01, n_iter_no_change = &2, random_state = 42)", Trim(txtmodelone.Text), Trim(txtmodeltwo.Text)))             ''
+          cmdLst.Add(Subst("sgd_reg = SGDRegressor(&1)", xParams))             ''
           cmdLst.Add("sgd_reg.fit(X_train, Y_train.ravel())")
           cmdLst.Add("sgd_reg.intercept_")
           cmdLst.Add("sgd_reg.coef_")
         Case "Ridge Regression"
           cmdLst.Add("from sklearn.linear_model import Ridge")
-          cmdLst.Add(Subst("ridge_reg = Ridge(alpha = &1, solver = 'cholesky')", Trim(txtmodelone.Text)))
+          cmdLst.Add(Subst("ridge_reg = Ridge(&1)", xParams))
           cmdLst.Add("ridge_reg.fit(X_train, Y_train)")
           cmdLst.Add("ridge_reg.intercept_")
           cmdLst.Add("ridge_reg.coef_")
         Case "Lasso Regression"
           cmdLst.Add("from sklearn.linear_model import Lasso")
-          cmdLst.Add(Subst("lasso_reg = Lasso(alpha = &1)", Trim(txtmodelone.Text)))
+          cmdLst.Add(Subst("lasso_reg = Lasso(&1)", xParams))
           cmdLst.Add("lasso_reg.fit(X_train, Y_train)")
           cmdLst.Add("lasso_reg.intercept_")
           cmdLst.Add("lasso_reg.coef_")
         Case "ElasticNet Regression"
           cmdLst.Add("from sklearn.linear_model import ElasticNet")
-          cmdLst.Add(Subst("elastic_net = ElasticNet(alpha = &1, l1_ratio = &2)", Trim(txtmodelone.Text), Trim(txtmodeltwo.Text)))
+          cmdLst.Add(Subst("elastic_net = ElasticNet(&1)", xParams))
           cmdLst.Add("elastic_net.fit(X_train, Y_train)")
           cmdLst.Add("elastic_net.intercept_")
           cmdLst.Add("elastic_net.coef_")
-        Case "Logistic Regression"
-          cmdLst.Add("from sklearn.linear_model import LogisticRegression")
-          cmdLst.Add("log_reg = LogisticRegression(random_state = 42)")
-          cmdLst.Add("log_reg.fit(X_train, Y_train)")
-          ' cmdLst.Add("log_reg.intercept_")
-          ' cmdLst.Add("log_reg.coef_")
         Case "Linear SVR"
           cmdLst.Add("from sklearn.svm import LinearSVR")
-          cmdLst.Add(Subst("linsvm_reg = LinearSVR(epsilon = &1, random_state = 42)", Trim(txtmodelone.Text)))
+          cmdLst.Add(Subst("linsvm_reg = LinearSVR(&1)", xParams))
           cmdLst.Add("linsvm_reg.fit(X_train, Y_train)")
         Case "Nonlinear SVR"
           cmdLst.Add("from sklearn.svm import SVR")
-          cmdLst.Add(Subst("svm_reg = SVR(kernel = 'poly', epsilon = &1, degree = &2, C = &3)", Trim(txtmodelone.Text), Trim(txtmodeltwo.Text), Trim(txtmodelthree.Text)))
+          cmdLst.Add(Subst("svm_reg = SVR(&1)", xParams))
           cmdLst.Add("svm_reg.fit(X_train, Y_train)")
         Case "DecisionTree Regression"
           cmdLst.Add("from sklearn.tree import DecisionTreeRegressor")
-          cmdLst.Add(Subst("tree_reg = DecisionTreeRegressor(max_depth = &1, random_state = 42)", Trim(txtmodelone.Text)))
+          cmdLst.Add(Subst("tree_reg = DecisionTreeRegressor(&1)", xParams))
           cmdLst.Add("tree_reg.fit(X_train, Y_train)")
         Case "RandomForest Regression"
           cmdLst.Add("from sklearn.ensemble import RandomForestRegressor")
-          cmdLst.Add(Subst("rf_reg = RandomForestRegressor(n_estimators = &1, max_depth = &2, random_state = 42)", Trim(txtmodelone.Text), Trim(txtmodeltwo.Text)))
+          cmdLst.Add(Subst("rf_reg = RandomForestRegressor(&1)", xParams))
           cmdLst.Add("rf_reg.fit(X_train, Y_train)")
       End Select
 
     Else If rbclass.Value = True Then
       If chkbagging.Value = True Then
         Select cmbmodel.Text
+          Case "Logistic Regression"
+            cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
+            cmdLst.Add("from sklearn.linear_model import LogisticRegression")
+            cmdLst.Add(Subst("log_clf = BaggingClassifier(LogisticRegression(&1))", xParams))
+            cmdLst.Add("log_clf.fit(X_train, Y_train)")
           Case "SGD Classifier"
             cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
             cmdLst.Add("from sklearn.linear_model import SGDClassifier")
-            cmdLst.Add("sgd_clf = BaggingClassifier(SGDClassifier(random_state = 42))")
+            cmdLst.Add(Subst("sgd_clf = BaggingClassifier(SGDClassifier(&1))", xParams))
             cmdLst.Add("sgd_clf.fit(X_train, Y_train)")
           Case "KNeighbors Classifier"
             cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
             cmdLst.Add("from sklearn.neighbors import KNeighborsClassifier")
-            cmdLst.Add("knn_clf = BaggingClassifier(KNeighborsClassifier())")
+            cmdLst.Add(Subst("knn_clf = BaggingClassifier(KNeighborsClassifier(&1))", xParams))
             cmdLst.Add("knn_clf.fit(X_train, Y_train)")
           Case "Linear SVC"
             cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
             cmdLst.Add("from sklearn.svm import LinearSVC")
-            cmdLst.Add(Subst("linsvm_clf = BaggingClassifier(LinearSVC(C = &1, random_state = 42))", Trim(txtmodeltwo.Text)))
+            cmdLst.Add(Subst("linsvm_clf = BaggingClassifier(LinearSVC(&1))", xParams))
             cmdLst.Add("linsvm_clf.fit(X_train, Y_train)")
           Case "Nonlinear SVC"
             cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
             cmdLst.Add("from sklearn.svm import SVC")
-            cmdLst.Add(Subst("svm_clf = BaggingClassifier(SVC(kernel = 'poly', degree = &1, coef0 = 1, C = &2))", Trim(txtmodelone.Text), Trim(txtmodeltwo.Text)))
+            cmdLst.Add(Subst("svm_clf = BaggingClassifier(SVC(&1))", xParams))
             cmdLst.Add("svm_clf.fit(X_train, Y_train)")
           Case "DecisionTree Classifier"
             cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
             cmdLst.Add("from sklearn.tree import DecisionTreeClassifier")
-            cmdLst.Add(Subst("tree_clf = BaggingClassifier(DecisionTreeClassifier(max_depth = &1, random_state = 42))", Trim(txtmodelone.Text)))
+            cmdLst.Add(Subst("tree_clf = BaggingClassifier(DecisionTreeClassifier(&1))", xParams))
             cmdLst.Add("tree_clf.fit(X_train, Y_train)")
             ' Case "RandomForest Classifier"
         End Select
@@ -940,31 +987,35 @@ Public Sub btnmodeltrain_Click()
         Select cmbmodel.Text
           Case "Dummy Classifier"
             cmdLst.Add("from sklearn.dummy import DummyClassifier")
-            cmdLst.Add("dummy_clf = DummyClassifier()")
+            cmdLst.Add(Subst("dummy_clf = DummyClassifier(&1)", xParams))
             cmdLst.Add("dummy_clf.fit(X_train, Y_train)")
+          Case "Logistic Regression"
+            cmdLst.Add("from sklearn.linear_model import LogisticRegression")
+            cmdLst.Add(Subst("log_clf = LogisticRegression(&1)", xParams))
+            cmdLst.Add("log_clf.fit(X_train, Y_train)")
           Case "SGD Classifier"
             cmdLst.Add("from sklearn.linear_model import SGDClassifier")
-            cmdLst.Add("sgd_clf = SGDClassifier(random_state = 42)")
+            cmdLst.Add(Subst("sgd_clf = SGDClassifier(&1)", xParams))
             cmdLst.Add("sgd_clf.fit(X_train, Y_train)")
           Case "KNeighbors Classifier"
             cmdLst.Add("from sklearn.neighbors import KNeighborsClassifier")
-            cmdLst.Add("knn_clf = KNeighborsClassifier()")
+            cmdLst.Add(Subst("knn_clf = KNeighborsClassifier(&1)", xParams))
             cmdLst.Add("knn_clf.fit(X_train, Y_train)")
           Case "Linear SVC"
             cmdLst.Add("from sklearn.svm import LinearSVC")
-            cmdLst.Add(Subst("linsvm_clf = LinearSVC(C = &1, random_state = 42)", Trim(txtmodeltwo.Text)))
+            cmdLst.Add(Subst("linsvm_clf = LinearSVC(&1)", xParams))
             cmdLst.Add("linsvm_clf.fit(X_train, Y_train)")
           Case "Nonlinear SVC"
             cmdLst.Add("from sklearn.svm import SVC")
-            cmdLst.Add(Subst("svm_clf = SVC(kernel = 'poly', degree = &1, coef0 = 1, C = &2)", Trim(txtmodelone.Text), Trim(txtmodeltwo.Text)))
+            cmdLst.Add(Subst("svm_clf = SVC(&1)", xParams))
             cmdLst.Add("svm_clf.fit(X_train, Y_train)")
           Case "DecisionTree Classifier"
             cmdLst.Add("from sklearn.tree import DecisionTreeClassifier")
-            cmdLst.Add(Subst("tree_clf = DecisionTreeClassifier(max_depth = &1, random_state = 42)", Trim(txtmodelone.Text)))
+            cmdLst.Add(Subst("tree_clf = DecisionTreeClassifier(&1)", xParams))
             cmdLst.Add("tree_clf.fit(X_train, Y_train)")
           Case "RandomForest Classifier"
             cmdLst.Add("from sklearn.ensemble import RandomForestClassifier")
-            cmdLst.Add(Subst("rf_clf = RandomForestClassifier(n_estimators = &1, max_depth = &2, random_state = 42)", Trim(txtmodelone.Text), Trim(txtmodeltwo.Text)))
+            cmdLst.Add(Subst("rf_clf = RandomForestClassifier(&1)", xParams))
             cmdLst.Add("rf_clf.fit(X_train, Y_train)")
         End Select
       Endif
@@ -973,11 +1024,11 @@ Public Sub btnmodeltrain_Click()
       Select cmbmodel.Text
         Case "KMeans Clustering"
           cmdLst.Add("from sklearn.cluster import KMeans")
-          cmdLst.Add(Subst("kmeans = KMeans(n_clusters = &1, random_state = 42)", Trim(txtmodelone.Text)))
+          cmdLst.Add(Subst("kmeans = KMeans(&1)", xParams))
           cmdLst.Add("kmeans.fit(X_train)")
         Case "DBSCAN"
           cmdLst.Add("from sklearn.cluster import DBSCAN")
-          cmdLst.Add(Subst("dbscan = DBSCAN(min_samples = &1, eps = &2)", Trim(txtmodelone.Text), Trim(txtmodeltwo.Text)))
+          cmdLst.Add(Subst("dbscan = DBSCAN(&1)", xParams))
           cmdLst.Add("dbscan.fit(X_train)")
       End Select
 
@@ -1012,8 +1063,6 @@ Public Sub btnsavemodel_Click()
         cmdLst.Add("joblib.dump(lasso_reg, '" & xpath & "')")
       Case "ElasticNet Regression"
         cmdLst.Add("joblib.dump(elastic_net, '" & xpath & "')")
-      Case "Logistic Regression"
-        cmdLst.Add("joblib.dump(log_reg, '" & xpath & "')")
       Case "Linear SVR"
         cmdLst.Add("joblib.dump(linsvm_reg, '" & xpath & "')")
       Case "Nonlinear SVR"
@@ -1024,6 +1073,8 @@ Public Sub btnsavemodel_Click()
         cmdLst.Add("joblib.dump(rf_reg, '" & xpath & "')")
       Case "Dummy Classifier"
         cmdLst.Add("joblib.dump(dummy_clf, '" & xpath & "')")
+      Case "Logistic Regression"
+        cmdLst.Add("joblib.dump(log_clf, '" & xpath & "')")
       Case "SGD Classifier"
         cmdLst.Add("joblib.dump(sgd_clf, '" & xpath & "')")
       Case "KNeighbors Classifier"
@@ -1083,8 +1134,6 @@ Public Sub btnevaluate_Click()
         TerminalInput("reg_model = lasso_reg")
       Case "ElasticNet Regression"
         TerminalInput("reg_model = elastic_net")
-      Case "Logistic Regression"
-        TerminalInput("reg_model = log_reg")
       Case "Linear SVR"
         TerminalInput("reg_model = linsvm_reg")
       Case "Nonlinear SVR"
@@ -1092,7 +1141,7 @@ Public Sub btnevaluate_Click()
       Case "DecisionTree Regression"
         TerminalInput("reg_model = tree_reg")
       Case "RandomForest Regression"
-        TerminalInput("rf_reg = tree_reg")
+        TerminalInput("reg_model = rf_reg")
     End Select
 
     If chkaccuracy.Value = True Then
@@ -1104,6 +1153,8 @@ Public Sub btnevaluate_Click()
     Select cmbmodel.Text
       Case "Dummy Classifier"
         cmdLst.Add("clf_model = dummy_clf")
+      Case "Logistic Regression"
+        TerminalInput("clf_model = log_clf")
       Case "SGD Classifier"
         cmdLst.Add("clf_model = sgd_clf")
       Case "KNeighbors Classifier"
@@ -1269,8 +1320,6 @@ Public Sub btnpredict_Click()
             cmdLst.Add("predict_val = lasso_reg.predict(X_input)")
           Case "ElasticNet Regression"
             cmdLst.Add("predict_val = elastic_net.predict(X_input)")
-          Case "Logistic Regression"
-            cmdLst.Add("predict_val = log_reg.predict(X_input)")
           Case "Linear SVR"
             cmdLst.Add("predict_val = linsvm_reg.predict(X_input)")
           Case "Nonlinear SVR"
@@ -1289,6 +1338,8 @@ Public Sub btnpredict_Click()
         Select cmbmodel.Text
           Case "Dummy Classifier"
             cmdLst.Add("predict_val = dummy_clf.predict(X_input)")
+          Case "Logistic Regression"
+            cmdLst.Add("predict_val = log_clf.predict(X_input)")
           Case "SGD Classifier"
             cmdLst.Add("predict_val = sgd_clf.predict(X_input)")
           Case "KNeighbors Classifier"

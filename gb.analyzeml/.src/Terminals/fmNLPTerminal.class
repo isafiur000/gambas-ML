@@ -7,16 +7,12 @@ Private $hProcess As Process
 Private $isOldVersion As Boolean
 
 Private $Columns As String[]
-Private $IndepCol As String[]
 Private $DateCol As String[]
 
-Private $imgPath As String
 Private $libprocess As String[]
 Private $categStr As String
 Private $numStr As String
-Private $cateyStr As String
 Private $numYStr As String
-Private $preProcess As String[]
 
 Public Sub _new()
 
@@ -145,12 +141,18 @@ Public Sub btndatainit_Click()
   cmdLst.Add("'nltk version :', nltk.__version__")
   cmdLst.Add("'enchant version :', enchant.__version__")
 
-  cmdLst.Add("sys.path.append('/usr/local/bin')")
+  cmdLst.Add("sys.path.append('/usr/local/bin/nltk3-cookbook')")
   cmdLst.Add("import replacers")
   cmdLst.Add("import transforms")
   cmdLst.Add("import chunkers")
+  cmdLst.Add("import catchunked")
   cmdLst.Add("import tag_util")
   cmdLst.Add("import taggers")
+  cmdLst.Add("import corpus")
+  cmdLst.Add("import featx")
+  cmdLst.Add("import classification")
+  cmdLst.Add("import folder_corpus")
+
   TerminalInputList(cmdLst)
   btndataload.Enabled = True
   Wizard1.ShowButton = False

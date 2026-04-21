@@ -1,6 +1,6 @@
 # Gambas Project File 3.0
 Title=analyzeml
-Startup=Form2
+Startup=Form1
 Version=3.19.2
 Component=gb.term
 Component=gb.image
@@ -23,4 +23,4 @@ CreateEachDirectory=1
 Packager=1
 Systems=ubuntu
 Groups=ubuntu:"database"
-ExtraFiles=ubuntu:"replacers.py\t/usr/local/bin\ntransforms.py\t/usr/local/bin\nchunkers.py\t/usr/local/bin\ntaggers.py\t/usr/local/bin\ntag_util.py\t/usr/local/bin"
+ExtraFiles=ubuntu:"nltk3-cookbook\t/usr/local/bin"
