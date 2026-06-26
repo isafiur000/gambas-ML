@@ -1,0 +1,15 @@
+1) Set up environment (eg Model name is XRay)
+
+$ cd public_html
+$ python3 -m venv XRay
+$ source XRay/bin/activate
+
+2) Install dependencies
+$ pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+$ pip install transformers
+
+3) Download trained model files into a folder
+  Update the model directory in /etc/web-api/XRay/script.py
+
+
+

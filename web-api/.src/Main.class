@@ -1,0 +1,122 @@
+' Gambas class file
+
+Private $url As String
+Private $confFile As String
+Private $htmldir As String = "/var/www/html/docs/uploads"
+
+Public Sub _new()
+
+  $url = CGI["REQUEST_URI"]
+  $confFile = "/etc/" &/ Application.Name &/ "appsettings.conf"
+
+End
+
+Private Sub PrintValues()
+
+  Dim yy As String
+  Dim sFieldName As String
+
+  Dim xTemp As String
+  Dim xfile As String
+  Dim xdir As String
+  Dim xfileList As String[]
+  Dim i As Integer
+
+  Dim xmodel As String
+  Dim xargs As String
+  Dim xargLst As String[]
+  Dim xval As String
+  Dim xshell As String
+
+  If InStr($url, "?") > 0 Then
+    yy = Split($url, "?")[1]
+    If yy = "upload" Then
+      xmodel = Request["model"]
+      xargs = Request["args"]
+      If xargs Then
+        xargLst = Split(xargs, ",")
+      Endif
+
+      xfileList = New String[]
+      i = 0
+      CreateDirectory()
+      For Each sFieldName In Request.Files.Keys
+        If sFieldName = "files" Then
+          xTemp = Request.Files[sFieldName]
+          xdir = "/tmp" &/ Application.Name &/ "uploads"
+          xfile = Format(Now(), "yymmddhhhnnssuu") & "_" & CStr(i)
+          Copy xTemp To xdir &/ xfile
+          xfileList.Add($htmldir &/ xfile)
+          i = i + 1
+        Endif
+      Next
+
+      xshell = modSettings.ShowSettingValue($confFile, xmodel &/ "Shell")
+      If xfileList.Count Then
+        xval = ExecuteScript(xmodel, xfileList, xshell)
+      Else If xargLst.Count Then
+        xval = ExecuteScript(xmodel, xargLst, xshell)
+      Endif
+
+      Print Trim(xval)
+    Endif
+  Endif
+
+End
+
+Private Function ExecuteScript(xModel As String, argsLst As String[], Optional xshell As String) As String
+
+  Dim xScript As String
+  Dim xcmd As String
+  Dim xval As String
+
+  xScript = "/etc" &/ Application.Name &/ xModel &/ "script.py"
+  If xshell Then
+    xcmd = xshell & Space(1) & xScript & Space(1) & argsLst.Join(Space(1))
+  Else
+    xcmd = "python3" & Space(1) & xScript & Space(1) & argsLst.Join(Space(1))
+  Endif
+  ' Print xcmd
+  Shell xcmd To xval
+
+  Return xval
+
+End
+
+Private Sub CreateDirectory()
+
+  If Not Exist("/tmp" &/ Application.Name) Then
+    Mkdir "/tmp" &/ Application.Name
+  Endif
+  If Not Exist("/tmp" &/ Application.Name &/ "uploads") Then
+    Link $htmldir To "/tmp" &/ Application.Name &/ "uploads"
+  Endif
+
+End
+
+''Testing: curl http://localhost/cgi-bin/web_api?'"model":"MLTest","args":"23.22,Male,2.43"'
+' Private Sub PrintValues()
+'
+'   Dim yy As String
+'   Dim xcoll As Collection
+'
+'   Dim xmodel As String
+'   Dim xargs As String
+'   Dim xargLst As String[]
+'   Dim xval As String
+'
+'   If InStr($url, "?") > 0 Then
+'     yy = Split($url, "?")[1]
+'     If yy Then
+'       xcoll = JSON.Decode(UnBase64(yy))
+'
+'       xmodel = xcoll["model"]
+'       xargs = xcoll["args"]
+'       xargLst = Split(xargs, ",")
+'
+'       xval = ExecuteScript(xmodel, xargLst)
+'       Print CStr(xval)
+'     Endif
+'   Endif
+'
+' End

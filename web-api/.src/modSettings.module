@@ -1,0 +1,18 @@
+' Gambas module file
+
+Public Function ShowSettingValue(sFile As String, strSetting As String) As String
+
+  Dim ConfFile As Settings
+  Dim strVal As String
+  Dim xx As String
+
+  ConfFile = New Settings(sFile)
+  strVal = ConfFile[strSetting, Null]
+  If strVal Then
+    xx = Trim(strVal)
+  Else
+    xx = ""
+  Endif
+  Return xx
+
+End

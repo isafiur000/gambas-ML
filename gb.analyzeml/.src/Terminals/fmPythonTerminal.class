@@ -75,6 +75,7 @@ Public Sub btndatainstall_Click()
   xList.Add("python3-matplotlib")
   xList.Add("python3-seaborn")
   xList.Add("python3-graphviz")
+  xList.Add("python3-dateutil")
   xList.Add("python3-nltk")
   modMain.InstallSelectedApplication(xList)
 
@@ -174,36 +175,33 @@ Public Sub btndataload_Click()
   Dim aHead As String[]
   Dim i As Integer
 
-  Dim dateLst As String[]
   Dim j As Integer
   Dim xcolm As String
 
   $Columns = $sHead.Copy()
-  dateLst = SelectListView("Columns with DateTime Values", $Columns, False)
-
   aHead = $sHead.Copy()
   For i = 0 To aHead.Count - 1
     aHead[i] = "'" & aHead[i] & "'"
   Next
   cmdLst.Add("columns = " & "[" & aHead.Join(", ") & "]")
-  If dateLst And If dateLst.Count Then
-    $DateCol = dateLst
-    For j = 0 To dateLst.Count - 1
-      dateLst[j] = "'" & dateLst[j] & "'"
-    Next
-    cmdLst.Add("datecolm = " & "[" & dateLst.Join(", ") & "]")
-    If $sType = "CSV" Then
-      cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns, header = 0, parse_dates = datecolm)")
-    Else
-      cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns, parse_dates = datecolm)")
-    Endif
+  ' If dateLst And If dateLst.Count Then
+  '   $DateCol = dateLst
+  '   For j = 0 To dateLst.Count - 1
+  '     dateLst[j] = "'" & dateLst[j] & "'"
+  '   Next
+  '   cmdLst.Add("datecolm = " & "[" & dateLst.Join(", ") & "]")
+  '   If $sType = "CSV" Then
+  '     cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns, header = 0, parse_dates = datecolm)")
+  '   Else
+  '     cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns, parse_dates = datecolm)")
+  '   Endif
+  ' Else
+  If $sType = "CSV" Then
+    cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns, header = 0)")
   Else
-    If $sType = "CSV" Then
-      cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns, header = 0)")
-    Else
-      cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns)")
-    Endif
+    cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns)")
   Endif
+  ' Endif
   TerminalInputList(cmdLst)
 
   For Each xcolm In $Columns
@@ -314,6 +312,23 @@ Public Sub btnfloadtype_Click()
   If xList And If xList.Count Then
     For Each xcolm In xList
       cmdLst.Add(Subst("orig_data['&1'] = orig_data['&1'].astype(float)", xcolm))
+    Next
+    TerminalInputList(cmdLst)
+  Endif
+
+End
+
+Public Sub btndatetype_Click()
+
+  Dim dateLst As String[]
+  Dim cmdLst As New String[]
+  Dim xcolm As String
+
+  dateLst = SelectListView("Columns with DateTime Values", $Columns, False)
+  If dateLst And If dateLst.Count Then
+    cmdLst.Add(Subst("from dateutil import parser"))
+    For Each xcolm In dateLst
+      cmdLst.Add(Subst("orig_data['&1'] = orig_data['&1'].apply(parser.parse)", xcolm))
     Next
     TerminalInputList(cmdLst)
   Endif
