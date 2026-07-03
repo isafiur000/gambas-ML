@@ -17,5 +17,5 @@ Packager=1
 Systems=ubuntu
 Menus=ubuntu:"Applications/Data Management"
 Groups=ubuntu:"devel"
-ExtraFiles=ubuntu:"MLTest\t/etc/web-api\nXRay\t/etc/web-api\nappsettings.conf\t/etc/web-api\ninstall\t/etc/web-api"
+ExtraFiles=ubuntu:"MLTest\t/etc/web-api\nXRay\t/etc/web-api\nModernBERT\t/etc/web-api\nappsettings.conf\t/etc/web-api\ninstall\t/etc/web-api"
 usehttpserver=1

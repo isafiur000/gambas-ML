@@ -60,4 +60,5 @@ $$ pip install torch torchvision --index-url https://download.pytorch.org/whl/cp
 $$ pip install transformers
 
 download trained model files into a folder and update the directory
+https://huggingface.co/codewithdark/vit-chest-xray/tree/main
 """

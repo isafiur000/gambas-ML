@@ -2,8 +2,11 @@
 
 Public Sub Form_Open()
 
-  AnalyzeML1.FileType = "CSV"
-  AnalyzeML1.Headers = ["EncID", "Name", "Age", "Gender", "Bilirubin Total", "Bilirubin Direct"]
-  AnalyzeML1.FilePath = User.Home &/ "/Project/SISHGAMBAS/ML/data.csv"
+  ' AnalyzeML1.FileType = "CSV"
+  ' AnalyzeML1.Headers = ["EncID", "Name", "Age", "Gender", "Bilirubin Total", "Bilirubin Direct"]
+  ' AnalyzeML1.FilePath = User.Home &/ "/Project/SISHGAMBAS/ML/data.csv"
+
+  AnalyzeML1.Headers = ["EncID", "Name", "Age", "Gender", "Final(1)", "Final(2)", "Final", "Provisional(1)", "Provisional(2)", "Provisional", "Nursing", "complaints"]                          ''
+  AnalyzeML1.FilePath = User.Home &/ "/Project/SISHGAMBAS/ML/dataset.json"
 
 End

@@ -11,7 +11,7 @@
     Arrangement = Arrange.Vertical
     { Wizard1 Wizard
       MoveScaled(0,1,120,44)
-      Count = 7
+      Count = 8
       Index = 0
       Text = ("Feature Selection")
       { Panel5 Panel
@@ -58,21 +58,21 @@
         Picture = Picture["icon:/small/delete"]
       }
       { Label7 Label
-        MoveScaled(26,13,26,3)
+        MoveScaled(26,17,26,3)
         Border = Border.Plain
         Text = ("Randomize Row sequence")
       }
       { btnrandomrow ToolButton
-        MoveScaled(53,13,3,3)
+        MoveScaled(53,17,3,3)
         Picture = Picture["icon:/small/apply"]
       }
       { Label6 Label
-        MoveScaled(26,17,26,3)
+        MoveScaled(26,21,26,3)
         Border = Border.Plain
         Text = ("Drop Rows with Null Values")
       }
       { btndropmissing ToolButton
-        MoveScaled(53,17,3,3)
+        MoveScaled(53,21,3,3)
         Picture = Picture["icon:/small/delete"]
       }
       { btnshowdata Button
@@ -104,42 +104,80 @@
         Text = ("Plot")
       }
       { Label9 Label
-        MoveScaled(76,1,12,3)
+        MoveScaled(76,21,12,3)
         Border = Border.Plain
         Text = ("Dependent")
       }
       { cmbdependent ComboBox
-        MoveScaled(89,1,29,3)
+        MoveScaled(89,21,29,3)
       }
       { btndepset Button
-        MoveScaled(107,5,11,3)
+        MoveScaled(107,25,11,3)
         Text = ("Select")
       }
       { txtdeptype TextBox
-        MoveScaled(89,5,17,3)
+        MoveScaled(89,25,17,3)
         ReadOnly = True
       }
-      { Label2 Label
-        MoveScaled(26,5,26,3)
+      { lblchangefloat Label
+        MoveScaled(26,9,26,3)
         Border = Border.Plain
         Text = ("Change Columns to Float")
       }
       { btnfloadtype ToolButton
-        MoveScaled(53,5,3,3)
+        MoveScaled(53,9,3,3)
         Picture = Picture["icon:/small/edit"]
       }
       { btnsavenew Button
         MoveScaled(103,31,11,3)
         Text = ("Save")
       }
-      { Label8 Label
-        MoveScaled(26,9,26,3)
+      { lblchangedate Label
+        MoveScaled(26,13,26,3)
         Border = Border.Plain
         Text = ("Change Columns to Date")
       }
       { btndatetype ToolButton
-        MoveScaled(53,9,3,3)
+        MoveScaled(53,13,3,3)
         Picture = Picture["icon:/small/edit"]
+      }
+      { lbltextnlp Label
+        MoveScaled(26,5,26,3)
+        Border = Border.Plain
+        Text = ("Columns for Text Processing")
+      }
+      { btnparatype ToolButton
+        MoveScaled(53,5,3,3)
+        Picture = Picture["icon:/small/edit"]
+      }
+      { Panel25 Frame
+        MoveScaled(72,1,46,11)
+        Text = ("Text Processing")
+        Alignment = Align.Left
+        { cmbtokenizer ComboBox
+          MoveScaled(12,3,29,3)
+        }
+        { btntokendown ToolButton
+          MoveScaled(42,3,3,3)
+          Picture = Picture["icon:/small/exec"]
+        }
+        { chkcleanpara CheckBox
+          MoveScaled(1,7,23,3)
+          Text = ("Clean Paragraph")
+        }
+        { btntokenize Button
+          MoveScaled(27,7,14,3)
+          Text = ("Tokenize")
+        }
+        { Label16 Label
+          MoveScaled(1,3,11,3)
+          Border = Border.Plain
+          Text = ("Tokenizer")
+        }
+      }
+      { btnfilesave Button
+        MoveScaled(114,31,4,3)
+        Picture = Picture["icon:/small/download"]
       }
       Index = 1
       Text = ("Processing of Categorical Columns")
@@ -325,9 +363,60 @@
         }
       }
       Index = 3
+      Text = ("Processing of Unstructured Text")
+      { chkspelcorrect CheckBox
+        MoveScaled(1,17,43,3)
+        Text = ("Spelling Correction")
+      }
+      { btndownstop2 ToolButton
+        MoveScaled(48,17,3,3)
+        Picture = Picture["icon:/small/exec"]
+      }
+      { chkrepeatchar CheckBox
+        MoveScaled(1,13,43,3)
+        Text = ("Remove Repeating Characters")
+      }
+      { chklowercase CheckBox
+        MoveScaled(1,9,43,3)
+        Text = ("Change to Lower Case")
+      }
+      { chkstopword CheckBox
+        MoveScaled(1,5,43,3)
+        Text = ("Stop Words and Punctuation Removal")
+      }
+      { btndownstop ToolButton
+        MoveScaled(48,5,3,3)
+        Picture = Picture["icon:/small/exec"]
+      }
+      { Label17 Label
+        MoveScaled(1,21,15,3)
+        Border = Border.Plain
+        Text = ("Stemming")
+      }
+      { cmbstemming ComboBox
+        MoveScaled(17,21,29,3)
+      }
+      { Label18 Label
+        MoveScaled(1,25,15,3)
+        Border = Border.Plain
+        Text = ("Lemmatization")
+      }
+      { cmblemmatize ComboBox
+        MoveScaled(17,25,29,3)
+      }
+      { Label2 Label
+        MoveScaled(2,1,9,3)
+        Border = Border.Plain
+        Text = ("Hub URL")
+      }
+      { txthuburl TextBox
+        MoveScaled(12,1,39,3)
+        ReadOnly = True
+      }
+      Index = 4
       Text = ("Training and Testing Dataset")
       { Frame1 Frame
-        MoveScaled(0,1,47,7)
+        MoveScaled(1,1,47,7)
         Text = ("Split Dataset")
         Alignment = Align.Left
         { Label10 Label
@@ -351,7 +440,7 @@
         }
       }
       { Panel16 Panel
-        MoveScaled(0,10,47,10)
+        MoveScaled(1,10,47,10)
         Arrangement = Arrange.Vertical
         { Panel23 Panel
           MoveScaled(0,0,44,3.5)
@@ -378,7 +467,7 @@
         }
       }
       { Panel24 Panel
-        MoveScaled(0,30,46,4)
+        MoveScaled(1,30,46,4)
         { cmbsplitdata ComboBox
           MoveScaled(13,0,16,3)
         }
@@ -392,18 +481,18 @@
           Text = ("Show Data")
         }
       }
-      Index = 4
+      Index = 5
       Text = ("Model Training")
       { Label12 Label
-        MoveScaled(1,0.5,7,3)
+        MoveScaled(1,1,7,3)
         Border = Border.Plain
         Text = ("Model")
       }
       { cmbmodel ComboBox
-        MoveScaled(9,0.5,33,3)
+        MoveScaled(9,1,33,3)
       }
       { pnlmodel Panel
-        MoveScaled(1,4,45,30)
+        MoveScaled(1,5,45,30)
         Arrangement = Arrange.Vertical
         { pnlone Panel
           MoveScaled(0,0,45,3.5)
@@ -524,7 +613,7 @@
         }
       }
       { Frame2 Frame
-        MoveScaled(50,1,18,11)
+        MoveScaled(50,2,18,11)
         Text = ("Dump Model")
         { btnsaveProcess Button
           MoveScaled(1,3,16,3)
@@ -537,10 +626,10 @@
           Text = ("Model")
         }
       }
-      Index = 5
+      Index = 6
       Text = ("Model Evaluation")
       { Panel3 Panel
-        MoveScaled(1,1,37,26)
+        MoveScaled(1,0,37,26)
         Arrangement = Arrange.Vertical
         { pnlregress Panel
           MoveScaled(0,0,37,4)
@@ -592,7 +681,7 @@
         }
       }
       { Panel17 Panel
-        MoveScaled(1,29,37,4)
+        MoveScaled(1,28,37,4)
         { btnopen ToolButton
           MoveScaled(31,0.5,3,3)
           Picture = Picture["icon:/small/image"]
@@ -606,7 +695,7 @@
           Picture = Picture["icon:/small/apply"]
         }
       }
-      Index = 6
+      Index = 7
       Text = ("Prediction")
       { btnpredict Button
         MoveScaled(1,1,15,3)

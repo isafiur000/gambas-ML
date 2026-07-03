@@ -1,0 +1,32 @@
+' Gambas module file
+
+Public Function GetModelValue(xModelTag As String, sText As String) As String
+
+  Dim sFile As String
+  Dim xurl As String
+  Dim xmodel As String
+  Dim xcmd As String
+
+  Dim aData As String[]
+  Dim xval As String
+
+  xurl = modSettings.ShowModelsSettingFromFIle(xModelTag & "/" & "URL")
+  xmodel = modSettings.ShowModelsSettingFromFIle(xModelTag & "/" & "Name")
+
+  sFile = Temp() & ".txt"
+  File.Save(sFile, sText)
+
+  If sFile Then
+    aData = New String[]
+    aData.Add("--form 'model=" & Quote(xmodel) & "'")
+    aData.Add("--form 'files=@" & Quote(sFile) & "'")
+  Endif
+
+  If xurl Then
+    xcmd = "curl --location " & xurl & "?upload" & Space(1) & aData.Join(Space(1))
+    Shell xcmd To xval
+  Endif
+
+  Return xval
+
+End
