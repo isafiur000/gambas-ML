@@ -27,7 +27,7 @@
           Text = ("Load Data")
         }
         { btndatainstall Button
-          MoveScaled(1,30,23,3.5)
+          MoveScaled(1,27,23,3.5)
           Text = ("Install Libs")
           Border = False
         }
@@ -46,6 +46,13 @@
             MoveScaled(1,7,21,3)
             Text = ("Unsupervised")
           }
+        }
+        { Label22 Label
+          MoveScaled(1,31,23,2)
+          Font = Font["-1"]
+          Alignment = Align.Center
+          Border = Border.Plain
+          Text = ("© Safiur Rahman")
         }
       }
       { Label13 Label
@@ -365,53 +372,118 @@
       Index = 3
       Text = ("Processing of Unstructured Text")
       { chkspelcorrect CheckBox
-        MoveScaled(1,17,43,3)
+        MoveScaled(1,13,43,3)
         Text = ("Spelling Correction")
       }
       { btndownstop2 ToolButton
-        MoveScaled(48,17,3,3)
+        MoveScaled(48,13,3,3)
         Picture = Picture["icon:/small/exec"]
       }
       { chkrepeatchar CheckBox
-        MoveScaled(1,13,43,3)
+        MoveScaled(1,9,43,3)
         Text = ("Remove Repeating Characters")
       }
       { chklowercase CheckBox
-        MoveScaled(1,9,43,3)
+        MoveScaled(1,5,43,3)
         Text = ("Change to Lower Case")
       }
       { chkstopword CheckBox
-        MoveScaled(1,5,43,3)
+        MoveScaled(1,1,43,3)
         Text = ("Stop Words and Punctuation Removal")
       }
       { btndownstop ToolButton
-        MoveScaled(48,5,3,3)
+        MoveScaled(48,1,3,3)
         Picture = Picture["icon:/small/exec"]
       }
       { Label17 Label
-        MoveScaled(1,21,15,3)
+        MoveScaled(1,17,15,3)
         Border = Border.Plain
         Text = ("Stemming")
       }
       { cmbstemming ComboBox
-        MoveScaled(17,21,29,3)
+        MoveScaled(17,17,29,3)
       }
       { Label18 Label
-        MoveScaled(1,25,15,3)
+        MoveScaled(1,21,15,3)
         Border = Border.Plain
         Text = ("Lemmatization")
       }
       { cmblemmatize ComboBox
-        MoveScaled(17,25,29,3)
+        MoveScaled(17,21,29,3)
       }
-      { Label2 Label
-        MoveScaled(2,1,9,3)
-        Border = Border.Plain
-        Text = ("Hub URL")
-      }
-      { txthuburl TextBox
-        MoveScaled(12,1,39,3)
-        ReadOnly = True
+      { Panel26 Panel
+        MoveScaled(75,1,43,31)
+        Arrangement = Arrange.Vertical
+        AutoResize = True
+        { Panel27 Panel
+          MoveScaled(0,0,42,4)
+          { Label8 Label
+            MoveScaled(0,0.5,11,3)
+            Border = Border.Plain
+            Text = ("Vectorizer")
+          }
+          { cmbtextvector ComboBox
+            MoveScaled(12,0.5,28,3)
+          }
+        }
+        { chkusetextmodel CheckBox
+          MoveScaled(0,4,40,3)
+          Text = ("Use Preatrained Model")
+        }
+        { Panel28 Panel
+          MoveScaled(0,8,42.875,13.875)
+          Arrangement = Arrange.Vertical
+          AutoResize = True
+          { pnlwordvec Panel
+            MoveScaled(0,0,42,9)
+            Visible = False
+            { txtvectorsize ValueBox
+              MoveScaled(12,1,7,3)
+            }
+            { txtwindow ValueBox
+              MoveScaled(32,1,7,3)
+            }
+            { Label20 Label
+              MoveScaled(23,1,8,3)
+              Border = Border.Plain
+              Text = ("window")
+            }
+            { Label15 Label
+              MoveScaled(0,1,11,3)
+              Border = Border.Plain
+              Text = ("vector_size")
+            }
+            { txtmincount ValueBox
+              MoveScaled(12,5,7,3)
+            }
+            { txtsg ValueBox
+              MoveScaled(32,5,7,3)
+            }
+            { Label21 Label
+              MoveScaled(23,5,8,3)
+              Border = Border.Plain
+              Text = ("sg")
+            }
+            { Label19 Label
+              MoveScaled(0,5,11,3)
+              Border = Border.Plain
+              Text = ("min_count")
+            }
+          }
+          { pnlhuburl Panel
+            MoveScaled(0,9,42,4)
+            Visible = False
+            { txthuburl TextBox
+              MoveScaled(6,0.5,35,3)
+              ReadOnly = True
+            }
+            { Label2 Label
+              MoveScaled(0,0.5,5,3)
+              Border = Border.Plain
+              Text = ("Hub")
+            }
+          }
+        }
       }
       Index = 4
       Text = ("Training and Testing Dataset")
@@ -613,7 +685,7 @@
         }
       }
       { Frame2 Frame
-        MoveScaled(50,2,18,11)
+        MoveScaled(48,21,18,12)
         Text = ("Dump Model")
         { btnsaveProcess Button
           MoveScaled(1,3,16,3)
@@ -715,7 +787,7 @@
       Expand = True
       Arrangement = Arrange.Vertical
       { TerminalView1 TerminalView
-        MoveScaled(2,3,85,24)
+        MoveScaled(38,3,85,24)
         Background = Color.White
         Foreground = Color.Black
         Expand = True

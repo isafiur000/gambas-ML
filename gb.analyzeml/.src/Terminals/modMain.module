@@ -28,6 +28,20 @@ Public Function DistributionOSName() As String
 
 End
 
+Public Function PipSelectedApplication(AppList As String[]) As String
+
+  Dim xcmd As String
+
+  If AppList Then
+    If AppList.Count Then
+      xcmd = "pip install" & Space(1) & AppList.Join(Space(1))
+    Endif
+  Endif
+
+  Return xcmd
+
+End
+
 Public Sub InstallSelectedApplication(AppList As String[])
 
   Dim xlist As String[]

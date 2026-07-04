@@ -1,9 +1,18 @@
 ' Gambas class file
 
+''++++++++++++PRE-INSTALLATION++++++++++++++++++
+''$ cd public_html
+''$ python3 -m venv myenv
+''$ source myenv/bin/activate
+''$ pip install ipython3
+''Set the ipython path in appsetting.conf
+''++++++++++++++++++++++++++++++++++++++++++++++++
+
 Private $sType As String
 Private $sHead As String[]
 Private $sPath As String
 Private $hProcess As Process
+Private $pyShell As String
 Private $isOldVersion As Boolean
 
 Private $Columns As String[]
@@ -20,7 +29,6 @@ Private $textProcess As String[]
 Private $imgPath As String
 Private $categStr As String
 Private $numStr As String
-Private $txtStr As String
 Private $cateyStr As String
 Private $numYStr As String
 Private $preProcess As String[]
@@ -29,7 +37,12 @@ Private $useGensim As Boolean = True
 
 Public Sub _new()
 
-  $hProcess = TerminalView1.Shell("ipython3")
+  $pyShell = modSettings.ShowModelsSettingFromFIle("ipython/Shell")
+  If $pyShell Then
+    $hProcess = TerminalView1.Shell($pyShell)
+  Else
+    $hProcess = TerminalView1.Shell("ipython3")
+  Endif
 
   cmbmodel.List = GetModelList()
   cmbsplitdata.List = ["X_train", "X_test", "Y_train", "Y_test"]
@@ -48,6 +61,12 @@ Public Sub _new()
   cmbtokenizer.List = ["TreebankWordTokenizer", "WhitespaceTokenizer", "SpaceTokenizer", "WordPunctTokenizer", "ToktokTokenizer", "RegexpTokenizer"]
   cmbstemming.List = ["PorterStemmer", "LancasterStemmer", "RegexpStemmer", "SnowballStemmer"]
   cmblemmatize.List = ["WordNetLemmatizer"]
+
+  cmbtextvector.List = ["word2vec", "model2vec"]
+  cmbtextvector.Text = "word2vec"
+  pnlwordvec.Visible = True
+  pnlhuburl.Visible = False
+  GetNLPParameters()
 
 End
 
@@ -77,26 +96,44 @@ End
 
 Public Sub btndatainstall_Click()
 
+  Dim yList As String[]
   Dim xList As String[]
 
-  xList = New String[]
-  xList.Add("python3-full")
-  xList.Add("python3-pip")
-  xList.Add("ipython3")
-  xList.Add("python3-numpy")
-  xList.Add("python3-pandas")
-  xList.Add("python3-scipy")
-  xList.Add("python3-sklearn")
-  xList.Add("python3-matplotlib")
-  xList.Add("python3-graphviz")
-  xList.Add("python3-dateutil")
-
-  xList.Add("python3-nltk")
-  xList.Add("python3-bs4")
-  xList.Add("python3-enchant")
-  xList.Add("libenchant-2-2")
-  xList.Add("python3-gensim")
+  yList = New String[]
+  yList.Add("python3-full")
+  yList.Add("python3-pip")
   modMain.InstallSelectedApplication(xList)
+
+  xList = New String[]
+  If $pyShell Then
+    xList.Add("numpy")
+    xList.Add("pandas")
+    xList.Add("scikit-learn")
+    xList.Add("matplotlib")
+    xList.Add("python-dateutil")
+
+    xList.Add("nltk")
+    xList.Add("beautifulsoup4")
+    xList.Add("pyenchant")
+    xList.Add("gensim")
+    TerminalInput(modMain.PipSelectedApplication(xList))
+  Else
+    xList.Add("ipython3")
+    xList.Add("python3-numpy")
+    xList.Add("python3-pandas")
+    xList.Add("python3-scipy")
+    xList.Add("python3-sklearn")
+    xList.Add("python3-matplotlib")
+    xList.Add("python3-graphviz")
+    xList.Add("python3-dateutil")
+
+    xList.Add("python3-nltk")
+    xList.Add("python3-bs4")
+    xList.Add("python3-enchant")
+    xList.Add("libenchant-2-2")
+    xList.Add("python3-gensim")
+    modMain.InstallSelectedApplication(xList)
+  Endif
 
 End
 
@@ -553,8 +590,6 @@ Public Sub btntokenize_Click()
   TerminalInputList(cmdLst)
   PressEnterKey()
 
-  txthuburl.Text = modSettings.ShowModelsSettingFromFIle("WordVectorizer/HubURL")
-
 End
 
 Private Sub SelectColumns()
@@ -834,6 +869,28 @@ Private Sub GetPreprocessing()
 End
 
 ''====================== Text Processing ===============================
+Private Sub GetNLPParameters()
+
+  txthuburl.Text = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/HubURL")
+  Select cmbtextvector.Text
+    Case "word2vec"
+      txtvectorsize.Value = 100
+      txtwindow.Value = 5
+      txtmincount.Value = 1
+      txtsg.Value = 1
+    Case "model2vec"
+  End Select
+
+End
+
+Public Sub cmbtextvector_Click()
+
+  If cmbtextvector.Text Then
+    GetNLPParameters()
+  Endif
+
+End
+
 Public Sub btndownstop_Click()
 
   TerminalInput("nltk.download('stopwords')")
@@ -855,13 +912,14 @@ Public Sub btntokendown_Click()
 
 End
 
-Private Sub GetTextProcessing()
+Private Sub DefineTextProcessing()
 
   Dim cmdLst As String[]
 
   If chkstopword.Value = True Then
     cmdLst = New String[]
     cmdLst.Add("def stopword_removal(tokens):")
+    cmdLst.Add("from nltk.corpus import stopwords")
     cmdLst.Add("english_stops = set(stopwords.words('english'))")
     cmdLst.Add("nlp_tokens = [word for word in tokens if word not in english_stops]")
     cmdLst.Add("nlp_tokens = [word for word in nlp_tokens if len(word) >= 3]")
@@ -940,12 +998,9 @@ Private Sub GetTextProcessing()
 
 End
 
-Private Sub TextProcessingPipeline()
+Private Sub GetTextProcessing()
 
   Dim cmdLst As String[]
-  Dim xmodel As String
-
-  GetTextProcessing()
 
   cmdLst = New String[]
   cmdLst.Add("def word_process(tokens):")
@@ -971,31 +1026,107 @@ Private Sub TextProcessingPipeline()
   TerminalInputList(cmdLst)
   PressEnterKey()
 
-  If $useGensim = True Then
-    xmodel = modSettings.ShowModelsSettingFromFIle("WordVectorizer/ModelPath")
-    cmdLst = New String[]
-    cmdLst.Add("from gensim.models import Word2Vec")
-    cmdLst.Add(Subst("model = Word2Vec.load('&1')", xmodel))
-    cmdLst.Add("word_vectors = model.wv")
-    cmdLst.Add("def vectorize_text(tokens, kv_model):")
-    cmdLst.Add("tokens = word_process(tokens)")
-    cmdLst.Add("valid_vectors = [kv_model[word] for word in tokens if word in kv_model] if tokens else []")
-    cmdLst.Add("return numpy.mean(valid_vectors, axis=0) if valid_vectors else numpy.zeros(kv_model.vector_size)")
-    TerminalInputList(cmdLst)
-    PressEnterKey()
+End
 
-    cmdLst = New String[]
-    cmdLst.Add("all_vectors = []")
-    cmdLst.Add("for col in para_columns:")
-    cmdLst.Add("vectors = para_data[col].apply(lambda x: vectorize_text(x, word_vectors)).tolist()")
-    cmdLst.Add("vector_df = pandas.DataFrame(vectors, index=para_data.index)")
-    cmdLst.Add("vector_df.columns = [f'{col}_dim_{i}' for i in range(vector_df.shape[1])]")
-    cmdLst.Add("all_vectors.append(vector_df)")
-    TerminalInputList(cmdLst)
-    PressEnterKey()
+Public Sub chkusetextmodel_Click()
 
-    TerminalInput("vector_data = pandas.concat(all_vectors, axis=1)")
+  If chkusetextmodel.Value = True Then
+    pnlwordvec.Visible = False
+    pnlhuburl.Visible = True
+  Else If chkusetextmodel.Value = False Then
+    pnlwordvec.Visible = True
+    pnlhuburl.Visible = False
   Endif
+
+End
+
+Private Sub TrainVocabulary()
+
+  Dim cmdLst As String[]
+
+  cmdLst = New String[]
+  cmdLst.Add("token_corpus = []")
+  cmdLst.Add("for col in para_columns:")
+  cmdLst.Add("raw_token = para_data[col].apply(lambda tok: word_process(tok)).tolist()")
+  cmdLst.Add("for row in raw_token:")
+  cmdLst.Add("token_corpus.append(row)")
+  TerminalInputList(cmdLst)
+  PressEnterKey()
+  ' TerminalInput("token_corpus = [sum(row, []) for row in zip(*[orig_data[col] for col in para_columns])]")
+
+End
+
+Private Sub DefineTextVectorization()
+
+  Dim cmdLst As String[]
+  Dim xmodel As String
+
+  If cmbtextvector.Text = "word2vec" Then
+    TerminalInput("from gensim.models import Word2Vec")
+    If chkusetextmodel.Value Then
+      xmodel = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/ModelPath")
+      TerminalInput(Subst("nlp_model = Word2Vec.load('&1')", xmodel))
+    Else
+      TrainVocabulary()
+      cmdLst = New String[]
+      cmdLst.Add(Subst("nlp_model = Word2Vec(vector_size = &1, window = &2, min_count = &3, sg = &4)", txtvectorsize.Value, txtwindow.Value, txtmincount.Value, txtsg.Value))
+      cmdLst.Add("nlp_model.build_vocab(token_corpus)")
+      cmdLst.Add("nlp_model.train(token_corpus, total_examples=nlp_model.corpus_count, epochs=5)")
+      TerminalInputList(cmdLst)
+      PressEnterKey()
+    Endif
+    TerminalInput("word_vectors = nlp_model.wv")
+
+  Else If cmbtextvector.Text = "model2vec" Then
+    chkusetextmodel.Value = True
+    TerminalInput("from model2vec import StaticModel")
+    If chkusetextmodel.Value Then
+      xmodel = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/ModelPath")
+      TerminalInput(Subst("nlp_model = StaticModel.from_pretrained('&1')", xmodel))
+    Endif
+
+  Endif
+
+  cmdLst = New String[]
+  cmdLst.Add("def vectorize_text(tokens):")
+  cmdLst.Add("word_tokens = word_process(tokens)")
+  If cmbtextvector.Text = "word2vec" Then
+    cmdLst.Add("valid_vectors = [word_vectors[word] for word in word_tokens if word in word_vectors] if tokens else []")
+    cmdLst.Add("return numpy.mean(valid_vectors, axis=0) if valid_vectors else numpy.zeros(word_vectors.vector_size)")
+  Else If cmbtextvector.Text = "model2vec" Then
+    cmdLst.Add("valid_vectors = [nlp_model.encode(word_tokens)] if tokens else []")
+    cmdLst.Add("return numpy.mean(valid_vectors, axis=0)")
+  Endif
+  TerminalInputList(cmdLst)
+  PressEnterKey()
+
+End
+
+Private Sub GetTextVectorization()
+
+  Dim cmdLst As String[]
+
+  cmdLst = New String[]
+  cmdLst.Add("all_vectors = []")
+  cmdLst.Add("for col in para_columns:")
+  cmdLst.Add("vectors = para_data[col].apply(lambda tok: vectorize_text(tok)).tolist()")
+  cmdLst.Add("vector_df = pandas.DataFrame(vectors, index=para_data.index)")
+  cmdLst.Add("vector_df.columns = [f'{col}_dim_{i}' for i in range(vector_df.shape[1])]")
+  cmdLst.Add("all_vectors.append(vector_df)")
+  TerminalInputList(cmdLst)
+  PressEnterKey()
+
+  TerminalInput("vector_data = pandas.concat(all_vectors, axis=1)")
+
+End
+
+Private Sub TextProcessingPipeline()
+
+  DefineTextProcessing()
+  GetTextProcessing()
+
+  DefineTextVectorization()
+  GetTextVectorization()
 
 End
 
@@ -1467,7 +1598,6 @@ Public Sub btnmodeltrain_Click()
     TerminalInputList(cmdLst)
     Dec Application.Busy
     btnevaluate.Enabled = True
-    btnmodeltrain.Enabled = False
   Endif
 
 End
