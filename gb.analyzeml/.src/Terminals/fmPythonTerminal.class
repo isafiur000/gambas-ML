@@ -5,7 +5,7 @@
 ''$ python3 -m venv myenv
 ''$ source myenv/bin/activate
 ''$ pip install ipython3
-''Set the ipython path in appsetting.conf
+''Set ipython path in appsetting.conf
 ''++++++++++++++++++++++++++++++++++++++++++++++++
 
 Private $sType As String
@@ -17,6 +17,7 @@ Private $isOldVersion As Boolean
 
 Private $Columns As String[]
 Private $IndepCol As String[]
+Private $vecModels As String[]
 
 Private $paraCol As String[]
 Private $numbCol As String[]
@@ -27,9 +28,9 @@ Private $libprocess As String[]
 Private $textProcess As String[]
 
 Private $imgPath As String
-Private $categStr As String
-Private $numStr As String
-Private $cateyStr As String
+Private $catXStr As String
+Private $numXStr As String
+Private $catYStr As String
 Private $numYStr As String
 Private $preProcess As String[]
 
@@ -45,7 +46,7 @@ Public Sub _new()
   Endif
 
   cmbmodel.List = GetModelList()
-  cmbsplitdata.List = ["X_train", "X_test", "Y_train", "Y_test"]
+  cmbsplitdata.List = ["X_train.shape", "X_test.shape", "Y_train.shape", "Y_test.shape"]
 
   cmbnullmethod.List = ["SimpleImputer", "KNNImputer", "IterativeImputer"]
   cmbcatnullmethod.List = ["SimpleImputer", "KNNImputer", "IterativeImputer"]
@@ -58,15 +59,11 @@ Public Sub _new()
   cmbscaling.List = ["MinMaxScaler", "StandardScaler"]
   cmbscoreaverage.List = ["macro", "micro", "weighted"]
 
-  cmbtokenizer.List = ["TreebankWordTokenizer", "WhitespaceTokenizer", "SpaceTokenizer", "WordPunctTokenizer", "ToktokTokenizer", "RegexpTokenizer"]
+  cmbtokenizer.List = ["word_tokenize", "TreebankWordTokenizer", "WhitespaceTokenizer", "SpaceTokenizer", "WordPunctTokenizer", "ToktokTokenizer", "RegexpTokenizer"]
   cmbstemming.List = ["PorterStemmer", "LancasterStemmer", "RegexpStemmer", "SnowballStemmer"]
   cmblemmatize.List = ["WordNetLemmatizer"]
 
-  cmbtextvector.List = ["word2vec", "model2vec"]
-  cmbtextvector.Text = "word2vec"
-  pnlwordvec.Visible = True
-  pnlhuburl.Visible = False
-  GetNLPParameters()
+  $vecModels = ["word2vec", "model2vec", "modernbert"]
 
 End
 
@@ -111,27 +108,18 @@ Public Sub btndatainstall_Click()
     xList.Add("scikit-learn")
     xList.Add("matplotlib")
     xList.Add("python-dateutil")
-
     xList.Add("nltk")
     xList.Add("beautifulsoup4")
-    xList.Add("pyenchant")
-    xList.Add("gensim")
     TerminalInput(modMain.PipSelectedApplication(xList))
   Else
     xList.Add("ipython3")
     xList.Add("python3-numpy")
     xList.Add("python3-pandas")
-    xList.Add("python3-scipy")
     xList.Add("python3-sklearn")
     xList.Add("python3-matplotlib")
-    xList.Add("python3-graphviz")
     xList.Add("python3-dateutil")
-
     xList.Add("python3-nltk")
     xList.Add("python3-bs4")
-    xList.Add("python3-enchant")
-    xList.Add("libenchant-2-2")
-    xList.Add("python3-gensim")
     modMain.InstallSelectedApplication(xList)
   Endif
 
@@ -204,7 +192,7 @@ End
 Public Sub btndatainit_Click()
 
   Dim cmdLst As New String[]
-  Dim xlibs As String[] = ["import numpy", "import pandas", "import sklearn", "import matplotlib", "import nltk", "import enchant", "import sys"]
+  Dim xlibs As String[] = ["import numpy", "import pandas", "import sklearn", "import matplotlib", "import nltk", "import sys"]
 
   $Columns = New String[]
   $IndepCol = New String[]
@@ -219,8 +207,8 @@ Public Sub btndatainit_Click()
 
   $libprocess = New String[]
   $textProcess = New String[]
-  $categStr = ""
-  $numStr = ""
+  $catXStr = ""
+  $numXStr = ""
   $numYStr = ""
   $defined = False
 
@@ -235,6 +223,27 @@ Public Sub btndatainit_Click()
   TerminalInputList(cmdLst)
   btndataload.Enabled = True
   Wizard1.ShowButton = False
+
+End
+
+Public Sub btninstmodel_Click()
+
+  Dim xList As String[]
+
+  xList = New String[]
+  Select cmbmodel.Text
+    Case "XGBoost Regression", "XGBoost Classifier"
+      If $pyShell Then
+        TerminalInput("pip install xgboost")
+      Else
+        xList.Add("python3-xgboost")
+        modMain.InstallSelectedApplication(xList)
+      Endif
+    Case "LGBM Classifier", "LGBM Regression"
+      If $pyShell Then
+        TerminalInput("pip install 'lightgbm[scikit-learn]'")
+      Endif
+  End Select
 
 End
 
@@ -289,6 +298,10 @@ Private Sub GetModelList() As String[]
     xlst.Add("Nonlinear SVR")
     xlst.Add("DecisionTree Regression")
     xlst.Add("RandomForest Regression")
+    xlst.Add("HGBT Regression")
+    xlst.Add("LGBM Regression")
+    xlst.Add("AdaBoost Regression")
+    xlst.Add("XGBoost Regression")
     valtrain.Value = 80
     valtrain.Enabled = True
     pnlregress.Visible = True
@@ -303,6 +316,10 @@ Private Sub GetModelList() As String[]
     xlst.Add("Nonlinear SVC")
     xlst.Add("DecisionTree Classifier")
     xlst.Add("RandomForest Classifier")
+    xlst.Add("HGBT Classifier")
+    xlst.Add("LGBM Classifier")
+    xlst.Add("AdaBoost Classifier")
+    xlst.Add("XGBoost Classifier")
     valtrain.Value = 80
     valtrain.Enabled = True
     pnlregress.Visible = False
@@ -311,6 +328,8 @@ Private Sub GetModelList() As String[]
   Else If rbunsupervis.Value = True Then
     xlst.Add("KMeans Clustering")
     xlst.Add("DBSCAN")
+    xlst.Add("Isolation Forest")
+    xlst.Add("Local Outlier Factor")
     valtrain.Value = 100
     valtrain.Enabled = False
     pnlregress.Visible = True
@@ -488,7 +507,7 @@ Public Sub btndatacorrelation_Click()
 
   Dim cmdLst As New String[]
 
-  cmdLst.Add("corr_data = orig_data.select_dtypes(include=[numpy.number])")
+  cmdLst.Add("corr_data = orig_data.select_dtypes(include = [numpy.number])")
   cmdLst.Add("corr_data.corr()")
   TerminalInputList(cmdLst)
 
@@ -500,7 +519,7 @@ Public Sub btnsavenew_Click()
 
   If Dialog.SelectDirectory() Then Return
   xPath = Dialog.Path &/ modMain.GetNowString() & ".csv"
-  TerminalInput(Subst("orig_data.to_csv('&1', sep='" & "\\" & "t" & "')", xPath))
+  TerminalInput(Subst("orig_data.to_csv('&1', sep ='" & "\\" & "t" & "')", xPath))
 
 End
 
@@ -522,15 +541,21 @@ Public Sub btnscatter_Click()
   xPath = Temp() & ".png"
   cmdLst.Add("from matplotlib import pyplot")
   cmdLst.Add("from pandas.plotting import scatter_matrix")
-  cmdLst.Add("numeric_cols = orig_data.select_dtypes(include=[numpy.number]).columns")
-  cmdLst.Add("scatter_matrix(orig_data[numeric_cols], alpha=0.8, figsize=(8, 8), diagonal='hist')")
-  cmdLst.Add("pyplot.savefig('" & xPath & "', format='png')")
+  cmdLst.Add("numeric_cols = orig_data.select_dtypes(include = [numpy.number]).columns")
+  cmdLst.Add("scatter_matrix(orig_data[numeric_cols], alpha = 0.8, figsize = (8, 8), diagonal = 'hist')")
+  cmdLst.Add("pyplot.savefig('" & xPath & "', format = 'png')")
   TerminalInputList(cmdLst)
 
   While (Exist(xPath) = False)
     Wait 0.5
   Wend
   Desktop.Open(xPath)
+
+End
+
+Public Sub chktokenize_Click()
+
+  cmbtokenizer.Text = "word_tokenize"
 
 End
 
@@ -549,46 +574,55 @@ Public Sub btntokenize_Click()
     PressEnterKey()
   Endif
 
-  cmdLst = New String[]
-  cmdLst.Add("def tokenize_text(nlp_text):")
-  If cmbtokenizer.Text Then
-    Select cmbtokenizer.Text
-      Case "TreebankWordTokenizer"
-        cmdLst.Add("from nltk.tokenize import TreebankWordTokenizer")
-        cmdLst.Add("tokenizer = TreebankWordTokenizer()")
-      Case "WhitespaceTokenizer"
-        cmdLst.Add("from nltk.tokenize import WhitespaceTokenizer")
-        cmdLst.Add("tokenizer = WhitespaceTokenizer()")
-      Case "SpaceTokenizer"
-        cmdLst.Add("from nltk.tokenize import SpaceTokenizer")
-        cmdLst.Add("tokenizer = SpaceTokenizer()")
-      Case "WordPunctTokenizer"
-        cmdLst.Add("from nltk.tokenize import WordPunctTokenizer")
-        cmdLst.Add("tokenizer = WordPunctTokenizer()")
-      Case "ToktokTokenizer"
-        cmdLst.Add("from nltk.tokenize import ToktokTokenizer")
-        cmdLst.Add("tokenizer = ToktokTokenizer()")
-      Case "RegexpTokenizer"
-        cmdLst.Add("from nltk.tokenize import RegexpTokenizer")
-        cmdLst.Add("tokenizer = RegexpTokenizer('[" & "\\" & "w']+')")
-    End Select
-    cmdLst.Add("tokens = tokenizer.tokenize(nlp_text)")
-  Else
-    cmdLst.Add("from nltk.tokenize import word_tokenize")
-    cmdLst.Add("tokens = word_tokenize(nlp_text)")
+  If chktokenize.Value = True Then
+    cmdLst = New String[]
+    cmdLst.Add("def tokenize_text(nlp_text):")
+    If cmbtokenizer.Text = "word_tokenize" Then
+      cmdLst.Add("from nltk.tokenize import word_tokenize")
+      cmdLst.Add("tokens = word_tokenize(nlp_text)")
+    Else
+      Select cmbtokenizer.Text
+        Case "TreebankWordTokenizer"
+          cmdLst.Add("from nltk.tokenize import TreebankWordTokenizer")
+          cmdLst.Add("tokenizer = TreebankWordTokenizer()")
+        Case "WhitespaceTokenizer"
+          cmdLst.Add("from nltk.tokenize import WhitespaceTokenizer")
+          cmdLst.Add("tokenizer = WhitespaceTokenizer()")
+        Case "SpaceTokenizer"
+          cmdLst.Add("from nltk.tokenize import SpaceTokenizer")
+          cmdLst.Add("tokenizer = SpaceTokenizer()")
+        Case "WordPunctTokenizer"
+          cmdLst.Add("from nltk.tokenize import WordPunctTokenizer")
+          cmdLst.Add("tokenizer = WordPunctTokenizer()")
+        Case "ToktokTokenizer"
+          cmdLst.Add("from nltk.tokenize import ToktokTokenizer")
+          cmdLst.Add("tokenizer = ToktokTokenizer()")
+        Case "RegexpTokenizer"
+          cmdLst.Add("from nltk.tokenize import RegexpTokenizer")
+          cmdLst.Add("tokenizer = RegexpTokenizer('[" & "\\" & "w']+')")
+      End Select
+      cmdLst.Add("tokens = tokenizer.tokenize(nlp_text)")
+    Endif
+    cmdLst.Add("return tokens")
+    TerminalInputList(cmdLst)
+    PressEnterKey()
   Endif
-  cmdLst.Add("return tokens")
-  TerminalInputList(cmdLst)
-  PressEnterKey()
 
   cmdLst = New String[]
   cmdLst.Add("for col in para_columns:")
   If chkcleanpara.Value = True Then
     cmdLst.Add("orig_data[col] = orig_data[col].apply(clean_html_text)")
   Endif
-  cmdLst.Add("orig_data[col] = orig_data[col].apply(tokenize_text)")
-  TerminalInputList(cmdLst)
-  PressEnterKey()
+  If chktokenize.Value = True Then
+    cmdLst.Add("orig_data[col] = orig_data[col].apply(tokenize_text)")
+    pnltextprocess.Visible = True
+  Else
+    pnltextprocess.Visible = False
+  Endif
+  If chkcleanpara.Value Or If chktokenize.Value Then
+    TerminalInputList(cmdLst)
+    PressEnterKey()
+  Endif
 
 End
 
@@ -620,7 +654,9 @@ Private Sub SelectColumns()
 
   TerminalInput("num_columns")
   TerminalInput("categ_columns")
-  TerminalInput("para_columns")
+  If $paraCol.Count Then
+    TerminalInput("para_columns")
+  Endif
 
 End
 
@@ -679,8 +715,25 @@ Public Sub btndepset_Click()
       TerminalInputList(cmdLst)
 
       txtdeptype.Text = GetIpythonOutput("str(orig_data.dtypes['" & cmbdependent.Text & "'])")
+      GetTextProcessModels()
       Wizard1.ShowButton = True
     Endif
+
+  Endif
+
+End
+
+Private Sub GetTextProcessModels()
+
+  If chktokenize.Value = True Then
+    cmbtextvector.List = ["word2vec", "model2vec"]
+    cmbtextvector.Text = "word2vec"
+    pnlwordvec.Visible = True
+    pnlhuburl.Visible = False
+    GetNLPParameters()
+
+  Else
+    cmbtextvector.List = ["modernbert"]
 
   Endif
 
@@ -779,8 +832,8 @@ End
 
 Private Sub GetPreprocessing()
 
-  Dim categLst As New String[]
-  Dim numLst As New String[]
+  Dim catgXLst As New String[]
+  Dim numXLst As New String[]
 
   Dim ynull As String
   Dim xnull As String
@@ -798,31 +851,33 @@ Private Sub GetPreprocessing()
   If chknullcateg.Value = True Then
     If cmbnullmethod.Text = "SimpleImputer" Then
       $libprocess.Add("from sklearn.impute import SimpleImputer")
-      categLst.Add(Subst("SimpleImputer(missing_values = &1, strategy='&2')", ynull, cmbcatnulstrategy.Text))
+      catgXLst.Add(Subst("SimpleImputer(missing_values = &1, strategy = '&2')", ynull, cmbcatnulstrategy.Text))
     Else If cmbnullmethod.Text = "KNNImputer" Then
       $libprocess.Add("from sklearn.impute import KNNImputer")
-      categLst.Add(Subst("KNNImputer(missing_values = &1, weights='&2')", ynull, cmbcatnulstrategy.Text))
+      catgXLst.Add(Subst("KNNImputer(missing_values = &1, weights = '&2')", ynull, cmbcatnulstrategy.Text))
     Else If cmbnullmethod.Text = "IterativeImputer" Then
       $libprocess.Add("from sklearn.impute import IterativeImputer")
-      categLst.Add(Subst("IterativeImputer(missing_values = &1, initial_strategy='&2')", ynull, cmbcatnulstrategy.Text))
+      catgXLst.Add(Subst("IterativeImputer(missing_values = &1, initial_strategy = '&2')", ynull, cmbcatnulstrategy.Text))
     Endif
   Endif
   If chkcategencode.Value = True Then
     If cmbencoding.Text = "OrdinalEncoder" Then
-      $libprocess.Add("from sklearn.preprocessing import OrdinalEncoder")
-      categLst.Add("OrdinalEncoder()")
+      $libprocess.Add("from sklearn.preprocessing import OrdinalEncoder, LabelEncoder")
+      catgXLst.Add("OrdinalEncoder()")
+      $catYStr = "cat_encode = LabelEncoder()"
     Else If cmbencoding.Text = "OneHotEncoder" Then
       $libprocess.Add("from sklearn.preprocessing import OneHotEncoder")
       If $isOldVersion = True Then
-        categLst.Add("OneHotEncoder(sparse=False, drop='first')")
+        catgXLst.Add("OneHotEncoder(sparse = False, drop = 'first')")
+        $catYStr = "cat_encode = OneHotEncoder(sparse = False, drop = 'first')"
       Else
-        categLst.Add("OneHotEncoder(sparse_output=False, drop='first')")
+        catgXLst.Add("OneHotEncoder(sparse_output = False, drop = 'first')")
+        $catYStr = "cat_encode = OneHotEncoder(sparse_output = False, drop = 'first')"
       Endif
     Endif
   Endif
-  If categLst.Count Then
-    $categStr = "cat_pipeline = make_pipeline(" & categLst.Join(", ") & ")"
-    $cateyStr = "caty_pipeline = make_pipeline(" & categLst.Join(", ") & ")"
+  If catgXLst.Count Then
+    $catXStr = "cat_pipeline = make_pipeline(" & catgXLst.Join(", ") & ")"
   Endif
 
   ''----------numerical preprocessing ---------------------------
@@ -835,80 +890,75 @@ Private Sub GetPreprocessing()
   If chknullnumber.Value = True Then
     If cmbnullmethod.Text = "SimpleImputer" Then
       $libprocess.Add("from sklearn.impute import SimpleImputer")
-      numLst.Add(Subst("SimpleImputer(missing_values = &1, strategy='&2')", xnull, cmbnulstrategy.Text))
+      numXLst.Add(Subst("SimpleImputer(missing_values = &1, strategy = '&2')", xnull, cmbnulstrategy.Text))
     Else If cmbnullmethod.Text = "KNNImputer" Then
       $libprocess.Add("from sklearn.impute import KNNImputer")
-      numLst.Add(Subst("KNNImputer(missing_values = &1, weights='&2')", xnull, cmbnulstrategy.Text))
+      numXLst.Add(Subst("KNNImputer(missing_values = &1, weights = '&2')", xnull, cmbnulstrategy.Text))
     Else If cmbnullmethod.Text = "IterativeImputer" Then
       $libprocess.Add("from sklearn.impute import IterativeImputer")
-      numLst.Add(Subst("IterativeImputer(missing_values = &1, initial_strategy='&2')", xnull, cmbnulstrategy.Text))
+      numXLst.Add(Subst("IterativeImputer(missing_values = &1, initial_strategy = '&2')", xnull, cmbnulstrategy.Text))
     Endif
-    $numYStr = "numy_pipeline = make_pipeline(" & numLst.Join(", ") & ")"
   Endif
+
   If chkpolynomial.Value = True Then
     $libprocess.Add("from sklearn.preprocessing import PolynomialFeatures")
-    numLst.Add(Subst("PolynomialFeatures(degree = &1, include_bias = False)", txtpolynomial.Value))
+    numXLst.Add(Subst("PolynomialFeatures(degree = &1, include_bias = False)", txtpolynomial.Value))
   Endif
   If chkscaling.Value = True Then
     If cmbscaling.Text = "MinMaxScaler" Then
       $libprocess.Add("from sklearn.preprocessing import MinMaxScaler")
       If txtscalerange.Text Then
-        numLst.Add(Subst("MinMaxScaler(feature_range=(&1))", Trim(txtscalerange.Text)))
+        numXLst.Add(Subst("MinMaxScaler(feature_range = (&1))", Trim(txtscalerange.Text)))
+        If chkscaledep.Value = True Then
+          $numYStr = Subst("num_encode = MinMaxScaler(feature_range = (&1))", Trim(txtscalerange.Text))
+        Endif
       Else
-        numLst.Add("MinMaxScaler(feature_range=(-1, 1))")
+        numXLst.Add("MinMaxScaler(feature_range = (-1, 1))")
+        If chkscaledep.Value = True Then
+          $numYStr = "num_encode = MinMaxScaler(feature_range = (-1, 1))"
+        Endif
       Endif
     Else If cmbscaling.Text = "StandardScaler" Then
       $libprocess.Add("from sklearn.preprocessing import StandardScaler")
-      numLst.Add("StandardScaler()")
+      numXLst.Add("StandardScaler()")
+      If chkscaledep.Value = True Then
+        $numYStr = "num_encode = StandardScaler()"
+      Endif
     Endif
   Endif
-  If numLst.Count Then
-    $numStr = "num_pipeline = make_pipeline(" & numLst.Join(", ") & ")"
+  If numXLst.Count Then
+    $numXStr = "num_pipeline = make_pipeline(" & numXLst.Join(", ") & ")"
   Endif
 
 End
 
 ''====================== Text Processing ===============================
-Private Sub GetNLPParameters()
-
-  txthuburl.Text = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/HubURL")
-  Select cmbtextvector.Text
-    Case "word2vec"
-      txtvectorsize.Value = 100
-      txtwindow.Value = 5
-      txtmincount.Value = 1
-      txtsg.Value = 1
-    Case "model2vec"
-  End Select
-
-End
-
-Public Sub cmbtextvector_Click()
-
-  If cmbtextvector.Text Then
-    GetNLPParameters()
-  Endif
-
-End
-
 Public Sub btndownstop_Click()
 
   TerminalInput("nltk.download('stopwords')")
 
 End
 
-Public Sub btndownstop2_Click()
+Public Sub btnenchant_Click()
 
-  TerminalInput("%pip install pyenchant")
+  Dim xList As String[]
+
+  xList = New String[]
+  If $pyShell Then
+    TerminalInput("pip install pyenchant")
+  Else
+    xList.Add("python3-enchant")
+    xList.Add("libenchant-2-2")
+    modMain.InstallSelectedApplication(xList)
+  Endif
 
 End
 
 Public Sub btntokendown_Click()
 
-  If cmbtokenizer.Text Then
-  Else
-    TerminalInput("nltk.download('punkt')")
-  Endif
+  TerminalInput("nltk.download('punkt')")
+  TerminalInput("nltk.download('punkt_tab')")
+  TerminalInput("nltk.download('wordnet')")
 
 End
 
@@ -977,6 +1027,7 @@ Private Sub DefineTextProcessing()
   If chkrepeatchar.Value = True Then
     cmdLst = New String[]
     cmdLst.Add("def remove_repeatition(tokens):")
+    cmdLst.Add("import enchant")
     cmdLst.Add("from replacers import RepeatReplacer")
     cmdLst.Add("replacer = RepeatReplacer()")
     cmdLst.Add("nlp_tokens = [replacer.replace(word) for word in tokens]")
@@ -988,6 +1039,7 @@ Private Sub DefineTextProcessing()
   If chkspelcorrect.Value = True Then
     cmdLst = New String[]
     cmdLst.Add("def spelling_correction(tokens):")
+    cmdLst.Add("import enchant")
     cmdLst.Add("from replacers import SpellingReplacer")
     cmdLst.Add("replacer = SpellingReplacer()")
     cmdLst.Add("nlp_tokens = [replacer.replace(word) for word in tokens]")
@@ -1028,18 +1080,7 @@ Private Sub GetTextProcessing()
 
 End
 
-Public Sub chkusetextmodel_Click()
-
-  If chkusetextmodel.Value = True Then
-    pnlwordvec.Visible = False
-    pnlhuburl.Visible = True
-  Else If chkusetextmodel.Value = False Then
-    pnlwordvec.Visible = True
-    pnlhuburl.Visible = False
-  Endif
-
-End
-
+''======================== Text Vectorization ===================
 Private Sub TrainVocabulary()
 
   Dim cmdLst As String[]
@@ -1053,6 +1094,77 @@ Private Sub TrainVocabulary()
   TerminalInputList(cmdLst)
   PressEnterKey()
   ' TerminalInput("token_corpus = [sum(row, []) for row in zip(*[orig_data[col] for col in para_columns])]")
+
+End
+
+Private Sub GetNLPParameters()
+
+  Select cmbtextvector.Text
+    Case "word2vec"
+      txtvectorsize.Value = 100
+      txtwindow.Value = 5
+      txtmincount.Value = 1
+      txtsg.Value = 1
+    Case "model2vec"
+  End Select
+
+End
+
+Public Sub cmbtextvector_Click()
+
+  If cmbtextvector.Text Then
+    Select cmbtextvector.Text
+      Case "word2vec", "model2vec"
+        GetNLPParameters()
+      Case Else
+    End Select
+  Endif
+
+End
+
+Public Sub chkusetextmodel_Click()
+
+  If chkusetextmodel.Value = True Then
+    pnlwordvec.Visible = False
+    pnlhuburl.Visible = True
+    txthuburl.Text = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/HubURL")
+  Else If chkusetextmodel.Value = False Then
+    pnlwordvec.Visible = True
+    pnlhuburl.Visible = False
+  Endif
+
+End
+
+Public Sub txthuburl_Click()
+
+  Clipboard.Copy(txthuburl.Text)
+
+End
+
+Public Sub btninstallmodel_Click()
+
+  Dim xList As String[]
+
+  If cmbtextvector.Text Then
+    xList = New String[]
+    Select cmbtextvector.Text
+      Case "word2vec", "model2vec"
+        If $pyShell Then
+          TerminalInput("pip install gensim")
+        Else
+          xList.Add("python3-gensim")
+          modMain.InstallSelectedApplication(xList)
+        Endif
+
+      Case "modernbert"
+        If $pyShell Then
+          TerminalInput("pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu")
+          TerminalInput("pip install transformers")
+        Else
+        Endif
+    End Select
+
+  Endif
 
 End
 
@@ -1071,32 +1183,63 @@ Private Sub DefineTextVectorization()
       cmdLst = New String[]
       cmdLst.Add(Subst("nlp_model = Word2Vec(vector_size = &1, window = &2, min_count = &3, sg = &4)", txtvectorsize.Value, txtwindow.Value, txtmincount.Value, txtsg.Value))
       cmdLst.Add("nlp_model.build_vocab(token_corpus)")
-      cmdLst.Add("nlp_model.train(token_corpus, total_examples=nlp_model.corpus_count, epochs=5)")
+      cmdLst.Add("nlp_model.train(token_corpus, total_examples = nlp_model.corpus_count, epochs = 5)")
       TerminalInputList(cmdLst)
       PressEnterKey()
     Endif
     TerminalInput("word_vectors = nlp_model.wv")
 
   Else If cmbtextvector.Text = "model2vec" Then
-    chkusetextmodel.Value = True
     TerminalInput("from model2vec import StaticModel")
     If chkusetextmodel.Value Then
       xmodel = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/ModelPath")
       TerminalInput(Subst("nlp_model = StaticModel.from_pretrained('&1')", xmodel))
     Endif
 
+  Else If cmbtextvector.Text = "modernbert" Then
+    If chkusetextmodel.Value Then
+      xmodel = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/ModelPath")
+      cmdLst = New String[]
+      cmdLst.Add("import torch")
+      cmdLst.Add("from transformers import AutoModel, AutoTokenizer")
+      cmdLst.Add(Subst("model_path = '&1'", xmodel))
+      cmdLst.Add("nlp_model = AutoModel.from_pretrained(model_path)")
+      cmdLst.Add("nlp_tokenizer = AutoTokenizer.from_pretrained(model_path)")
+      TerminalInputList(cmdLst)
+      PressEnterKey()
+    Endif
+
   Endif
 
   cmdLst = New String[]
   cmdLst.Add("def vectorize_text(tokens):")
-  cmdLst.Add("word_tokens = word_process(tokens)")
   If cmbtextvector.Text = "word2vec" Then
+    cmdLst.Add("word_tokens = word_process(tokens)")
     cmdLst.Add("valid_vectors = [word_vectors[word] for word in word_tokens if word in word_vectors] if tokens else []")
-    cmdLst.Add("return numpy.mean(valid_vectors, axis=0) if valid_vectors else numpy.zeros(word_vectors.vector_size)")
+    cmdLst.Add("return numpy.mean(valid_vectors, axis = 0) if valid_vectors else numpy.zeros(word_vectors.vector_size)")
   Else If cmbtextvector.Text = "model2vec" Then
-    cmdLst.Add("valid_vectors = [nlp_model.encode(word_tokens)] if tokens else []")
-    cmdLst.Add("return numpy.mean(valid_vectors, axis=0)")
+    cmdLst.Add("word_tokens = word_process(tokens)")
+    cmdLst.Add("return nlp_model.encode(' '.join(word_tokens))")
+  Else If cmbtextvector.Text = "modernbert" Then
+    ModelTorchOutput()
+    cmdLst.Add("nlp_inputs = nlp_tokenizer(tokens, return_tensors = 'pt', padding = True, truncation = True)")
+    cmdLst.Add("nlp_outputs = get_nlp_outputs(nlp_model, nlp_inputs)")
+    cmdLst.Add("cls_embedding = nlp_outputs.last_hidden_state.mean(dim = 1).squeeze().numpy()")
+    cmdLst.Add("return cls_embedding.tolist()")
   Endif
+  TerminalInputList(cmdLst)
+  PressEnterKey()
+
+End
+
+Private Sub ModelTorchOutput()
+
+  Dim cmdLst As String[]
+
+  cmdLst = New String[]
+  cmdLst.Add("def get_nlp_outputs(nlp_model, nlp_inputs):")
+  cmdLst.Add("with torch.no_grad():")
+  cmdLst.Add("return nlp_model(**nlp_inputs)")
   TerminalInputList(cmdLst)
   PressEnterKey()
 
@@ -1110,7 +1253,7 @@ Private Sub GetTextVectorization()
   cmdLst.Add("all_vectors = []")
   cmdLst.Add("for col in para_columns:")
   cmdLst.Add("vectors = para_data[col].apply(lambda tok: vectorize_text(tok)).tolist()")
-  cmdLst.Add("vector_df = pandas.DataFrame(vectors, index=para_data.index)")
+  cmdLst.Add("vector_df = pandas.DataFrame(vectors, index = para_data.index)")
   cmdLst.Add("vector_df.columns = [f'{col}_dim_{i}' for i in range(vector_df.shape[1])]")
   cmdLst.Add("all_vectors.append(vector_df)")
   TerminalInputList(cmdLst)
@@ -1122,64 +1265,15 @@ End
 
 Private Sub TextProcessingPipeline()
 
-  DefineTextProcessing()
-  GetTextProcessing()
+  If chktokenize.Value = True Then
+    DefineTextProcessing()
+    GetTextProcessing()
+  Endif
 
   DefineTextVectorization()
   GetTextVectorization()
 
 End
-
-' Public Sub btnembedconvert_Click()
-'
-'   Dim aHead As String[]
-'   Dim hFile As File
-'   Dim sLine As String
-'   Dim asx As String[]
-'
-'   Dim i As Integer
-'   Dim Colm As Integer
-'   Dim xcell As String
-'   Dim xVar As Variant[]
-'   Dim aVar As Variant[]
-'   Dim xout As Variant
-'   Dim newFile As String
-'
-'   aHead = $sHead.Copy()
-'   aVar = New Variant[]
-'
-'   Inc Application.Busy
-'   hFile = Open $sPath
-'   For Each sLine In hFile.Lines
-'     asx = Split(sLine, gb.Tab)
-'
-'     xVar = New Variant[]
-'     For i = 0 To $paraCol.Count - 1
-'       Colm = aHead.Find($paraCol[i])
-'       If Colm Then
-'         xcell = asx[Colm]
-'         If Not xcell Then
-'           xcell = "NULL"
-'         Endif
-'         xout = modMLModels.GetModelValue(cmbembed.Text, xcell)
-'         If xout Then
-'           xVar.Add(xout)
-'         Else
-'           xVar.Add(Null)
-'         Endif
-'       Endif
-'     Next
-'
-'     aVar.Add(xVar)
-'   Next
-'   hFile.Close
-'   Dec Application.Busy
-'
-'   newFile = Temp() & ".json"
-'   File.Save(newFile, JSON.Encode(aVar))
-'   Message.Info(newFile)
-'
-' End
 
 ''==================================== Split data and process =======================
 Private Sub GetProcessedDataSet()
@@ -1187,51 +1281,49 @@ Private Sub GetProcessedDataSet()
   Dim xList As New String[]
   Dim aList As New String[]
 
-  GetPreprocessing()
-
   ''for X_data
+  GetPreprocessing()
   TerminalInputList($libprocess)
-  ' If $categStr Then
   If $catgCol.Count Then
-    TerminalInput($categStr)
-    ' aList.Add("(cat_pipeline, make_column_selector(dtype_include=object))")
+    TerminalInput($catXStr)
     aList.Add("(cat_pipeline, categ_columns)")
   Endif
-  ' If $numStr Then
   If $numbCol.Count Then
-    TerminalInput($numStr)
-    ' aList.Add("(num_pipeline, make_column_selector(dtype_include=numpy.number))")
+    TerminalInput($numXStr)
     aList.Add("(num_pipeline, num_columns)")
   Endif
 
   If aList.Count Then
     $preProcess = aList
     xList.Add("preprocess_X = make_column_transformer(" & aList.Join(", ") & ")")
-    xList.Add("X_processed = preprocess_X.fit_transform(X_data)")
+    xList.Add("X_combined = preprocess_X.fit_transform(X_data)")
     TerminalInputList(xList)
   Else
     $preProcess = New String[]
-    TerminalInput("X_processed = X_data")
+    TerminalInput("X_combined = X_data")
   Endif
+
   If $paraCol.Count Then
     TextProcessingPipeline()
-    TerminalInput("X_processed = numpy.hstack([X_processed, vector_data])")
+    TerminalInput("X_processed = numpy.hstack([X_combined, vector_data])")
+  Else
+    TerminalInput("X_processed = X_combined")
   Endif
 
   ''Y_data
   If rbunsupervis.Value = True Then
   Else
-    If txtdeptype.Text = "object" Then
-      If $cateyStr Then
-        TerminalInput($cateyStr)
-        TerminalInput("Y_processed = caty_pipeline.fit_transform(Y_data.values.reshape(-1, 1))")
+    If txtdeptype.Text = "object" Or If txtdeptype.Text = "str" Then
+      If $catYStr Then
+        TerminalInput($catYStr)
+        TerminalInput("Y_processed = cat_encode.fit_transform(Y_data.values.reshape(-1, 1))")
       Else
         TerminalInput("Y_processed = Y_data")
       Endif
     Else
       If $numYStr Then
         TerminalInput($numYStr)
-        TerminalInput("Y_processed = numy_pipeline.fit_transform(Y_data.values.reshape(-1, 1))")
+        TerminalInput("Y_processed = num_encode.fit_transform(Y_data.values.reshape(-1, 1))")
       Else
         TerminalInput("Y_processed = Y_data")
       Endif
@@ -1287,7 +1379,7 @@ Public Sub btnpca_Click()
     cmdLst.Add(Subst("pca = PCA(n_components = &1)", txtpca.Value))
     cmdLst.Add("X_train_pca = pca.fit_transform(X_train)")
     cmdLst.Add("X_train = X_train_pca")
-    cmdLst.Add("X_test_pca = pca.fit_transform(X_test)")
+    cmdLst.Add("X_test_pca = pca.transform(X_test)")
     cmdLst.Add("X_test = X_test_pca")
     cmdLst.Add("pca.n_components_")
     TerminalInputList(cmdLst)
@@ -1331,6 +1423,15 @@ Public Sub cmbmodel_Click()
       xparamLst = ["random_state:42", "max_depth:2"]
     Case "RandomForest Regression"
       xparamLst = ["random_state:42", "n_estimators:100", "max_depth:2"]
+    Case "HGBT Regression"
+      xparamLst = ["random_state:42", "max_iter:100", "learning_rate:0.1"]
+    Case "LGBM Regression"
+      xparamLst = ["random_state:42", "n_estimators:100", "learning_rate:0.05"]
+    Case "AdaBoost Regression"
+      xparamLst = ["random_state:42", "n_estimators:50", "learning_rate:1.0"]
+    Case "XGBoost Regression"
+      xparamLst = ["random_state:42", "n_estimators:100", "learning_rate:0.1", "max_depth:5"]
+
     Case "Dummy Classifier"
       xparamLst = New String[]
     Case "SGD Classifier"
@@ -1345,10 +1446,23 @@ Public Sub cmbmodel_Click()
       xparamLst = ["random_state:42", "max_depth:2"]
     Case "RandomForest Classifier"
       xparamLst = ["random_state:42", "n_estimators:100", "max_depth:2"]
+    Case "HGBT Classifier"
+      xparamLst = ["random_state:42", "max_iter:100", "learning_rate:0.1"]
+    Case "LGBM Classifier"
+      xparamLst = ["random_state:42", "n_estimators:100", "learning_rate:0.05"]
+    Case "AdaBoost Classifier"
+      xparamLst = ["random_state:42", "n_estimators:50", "learning_rate:1.0"]
+    Case "XGBoost Classifier"
+      xparamLst = ["random_state:42", "n_estimators:100", "learning_rate:0.1", "max_depth:5"]
+
     Case "KMeans Clustering"
       xparamLst = ["random_state:42", "n_clusters:3"]
     Case "DBSCAN"
       xparamLst = ["min_samples:5", "eps:0.05"]
+    Case "Isolation Forest"
+      xparamLst = ["random_state:42", "contamination:0.05"]
+    Case "Local Outlier Factor"
+      xparamLst = ["n_neighbors:20"]
   End Select
 
   ShowHyperParams(xparamLst)
@@ -1451,11 +1565,17 @@ Public Sub btnmodeltrain_Click()
   Endif
 
   If cmbmodel.Text Then
-    If txtdeptype.Text = "object" Then
+    If txtdeptype.Text = "object" Or If txtdeptype.Text = "str" Then
       If cmbencoding.Text = "OrdinalEncoder" Then
         cmdLst.Add("Y_train = numpy.ravel(Y_train)")
         TerminalInputList(cmdLst)
       Else If cmbencoding.Text = "OneHotEncoder" Then
+        Select cmbmodel.Text
+          Case "DecisionTree Classifier", "RandomForest Classifier", "HGBT Classifier", "LGBM Classifier", "AdaBoost Classifier", "XGBoost Classifier"
+          Case Else
+            cmdLst.Add("Y_train = numpy.argmax(Y_train, axis=1)")
+        End Select
+        TerminalInputList(cmdLst)
       Endif
     Endif
 
@@ -1508,6 +1628,22 @@ Public Sub btnmodeltrain_Click()
           cmdLst.Add("from sklearn.ensemble import RandomForestRegressor")
           cmdLst.Add(Subst("rf_reg = RandomForestRegressor(&1)", xParams))
           cmdLst.Add("rf_reg.fit(X_train, Y_train)")
+        Case "HGBT Regression"
+          cmdLst.Add("from sklearn.ensemble import HistGradientBoostingRegressor")
+          cmdLst.Add(Subst("hist_reg = HistGradientBoostingRegressor(&1)", xParams))
+          cmdLst.Add("hist_reg.fit(X_train, Y_train)")
+        Case "LGBM Regression"
+          cmdLst.Add("from lightgbm import LGBMRegressor")
+          cmdLst.Add(Subst("grad_reg = LGBMRegressor(&1)", xParams))
+          cmdLst.Add("grad_reg.fit(X_train, Y_train)")
+        Case "AdaBoost Regression"
+          cmdLst.Add("from sklearn.ensemble import AdaBoostRegressor")
+          cmdLst.Add(Subst("ada_reg = AdaBoostRegressor(&1)", xParams))
+          cmdLst.Add("ada_reg.fit(X_train, Y_train)")
+        Case "XGBoost Regression"
+          cmdLst.Add("from xgboost import XGBRegressor")
+          cmdLst.Add(Subst("xgb_reg = XGBRegressor(&1)", xParams))
+          cmdLst.Add("xgb_reg.fit(X_train, Y_train)")
       End Select
 
     Else If rbclass.Value = True Then
@@ -1544,6 +1680,10 @@ Public Sub btnmodeltrain_Click()
             cmdLst.Add(Subst("tree_clf = BaggingClassifier(DecisionTreeClassifier(&1))", xParams))
             cmdLst.Add("tree_clf.fit(X_train, Y_train)")
             ' Case "RandomForest Classifier"
+            ' Case "HGBT Classifier"
+            ' Case "LGBM Classifier"
+            ' Case "AdaBoost Classifier"
+            ' Case "XGBoost Classifier"
         End Select
       Else
         Select cmbmodel.Text
@@ -1579,6 +1719,22 @@ Public Sub btnmodeltrain_Click()
             cmdLst.Add("from sklearn.ensemble import RandomForestClassifier")
             cmdLst.Add(Subst("rf_clf = RandomForestClassifier(&1)", xParams))
             cmdLst.Add("rf_clf.fit(X_train, Y_train)")
+          Case "HGBT Classifier"
+            cmdLst.Add("from sklearn.ensemble import HistGradientBoostingClassifier")
+            cmdLst.Add(Subst("hist_clf = HistGradientBoostingClassifier(&1)", xParams))
+            cmdLst.Add("hist_clf.fit(X_train, Y_train)")
+          Case "LGBM Classifier"
+            cmdLst.Add("from lightgbm import LGBMClassifier")
+            cmdLst.Add(Subst("grad_clf = LGBMClassifier(&1)", xParams))
+            cmdLst.Add("grad_clf.fit(X_train, Y_train)")
+          Case "AdaBoost Classifier"
+            cmdLst.Add("from sklearn.ensemble import AdaBoostClassifier")
+            cmdLst.Add(Subst("ada_clf = AdaBoostClassifier(&1)", xParams))
+            cmdLst.Add("ada_clf.fit(X_train, Y_train)")
+          Case "XGBoost Classifier"
+            cmdLst.Add("from xgboost import XGBClassifier")
+            cmdLst.Add(Subst("xgb_clf = XGBClassifier(&1)", xParams))
+            cmdLst.Add("xgb_clf.fit(X_train, Y_train)")
         End Select
       Endif
 
@@ -1592,6 +1748,14 @@ Public Sub btnmodeltrain_Click()
           cmdLst.Add("from sklearn.cluster import DBSCAN")
           cmdLst.Add(Subst("dbscan = DBSCAN(&1)", xParams))
           cmdLst.Add("dbscan.fit(X_train)")
+        Case "Isolation Forest"
+          cmdLst.Add("from sklearn.ensemble import IsolationForest")
+          cmdLst.Add(Subst("iso_forest = IsolationForest(&1)", xParams))
+          cmdLst.Add("iso_forest.fit(X_train)")
+        Case "Local Outlier Factor"
+          cmdLst.Add("from sklearn.neighbors import LocalOutlierFactor")
+          cmdLst.Add(Subst("loc_out = LocalOutlierFactor(&1, novelty = True)", xParams))
+          cmdLst.Add("loc_out.fit(X_train)")
       End Select
 
     Endif
@@ -1632,6 +1796,15 @@ Public Sub btnsavemodel_Click()
         cmdLst.Add("joblib.dump(tree_reg, '" & xpath & "')")
       Case "RandomForest Regression"
         cmdLst.Add("joblib.dump(rf_reg, '" & xpath & "')")
+      Case "HGBT Regression"
+        cmdLst.Add("joblib.dump(hist_reg, '" & xpath & "')")
+      Case "LGBM Regression"
+        cmdLst.Add("joblib.dump(grad_reg, '" & xpath & "')")
+      Case "AdaBoost Regression"
+        cmdLst.Add("joblib.dump(ada_reg, '" & xpath & "')")
+      Case "XGBoost Regression"
+        cmdLst.Add("joblib.dump(xgb_reg, '" & xpath & "')")
+
       Case "Dummy Classifier"
         cmdLst.Add("joblib.dump(dummy_clf, '" & xpath & "')")
       Case "Logistic Regression"
@@ -1648,10 +1821,23 @@ Public Sub btnsavemodel_Click()
         cmdLst.Add("joblib.dump(tree_clf, '" & xpath & "')")
       Case "RandomForest Classifier"
         cmdLst.Add("joblib.dump(rf_clf, '" & xpath & "')")
+      Case "HGBT Classifier"
+        cmdLst.Add("joblib.dump(hist_clf, '" & xpath & "')")
+      Case "LGBM Classifier"
+        cmdLst.Add("joblib.dump(grad_clf, '" & xpath & "')")
+      Case "AdaBoost Classifier"
+        cmdLst.Add("joblib.dump(ada_clf, '" & xpath & "')")
+      Case "XGBoost Classifier"
+        cmdLst.Add("joblib.dump(xgb_clf, '" & xpath & "')")
+
       Case "KMeans Clustering"
         cmdLst.Add("joblib.dump(kmeans, '" & xpath & "')")
       Case "DBSCAN"
         cmdLst.Add("joblib.dump(dbscan, '" & xpath & "')")
+      Case "Isolation Forest"
+        cmdLst.Add("joblib.dump(iso_forest, '" & xpath & "')")
+      Case "Local Outlier Factor"
+        cmdLst.Add("joblib.dump(loc_out, '" & xpath & "')")
     End Select
     TerminalInputList(cmdLst)
     Dec Application.Busy
@@ -1703,6 +1889,14 @@ Public Sub btnevaluate_Click()
         TerminalInput("reg_model = tree_reg")
       Case "RandomForest Regression"
         TerminalInput("reg_model = rf_reg")
+      Case "HGBT Regression"
+        TerminalInput("reg_model = hist_reg")
+      Case "LGBM Regression"
+        TerminalInput("reg_model = grad_reg")
+      Case "AdaBoost Regression"
+        TerminalInput("reg_model = ada_reg")
+      Case "XGBoost Regression"
+        TerminalInput("reg_model = xgb_reg")
     End Select
 
     If chkaccuracy.Value = True Then
@@ -1728,6 +1922,14 @@ Public Sub btnevaluate_Click()
         cmdLst.Add("clf_model = tree_clf")
       Case "RandomForest Classifier"
         cmdLst.Add("clf_model = rf_clf")
+      Case "HGBT Classifier"
+        cmdLst.Add("clf_model = hist_clf")
+      Case "LGBM Classifier"
+        cmdLst.Add("clf_model = grad_clf")
+      Case "AdaBoost Classifier"
+        cmdLst.Add("clf_model = ada_clf")
+      Case "XGBoost Classifier"
+        cmdLst.Add("clf_model = xgb_clf")
     End Select
     cmdLst.Add("from sklearn.model_selection import cross_val_predict")
     cmdLst.Add("y_train_pred = cross_val_predict(clf_model, X_train, Y_train)")
@@ -1740,14 +1942,13 @@ Public Sub btnevaluate_Click()
     If chkprecision.Value = True Then
       cmdLst.Add("from sklearn.metrics import precision_score, recall_score")
       cmdLst.Add("from sklearn.metrics import f1_score")
+      If Not cmbscoreaverage.Text Then
+        cmbscoreaverage.Text = "binary"
+      Endif
       If cmbscoreaverage.Text Then
         cmdLst.Add(Subst("print('Precision Score = ', precision_score(Y_train, y_train_pred, average='&1'))", cmbscoreaverage.Text))
         cmdLst.Add(Subst("print('Recall Score = ', recall_score(Y_train, y_train_pred, average='&1'))", cmbscoreaverage.Text))
         cmdLst.Add(Subst("print('F1 Score = ', f1_score(Y_train, y_train_pred, average='&1'))", cmbscoreaverage.Text))
-      Else
-        cmdLst.Add("print('Precision Score = ', precision_score(Y_train, y_train_pred))")
-        cmdLst.Add("print('Recall Score = ', recall_score(Y_train, y_train_pred))")
-        cmdLst.Add("print('F1 Score = ', f1_score(Y_train, y_train_pred))")
       Endif
     Endif
     TerminalInputList(cmdLst)
@@ -1756,15 +1957,21 @@ Public Sub btnevaluate_Click()
     Select cmbmodel.Text
       Case "KMeans Clustering"
         TerminalInput("unsup_model = kmeans")
-        TerminalInput("print('Training Score = ', kmeans.score(X_train))")
       Case "DBSCAN"
         TerminalInput("unsup_model = dbscan")
+      Case "Isolation Forest"
+        TerminalInput("unsup_model = iso_forest")
+      Case "Local Outlier Factor"
+        TerminalInput("unsup_model = loc_out")
     End Select
 
     If chkaccuracy.Value = True Then
-      cmdLst.Add("from sklearn.metrics import silhouette_score")
-      cmdLst.Add("silhouette_score(X_train, unsup_model.labels_)")
-      TerminalInputList(cmdLst)
+      Select cmbmodel.Text
+        Case "KMeans Clustering", "DBSCAN"
+          cmdLst.Add("from sklearn.metrics import silhouette_score")
+          cmdLst.Add("silhouette_score(X_train, unsup_model.labels_)")
+          TerminalInputList(cmdLst)
+      End Select
     Endif
 
   Endif
@@ -1781,6 +1988,10 @@ Public Sub btnunsupervised_Click()
       cmdLst.Add("X_Pred = kmeans.predict(X_processed)")
     Case "DBSCAN"
       cmdLst.Add("X_Pred = dbscan.labels_")
+    Case "Isolation Forest"
+      TerminalInput("X_Pred = iso_forest.predict(X_processed)")
+    Case "Local Outlier Factor"
+      TerminalInput("X_Pred = loc_out.predict(X_processed)")
   End Select
   cmdLst.Add("X_data['cluster'] = X_Pred.tolist()")
   cmdLst.Add("X_data")
@@ -1826,6 +2037,20 @@ Public Sub btnshowscatterplot_Click()
     Case "RandomForest Regression", "RandomForest Classifier"
 
   End Select
+
+End
+
+Public Sub btntreeinstal_Click()
+
+  Dim xList As String[]
+
+  xList = New String[]
+  If $pyShell Then
+    TerminalInput("pip install graphviz")
+  Else
+    xList.Add("python3-graphviz")
+    modMain.InstallSelectedApplication(xList)
+  Endif
 
 End
 
@@ -1889,6 +2114,14 @@ Public Sub btnpredict_Click()
             cmdLst.Add("predict_val = tree_reg.predict(X_input)")
           Case "RandomForest Regression"
             cmdLst.Add("predict_val = rf_reg.predict(X_input)")
+          Case "HGBT Regression"
+            cmdLst.Add("predict_val = hist_reg.predict(X_input)")
+          Case "LGBM Regression"
+            cmdLst.Add("predict_val = grad_reg.predict(X_input)")
+          Case "AdaBoost Regression"
+            cmdLst.Add("predict_val = ada_reg.predict(X_input)")
+          Case "XGBoost Regression"
+            cmdLst.Add("predict_val = xgb_reg.predict(X_input)")
         End Select
         cmdLst.Add("prediction = predict_val[0]")
         cmdLst.Add("print('Predicted Value = ', prediction)")
@@ -1913,11 +2146,19 @@ Public Sub btnpredict_Click()
             cmdLst.Add("predict_val = tree_clf.predict(X_input)")
           Case "RandomForest Classifier"
             cmdLst.Add("predict_val = rf_clf.predict(X_input)")
+          Case "HGBT Classifier"
+            cmdLst.Add("predict_val = hist_clf.predict(X_input)")
+          Case "LGBM Classifier"
+            cmdLst.Add("predict_val = grad_clf.predict(X_input)")
+          Case "AdaBoost Classifier"
+            cmdLst.Add("predict_val = ada_clf.predict(X_input)")
+          Case "XGBoost Classifier"
+            cmdLst.Add("predict_val = xgb_clf.predict(X_input)")
         End Select
         cmdLst.Add("prediction = predict_val[0]")
         cmdLst.Add("print('Predicted Value = ', prediction)")
-        If $cateyStr Then
-          cmdLst.Add("predicted_value_label = caty_pipeline.inverse_transform(prediction.reshape(1, -1))")
+        If $catYStr Then
+          cmdLst.Add("predicted_value_label = cat_encode.inverse_transform(prediction.reshape(1, -1))")
           cmdLst.Add("predicted_label = predicted_value_label[0][0]")
           cmdLst.Add("print('Predicted Label = ', predicted_label)")
         Else

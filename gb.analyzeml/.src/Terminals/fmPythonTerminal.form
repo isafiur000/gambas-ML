@@ -158,28 +158,27 @@
         Picture = Picture["icon:/small/edit"]
       }
       { Panel25 Frame
-        MoveScaled(72,1,46,11)
+        MoveScaled(72,1,46,15)
         Text = ("Text Processing")
         Alignment = Align.Left
         { cmbtokenizer ComboBox
-          MoveScaled(12,3,29,3)
+          MoveScaled(14,7,31,3)
         }
         { btntokendown ToolButton
           MoveScaled(42,3,3,3)
           Picture = Picture["icon:/small/exec"]
         }
         { chkcleanpara CheckBox
-          MoveScaled(1,7,23,3)
+          MoveScaled(1,3,23,3)
           Text = ("Clean Paragraph")
         }
         { btntokenize Button
-          MoveScaled(27,7,14,3)
-          Text = ("Tokenize")
+          MoveScaled(30,11,14,3)
+          Text = ("Execute")
         }
-        { Label16 Label
-          MoveScaled(1,3,11,3)
-          Border = Border.Plain
-          Text = ("Tokenizer")
+        { chktokenize CheckBox
+          MoveScaled(1,7,12,3)
+          Text = ("Tokenize")
         }
       }
       { btnfilesave Button
@@ -334,7 +333,7 @@
           }
         }
         { Panel14 Panel
-          MoveScaled(0,12,34,14)
+          MoveScaled(0,12,34,18)
           Arrangement = Arrange.Vertical
           AutoResize = True
           Margin = True
@@ -346,71 +345,35 @@
             }
           }
           { pnlscaling Panel
-            MoveScaled(0,4,33.5,9)
+            MoveScaled(0,4,34,11)
             Visible = False
             { cmbscaling ComboBox
-              MoveScaled(11,1,21,3)
+              MoveScaled(11,0.5,21,3)
             }
             { Label1 Label
-              MoveScaled(1,1,9,3)
+              MoveScaled(1,0.5,9,3)
               Border = Border.Plain
               Text = ("Method")
             }
             { lblscale Label
-              MoveScaled(1,5,9,3)
+              MoveScaled(1,7.5,9,3)
               Visible = False
               Border = Border.Plain
               Text = ("Range")
             }
             { txtscalerange TextBox
-              MoveScaled(11,5,13,3)
+              MoveScaled(11,7.5,13,3)
               Visible = False
+            }
+            { chkscaledep CheckBox
+              MoveScaled(1,4,25,3)
+              Text = ("Dependent Variable")
             }
           }
         }
       }
       Index = 3
       Text = ("Processing of Unstructured Text")
-      { chkspelcorrect CheckBox
-        MoveScaled(1,13,43,3)
-        Text = ("Spelling Correction")
-      }
-      { btndownstop2 ToolButton
-        MoveScaled(48,13,3,3)
-        Picture = Picture["icon:/small/exec"]
-      }
-      { chkrepeatchar CheckBox
-        MoveScaled(1,9,43,3)
-        Text = ("Remove Repeating Characters")
-      }
-      { chklowercase CheckBox
-        MoveScaled(1,5,43,3)
-        Text = ("Change to Lower Case")
-      }
-      { chkstopword CheckBox
-        MoveScaled(1,1,43,3)
-        Text = ("Stop Words and Punctuation Removal")
-      }
-      { btndownstop ToolButton
-        MoveScaled(48,1,3,3)
-        Picture = Picture["icon:/small/exec"]
-      }
-      { Label17 Label
-        MoveScaled(1,17,15,3)
-        Border = Border.Plain
-        Text = ("Stemming")
-      }
-      { cmbstemming ComboBox
-        MoveScaled(17,17,29,3)
-      }
-      { Label18 Label
-        MoveScaled(1,21,15,3)
-        Border = Border.Plain
-        Text = ("Lemmatization")
-      }
-      { cmblemmatize ComboBox
-        MoveScaled(17,21,29,3)
-      }
       { Panel26 Panel
         MoveScaled(75,1,43,31)
         Arrangement = Arrange.Vertical
@@ -426,12 +389,19 @@
             MoveScaled(12,0.5,28,3)
           }
         }
-        { chkusetextmodel CheckBox
-          MoveScaled(0,4,40,3)
-          Text = ("Use Preatrained Model")
+        { Panel29 Panel
+          MoveScaled(0,5,41,4)
+          { chkusetextmodel CheckBox
+            MoveScaled(0.5,0.5,25,3)
+            Text = ("Use Preatrained Model")
+          }
+          { btninstallmodel ToolButton
+            MoveScaled(37,0.5,3,3)
+            Picture = Picture["icon:/small/exec"]
+          }
         }
         { Panel28 Panel
-          MoveScaled(0,8,42.875,13.875)
+          MoveScaled(0,11,42.875,13.875)
           Arrangement = Arrange.Vertical
           AutoResize = True
           { pnlwordvec Panel
@@ -473,16 +443,61 @@
           { pnlhuburl Panel
             MoveScaled(0,9,42,4)
             Visible = False
-            { txthuburl TextBox
-              MoveScaled(6,0.5,35,3)
-              ReadOnly = True
-            }
             { Label2 Label
               MoveScaled(0,0.5,5,3)
               Border = Border.Plain
               Text = ("Hub")
             }
+            { txthuburl ButtonBox
+              MoveScaled(6,0.5,35,3)
+              Picture = Picture["icon:/small/copy"]
+              ReadOnly = True
+            }
           }
+        }
+      }
+      { pnltextprocess Panel
+        MoveScaled(1,1,52,32)
+        Visible = False
+        { btndownstop ToolButton
+          MoveScaled(47,0,3,3)
+          Picture = Picture["icon:/small/exec"]
+        }
+        { chklowercase CheckBox
+          MoveScaled(0,4,43,3)
+          Text = ("Change to Lower Case")
+        }
+        { chkrepeatchar CheckBox
+          MoveScaled(0,8,43,3)
+          Text = ("Remove Repeating Characters")
+        }
+        { chkspelcorrect CheckBox
+          MoveScaled(0,12,43,3)
+          Text = ("Spelling Correction")
+        }
+        { btnenchant ToolButton
+          MoveScaled(47,12,3,3)
+          Picture = Picture["icon:/small/exec"]
+        }
+        { Label17 Label
+          MoveScaled(0,16,15,3)
+          Border = Border.Plain
+          Text = ("Stemming")
+        }
+        { cmbstemming ComboBox
+          MoveScaled(16,16,29,3)
+        }
+        { Label18 Label
+          MoveScaled(0,20,15,3)
+          Border = Border.Plain
+          Text = ("Lemmatization")
+        }
+        { cmblemmatize ComboBox
+          MoveScaled(16,20,29,3)
+        }
+        { chkstopword CheckBox
+          MoveScaled(0,0,43,3)
+          Text = ("Stop Words and Punctuation Removal")
         }
       }
       Index = 4
@@ -679,13 +694,17 @@
             Text = ("Train")
           }
           { chkbagging CheckBox
-            MoveScaled(0,0,18,3)
+            MoveScaled(0,0,15.5,3)
             Text = ("Bagging")
+          }
+          { btninstmodel ToolButton
+            MoveScaled(18,0,3,3)
+            Picture = Picture["icon:/small/exec"]
           }
         }
       }
       { Frame2 Frame
-        MoveScaled(48,21,18,12)
+        MoveScaled(48,4,18,12)
         Text = ("Dump Model")
         { btnsaveProcess Button
           MoveScaled(1,3,16,3)
@@ -755,16 +774,20 @@
       { Panel17 Panel
         MoveScaled(1,28,37,4)
         { btnopen ToolButton
-          MoveScaled(31,0.5,3,3)
+          MoveScaled(25,0.5,3,3)
           Picture = Picture["icon:/small/image"]
         }
         { chkpredictplot CheckBox
-          MoveScaled(1,0.5,22,3)
+          MoveScaled(1,0.5,17,3)
           Text = ("Plot Output")
         }
         { btnshowscatterplot ToolButton
-          MoveScaled(25,0.5,3.5,3)
+          MoveScaled(20,0.5,3.5,3)
           Picture = Picture["icon:/small/apply"]
+        }
+        { btntreeinstal ToolButton
+          MoveScaled(33,0.5,3,3)
+          Picture = Picture["icon:/small/exec"]
         }
       }
       Index = 7
