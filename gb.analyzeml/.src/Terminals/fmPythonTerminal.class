@@ -243,6 +243,10 @@ Public Sub btninstmodel_Click()
       If $pyShell Then
         TerminalInput("pip install 'lightgbm[scikit-learn]'")
       Endif
+    Case "Transfer Learning"
+      If $pyShell Then
+        TerminalInput("pip install 'accelerate>=1.1.0'")
+      Endif
   End Select
 
 End
@@ -335,6 +339,13 @@ Private Sub GetModelList() As String[]
     pnlregress.Visible = True
     pnlclassif.Visible = False
     pnlunsuper.Visible = True
+  Else If rbfinetune.Value = True Then
+    xlst.Add("Transfer Learning")
+    valtrain.Value = 80
+    valtrain.Enabled = True
+    pnlregress.Visible = False
+    pnlclassif.Visible = True
+    pnlunsuper.Visible = False
   Endif
 
   Return xlst
@@ -359,6 +370,13 @@ Public Sub rbunsupervis_Click()
 
   cmbmodel.List = GetModelList()
   btndepset.Text = "Proceed"
+
+End
+
+Public Sub rbfinetune_Click()
+
+  cmbmodel.List = GetModelList()
+  btndepset.Text = "Select"
 
 End
 
@@ -563,65 +581,69 @@ Public Sub btntokenize_Click()
 
   Dim cmdLst As String[]
 
-  If chkcleanpara.Value = True Then
-    cmdLst = New String[]
-    cmdLst.Add("def clean_html_text(nlp_text):")
-    cmdLst.Add("from bs4 import BeautifulSoup")
-    cmdLst.Add("soup = BeautifulSoup(nlp_text, 'html.parser')")
-    cmdLst.Add("clean_text = soup.get_text()")
-    cmdLst.Add("return clean_text")
-    TerminalInputList(cmdLst)
-    PressEnterKey()
-  Endif
+  If $paraCol.Count Then
 
-  If chktokenize.Value = True Then
-    cmdLst = New String[]
-    cmdLst.Add("def tokenize_text(nlp_text):")
-    If cmbtokenizer.Text = "word_tokenize" Then
-      cmdLst.Add("from nltk.tokenize import word_tokenize")
-      cmdLst.Add("tokens = word_tokenize(nlp_text)")
-    Else
-      Select cmbtokenizer.Text
-        Case "TreebankWordTokenizer"
-          cmdLst.Add("from nltk.tokenize import TreebankWordTokenizer")
-          cmdLst.Add("tokenizer = TreebankWordTokenizer()")
-        Case "WhitespaceTokenizer"
-          cmdLst.Add("from nltk.tokenize import WhitespaceTokenizer")
-          cmdLst.Add("tokenizer = WhitespaceTokenizer()")
-        Case "SpaceTokenizer"
-          cmdLst.Add("from nltk.tokenize import SpaceTokenizer")
-          cmdLst.Add("tokenizer = SpaceTokenizer()")
-        Case "WordPunctTokenizer"
-          cmdLst.Add("from nltk.tokenize import WordPunctTokenizer")
-          cmdLst.Add("tokenizer = WordPunctTokenizer()")
-        Case "ToktokTokenizer"
-          cmdLst.Add("from nltk.tokenize import ToktokTokenizer")
-          cmdLst.Add("tokenizer = ToktokTokenizer()")
-        Case "RegexpTokenizer"
-          cmdLst.Add("from nltk.tokenize import RegexpTokenizer")
-          cmdLst.Add("tokenizer = RegexpTokenizer('[" & "\\" & "w']+')")
-      End Select
-      cmdLst.Add("tokens = tokenizer.tokenize(nlp_text)")
+    If chkcleanpara.Value = True Then
+      cmdLst = New String[]
+      cmdLst.Add("def clean_html_text(nlp_text):")
+      cmdLst.Add("from bs4 import BeautifulSoup")
+      cmdLst.Add("soup = BeautifulSoup(nlp_text, 'html.parser')")
+      cmdLst.Add("clean_text = soup.get_text()")
+      cmdLst.Add("return clean_text")
+      TerminalInputList(cmdLst)
+      PressEnterKey()
     Endif
-    cmdLst.Add("return tokens")
-    TerminalInputList(cmdLst)
-    PressEnterKey()
-  Endif
 
-  cmdLst = New String[]
-  cmdLst.Add("for col in para_columns:")
-  If chkcleanpara.Value = True Then
-    cmdLst.Add("orig_data[col] = orig_data[col].apply(clean_html_text)")
-  Endif
-  If chktokenize.Value = True Then
-    cmdLst.Add("orig_data[col] = orig_data[col].apply(tokenize_text)")
-    pnltextprocess.Visible = True
-  Else
-    pnltextprocess.Visible = False
-  Endif
-  If chkcleanpara.Value Or If chktokenize.Value Then
-    TerminalInputList(cmdLst)
-    PressEnterKey()
+    If chktokenize.Value = True Then
+      cmdLst = New String[]
+      cmdLst.Add("def tokenize_text(nlp_text):")
+      If cmbtokenizer.Text = "word_tokenize" Then
+        cmdLst.Add("from nltk.tokenize import word_tokenize")
+        cmdLst.Add("tokens = word_tokenize(nlp_text)")
+      Else
+        Select cmbtokenizer.Text
+          Case "TreebankWordTokenizer"
+            cmdLst.Add("from nltk.tokenize import TreebankWordTokenizer")
+            cmdLst.Add("tokenizer = TreebankWordTokenizer()")
+          Case "WhitespaceTokenizer"
+            cmdLst.Add("from nltk.tokenize import WhitespaceTokenizer")
+            cmdLst.Add("tokenizer = WhitespaceTokenizer()")
+          Case "SpaceTokenizer"
+            cmdLst.Add("from nltk.tokenize import SpaceTokenizer")
+            cmdLst.Add("tokenizer = SpaceTokenizer()")
+          Case "WordPunctTokenizer"
+            cmdLst.Add("from nltk.tokenize import WordPunctTokenizer")
+            cmdLst.Add("tokenizer = WordPunctTokenizer()")
+          Case "ToktokTokenizer"
+            cmdLst.Add("from nltk.tokenize import ToktokTokenizer")
+            cmdLst.Add("tokenizer = ToktokTokenizer()")
+          Case "RegexpTokenizer"
+            cmdLst.Add("from nltk.tokenize import RegexpTokenizer")
+            cmdLst.Add("tokenizer = RegexpTokenizer('[" & "\\" & "w']+')")
+        End Select
+        cmdLst.Add("tokens = tokenizer.tokenize(nlp_text)")
+      Endif
+      cmdLst.Add("return tokens")
+      TerminalInputList(cmdLst)
+      PressEnterKey()
+    Endif
+
+    cmdLst = New String[]
+    cmdLst.Add("for col in para_columns:")
+    If chkcleanpara.Value = True Then
+      cmdLst.Add("orig_data[col] = orig_data[col].apply(clean_html_text)")
+    Endif
+    If chktokenize.Value = True Then
+      cmdLst.Add("orig_data[col] = orig_data[col].apply(tokenize_text)")
+      pnltextprocess.Visible = True
+    Else
+      pnltextprocess.Visible = False
+    Endif
+    If chkcleanpara.Value Or If chktokenize.Value Then
+      TerminalInputList(cmdLst)
+      PressEnterKey()
+    Endif
+
   Endif
 
 End
@@ -1160,6 +1182,7 @@ Public Sub btninstallmodel_Click()
         If $pyShell Then
           TerminalInput("pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu")
           TerminalInput("pip install transformers")
+          TerminalInput("pip install datasets")
         Else
         Endif
     End Select
@@ -1201,10 +1224,15 @@ Private Sub DefineTextVectorization()
       xmodel = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/ModelPath")
       cmdLst = New String[]
       cmdLst.Add("import torch")
+      cmdLst.Add("import transformers")
+      cmdLst.Add("'torch version :', torch.__version__")
+      cmdLst.Add("'transformers version :', transformers.__version__")
+
       cmdLst.Add("from transformers import AutoModel, AutoTokenizer")
       cmdLst.Add(Subst("model_path = '&1'", xmodel))
-      cmdLst.Add("nlp_model = AutoModel.from_pretrained(model_path)")
+      cmdLst.Add("device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')")
       cmdLst.Add("nlp_tokenizer = AutoTokenizer.from_pretrained(model_path)")
+      cmdLst.Add("nlp_model = AutoModel.from_pretrained(model_path).to(device)")
       TerminalInputList(cmdLst)
       PressEnterKey()
     Endif
@@ -1223,8 +1251,9 @@ Private Sub DefineTextVectorization()
   Else If cmbtextvector.Text = "modernbert" Then
     ModelTorchOutput()
     cmdLst.Add("nlp_inputs = nlp_tokenizer(tokens, return_tensors = 'pt', padding = True, truncation = True)")
+    cmdLst.Add("nlp_inputs = {k:v.to(device) for k,v in nlp_inputs.items()}")
     cmdLst.Add("nlp_outputs = get_nlp_outputs(nlp_model, nlp_inputs)")
-    cmdLst.Add("cls_embedding = nlp_outputs.last_hidden_state.mean(dim = 1).squeeze().numpy()")
+    cmdLst.Add("cls_embedding = nlp_outputs.last_hidden_state[:, 0, :].squeeze().numpy()")
     cmdLst.Add("return cls_embedding.tolist()")
   Endif
   TerminalInputList(cmdLst)
@@ -1316,7 +1345,8 @@ Private Sub GetProcessedDataSet()
     If txtdeptype.Text = "object" Or If txtdeptype.Text = "str" Then
       If $catYStr Then
         TerminalInput($catYStr)
-        TerminalInput("Y_processed = cat_encode.fit_transform(Y_data.values.reshape(-1, 1))")
+        ' TerminalInput("Y_processed = cat_encode.fit_transform(Y_data.values.reshape(-1, 1))")
+        TerminalInput("Y_processed = cat_encode.fit_transform(Y_data.values.tolist())")
       Else
         TerminalInput("Y_processed = Y_data")
       Endif
@@ -1332,29 +1362,68 @@ Private Sub GetProcessedDataSet()
 
 End
 
+Private Sub GetDataSetFineTune()
+
+  If txtdeptype.Text = "object" Or If txtdeptype.Text = "str" Then
+    GetPreprocessing()
+    TerminalInputList($libprocess)
+
+    If $catYStr Then
+      TerminalInput("para_col = para_columns[0]")
+      TerminalInput($catYStr)
+      TerminalInput("Y_processed = cat_encode.fit_transform(Y_data.values.tolist())")
+      TerminalInput(Subst("para_data['labels'] = pandas.DataFrame(Y_processed, columns=['&1'])", cmbdependent.Text))
+      TerminalInput("cat_labels = cat_encode.classes_")
+    Else
+      TerminalInput("para_data['labels'] = Y_data")
+    Endif
+  Endif
+
+  If $paraCol.Count Then
+    TerminalInput("para_data.rename(columns={para_col: 'text'}, inplace=True)")
+    TerminalInput("para_data.columns")
+  Endif
+
+End
+
 Public Sub btnsplidata_Click()
 
   Dim cmdLst As New String[]
   Dim trainval As Float
 
-  If rbunsupervis.Value = True Then
-    GetProcessedDataSet()
-    cmdLst.Add("X_train = X_processed")
-    TerminalInputList(cmdLst)
-    btnmodeltrain.Enabled = True
-    btnsavemodel.Enabled = True
-    btnsaveProcess.Enabled = True
-
-  Else
+  trainval = valtrain.Value / 100
+  If rbfinetune.Value = True Then
     If cmbdependent.Text Then
-      GetProcessedDataSet()
-      trainval = valtrain.Value / 100
+      GetDataSetFineTune()
       cmdLst.Add("from sklearn.model_selection import train_test_split")
-      cmdLst.Add(Subst("X_train, X_test, Y_train, Y_test = train_test_split(X_processed, Y_processed, train_size = &1, random_state=42)", trainval))
+      cmdLst.Add("from datasets import Dataset")
+      cmdLst.Add(Subst("train_nlp, eval_nlp = train_test_split(para_data, train_size = &1, random_state = 42)", trainval))
+      cmdLst.Add("train_tune = Dataset.from_pandas(train_nlp[['text', 'labels']])")
+      cmdLst.Add("eval_tune = Dataset.from_pandas(eval_nlp[['text', 'labels']])")
       TerminalInputList(cmdLst)
       btnmodeltrain.Enabled = True
       btnsavemodel.Enabled = True
       btnsaveProcess.Enabled = True
+    Endif
+  Else
+
+    If rbunsupervis.Value = True Then
+      GetProcessedDataSet()
+      cmdLst.Add("X_train = X_processed")
+      TerminalInputList(cmdLst)
+      btnmodeltrain.Enabled = True
+      btnsavemodel.Enabled = True
+      btnsaveProcess.Enabled = True
+    Else
+      If cmbdependent.Text Then
+        GetProcessedDataSet()
+        cmdLst.Add("from sklearn.model_selection import train_test_split")
+        cmdLst.Add(Subst("X_train, X_test, Y_train, Y_test = train_test_split(X_processed, Y_processed, train_size = &1, random_state = 42)", trainval))
+        TerminalInputList(cmdLst)
+        btnmodeltrain.Enabled = True
+        btnsavemodel.Enabled = True
+        btnsaveProcess.Enabled = True
+      Endif
     Endif
 
   Endif
@@ -1463,6 +1532,9 @@ Public Sub cmbmodel_Click()
       xparamLst = ["random_state:42", "contamination:0.05"]
     Case "Local Outlier Factor"
       xparamLst = ["n_neighbors:20"]
+
+    Case "Transfer Learning"
+      xparamLst = ["num_train_epochs:3", "warmup_steps:500", "weight_decay:0.01"]
   End Select
 
   ShowHyperParams(xparamLst)
@@ -1550,7 +1622,95 @@ Private Function GetParameterList() As String[]
 
 End
 
+Private Sub TransferLearningModel()
+
+  Dim cmdLst As String[]
+  Dim xmodel As String
+
+  Dim xParams As String
+  Dim xPLst As String[]
+
+  If chkusetextmodel.Value Then
+    xmodel = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/ModelPath")
+    TerminalInput(Subst("tuned_model = '&1'", User.Home &/ File.BaseName(xmodel) & "_finetuned"))
+
+    xPLst = GetParameterList()
+    xPLst.Add("output_dir = tuned_model")
+    xPLst.Add("fp16 = torch.cuda.is_available()")
+    If xPLst.Count Then
+      xParams = xPLst.Join(", ")
+    Endif
+
+    cmdLst = New String[]
+    cmdLst.Add("import torch")
+    cmdLst.Add("import transformers")
+    cmdLst.Add("'torch version :', torch.__version__")
+    cmdLst.Add("'transformers version :', transformers.__version__")
+
+    cmdLst.Add("from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer")
+    cmdLst.Add(Subst("model_path = '&1'", xmodel))
+    cmdLst.Add("device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')")
+    cmdLst.Add("fine_tokenizer = AutoTokenizer.from_pretrained(model_path)")
+    cmdLst.Add("fine_model = AutoModelForSequenceClassification.from_pretrained(model_path, num_labels = len(cat_labels)).to(device)")
+    TerminalInputList(cmdLst)
+
+    TuneTokenizeFunction()
+    TuneComputeMetrics()
+
+    cmdLst = New String[]
+    cmdLst.Add("train_tune = train_tune.map(tokenize_function, batched = True)")
+    cmdLst.Add("eval_tune = eval_tune.map(tokenize_function, batched = True)")
+    cmdLst.Add("train_tune.set_format(type='torch', columns = ['input_ids', 'attention_mask', 'labels'])")
+    cmdLst.Add("eval_tune.set_format(type='torch', columns = ['input_ids', 'attention_mask', 'labels'])")
+    TerminalInputList(cmdLst)
+
+    TerminalInput(Subst("training_args = TrainingArguments(&1)", xParams))
+    TerminalInput("trainer = Trainer(model = fine_model, args = training_args, train_dataset = train_tune, eval_dataset = eval_tune, compute_metrics = compute_metrics)")
+    TerminalInput("trainer.train()")
+  Endif
+
+End
+
+Private Sub TuneTokenizeFunction()
+
+  Dim cmdLst As String[]
+
+  cmdLst = New String[]
+  cmdLst.Add("def tokenize_function(batch):")
+  cmdLst.Add("return fine_tokenizer(batch['text'], padding = 'max_length', truncation = True)")
+  TerminalInputList(cmdLst)
+  PressEnterKey()
+
+End
+
+Private Sub TuneComputeMetrics()
+
+  Dim cmdLst As String[]
+
+  cmdLst = New String[]
+  cmdLst.Add("def compute_metrics(eval_pred):")
+  cmdLst.Add("predictions, labels = eval_pred")
+  cmdLst.Add("predictions = numpy.argmax(predictions, axis = 1)")
+  cmdLst.Add("accuracy = (predictions == labels).astype(np.float32).mean().item()")
+  cmdLst.Add("return {'accuracy': accuracy}")
+  TerminalInputList(cmdLst)
+  PressEnterKey()
+
+End
+
 Public Sub btnmodeltrain_Click()
+
+  If cmbmodel.Text Then
+    If cmbmodel.Text = "Transfer Learning" Then
+      TransferLearningModel()
+    Else
+      GetPredictionModels()
+    Endif
+  Endif
+
+End
+
+Private Sub GetPredictionModels()
 
   Dim cmdLst As New String[]
 
@@ -1564,283 +1724,298 @@ Public Sub btnmodeltrain_Click()
     xParams = ""
   Endif
 
-  If cmbmodel.Text Then
-    If txtdeptype.Text = "object" Or If txtdeptype.Text = "str" Then
-      If cmbencoding.Text = "OrdinalEncoder" Then
-        cmdLst.Add("Y_train = numpy.ravel(Y_train)")
-        TerminalInputList(cmdLst)
-      Else If cmbencoding.Text = "OneHotEncoder" Then
-        Select cmbmodel.Text
-          Case "DecisionTree Classifier", "RandomForest Classifier", "HGBT Classifier", "LGBM Classifier", "AdaBoost Classifier", "XGBoost Classifier"
-          Case Else
-            cmdLst.Add("Y_train = numpy.argmax(Y_train, axis=1)")
-        End Select
-        TerminalInputList(cmdLst)
-      Endif
-    Endif
-
-    Inc Application.Busy
-    If rbregression.Value = True Then
+  If txtdeptype.Text = "object" Or If txtdeptype.Text = "str" Then
+    If cmbencoding.Text = "OrdinalEncoder" Then
+      cmdLst.Add("Y_train = numpy.ravel(Y_train)")
+      TerminalInputList(cmdLst)
+    Else If cmbencoding.Text = "OneHotEncoder" Then
       Select cmbmodel.Text
-        Case "Linear Regression"
-          cmdLst.Add("from sklearn.linear_model import LinearRegression")
-          cmdLst.Add(Subst("lin_reg = LinearRegression(&1)", xParams))
-          cmdLst.Add("lin_reg.fit(X_train, Y_train)")
-          cmdLst.Add("lin_reg.intercept_")
-          cmdLst.Add("lin_reg.coef_")
-        Case "SGD Regression"
-          cmdLst.Add("from sklearn.linear_model import SGDRegressor")
-          cmdLst.Add(Subst("sgd_reg = SGDRegressor(&1)", xParams))             ''
-          cmdLst.Add("sgd_reg.fit(X_train, Y_train.ravel())")
-          cmdLst.Add("sgd_reg.intercept_")
-          cmdLst.Add("sgd_reg.coef_")
-        Case "Ridge Regression"
-          cmdLst.Add("from sklearn.linear_model import Ridge")
-          cmdLst.Add(Subst("ridge_reg = Ridge(&1)", xParams))
-          cmdLst.Add("ridge_reg.fit(X_train, Y_train)")
-          cmdLst.Add("ridge_reg.intercept_")
-          cmdLst.Add("ridge_reg.coef_")
-        Case "Lasso Regression"
-          cmdLst.Add("from sklearn.linear_model import Lasso")
-          cmdLst.Add(Subst("lasso_reg = Lasso(&1)", xParams))
-          cmdLst.Add("lasso_reg.fit(X_train, Y_train)")
-          cmdLst.Add("lasso_reg.intercept_")
-          cmdLst.Add("lasso_reg.coef_")
-        Case "ElasticNet Regression"
-          cmdLst.Add("from sklearn.linear_model import ElasticNet")
-          cmdLst.Add(Subst("elastic_net = ElasticNet(&1)", xParams))
-          cmdLst.Add("elastic_net.fit(X_train, Y_train)")
-          cmdLst.Add("elastic_net.intercept_")
-          cmdLst.Add("elastic_net.coef_")
-        Case "Linear SVR"
-          cmdLst.Add("from sklearn.svm import LinearSVR")
-          cmdLst.Add(Subst("linsvm_reg = LinearSVR(&1)", xParams))
-          cmdLst.Add("linsvm_reg.fit(X_train, Y_train)")
-        Case "Nonlinear SVR"
-          cmdLst.Add("from sklearn.svm import SVR")
-          cmdLst.Add(Subst("svm_reg = SVR(&1)", xParams))
-          cmdLst.Add("svm_reg.fit(X_train, Y_train)")
-        Case "DecisionTree Regression"
-          cmdLst.Add("from sklearn.tree import DecisionTreeRegressor")
-          cmdLst.Add(Subst("tree_reg = DecisionTreeRegressor(&1)", xParams))
-          cmdLst.Add("tree_reg.fit(X_train, Y_train)")
-        Case "RandomForest Regression"
-          cmdLst.Add("from sklearn.ensemble import RandomForestRegressor")
-          cmdLst.Add(Subst("rf_reg = RandomForestRegressor(&1)", xParams))
-          cmdLst.Add("rf_reg.fit(X_train, Y_train)")
-        Case "HGBT Regression"
-          cmdLst.Add("from sklearn.ensemble import HistGradientBoostingRegressor")
-          cmdLst.Add(Subst("hist_reg = HistGradientBoostingRegressor(&1)", xParams))
-          cmdLst.Add("hist_reg.fit(X_train, Y_train)")
-        Case "LGBM Regression"
-          cmdLst.Add("from lightgbm import LGBMRegressor")
-          cmdLst.Add(Subst("grad_reg = LGBMRegressor(&1)", xParams))
-          cmdLst.Add("grad_reg.fit(X_train, Y_train)")
-        Case "AdaBoost Regression"
-          cmdLst.Add("from sklearn.ensemble import AdaBoostRegressor")
-          cmdLst.Add(Subst("ada_reg = AdaBoostRegressor(&1)", xParams))
-          cmdLst.Add("ada_reg.fit(X_train, Y_train)")
-        Case "XGBoost Regression"
-          cmdLst.Add("from xgboost import XGBRegressor")
-          cmdLst.Add(Subst("xgb_reg = XGBRegressor(&1)", xParams))
-          cmdLst.Add("xgb_reg.fit(X_train, Y_train)")
+        Case "DecisionTree Classifier", "RandomForest Classifier", "HGBT Classifier", "LGBM Classifier", "AdaBoost Classifier", "XGBoost Classifier"
+        Case Else
+          cmdLst.Add("Y_train = numpy.argmax(Y_train, axis=1)")
       End Select
-
-    Else If rbclass.Value = True Then
-      If chkbagging.Value = True Then
-        Select cmbmodel.Text
-          Case "Logistic Regression"
-            cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
-            cmdLst.Add("from sklearn.linear_model import LogisticRegression")
-            cmdLst.Add(Subst("log_clf = BaggingClassifier(LogisticRegression(&1))", xParams))
-            cmdLst.Add("log_clf.fit(X_train, Y_train)")
-          Case "SGD Classifier"
-            cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
-            cmdLst.Add("from sklearn.linear_model import SGDClassifier")
-            cmdLst.Add(Subst("sgd_clf = BaggingClassifier(SGDClassifier(&1))", xParams))
-            cmdLst.Add("sgd_clf.fit(X_train, Y_train)")
-          Case "KNeighbors Classifier"
-            cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
-            cmdLst.Add("from sklearn.neighbors import KNeighborsClassifier")
-            cmdLst.Add(Subst("knn_clf = BaggingClassifier(KNeighborsClassifier(&1))", xParams))
-            cmdLst.Add("knn_clf.fit(X_train, Y_train)")
-          Case "Linear SVC"
-            cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
-            cmdLst.Add("from sklearn.svm import LinearSVC")
-            cmdLst.Add(Subst("linsvm_clf = BaggingClassifier(LinearSVC(&1))", xParams))
-            cmdLst.Add("linsvm_clf.fit(X_train, Y_train)")
-          Case "Nonlinear SVC"
-            cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
-            cmdLst.Add("from sklearn.svm import SVC")
-            cmdLst.Add(Subst("svm_clf = BaggingClassifier(SVC(&1))", xParams))
-            cmdLst.Add("svm_clf.fit(X_train, Y_train)")
-          Case "DecisionTree Classifier"
-            cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
-            cmdLst.Add("from sklearn.tree import DecisionTreeClassifier")
-            cmdLst.Add(Subst("tree_clf = BaggingClassifier(DecisionTreeClassifier(&1))", xParams))
-            cmdLst.Add("tree_clf.fit(X_train, Y_train)")
-            ' Case "RandomForest Classifier"
-            ' Case "HGBT Classifier"
-            ' Case "LGBM Classifier"
-            ' Case "AdaBoost Classifier"
-            ' Case "XGBoost Classifier"
-        End Select
-      Else
-        Select cmbmodel.Text
-          Case "Dummy Classifier"
-            cmdLst.Add("from sklearn.dummy import DummyClassifier")
-            cmdLst.Add(Subst("dummy_clf = DummyClassifier(&1)", xParams))
-            cmdLst.Add("dummy_clf.fit(X_train, Y_train)")
-          Case "Logistic Regression"
-            cmdLst.Add("from sklearn.linear_model import LogisticRegression")
-            cmdLst.Add(Subst("log_clf = LogisticRegression(&1)", xParams))
-            cmdLst.Add("log_clf.fit(X_train, Y_train)")
-          Case "SGD Classifier"
-            cmdLst.Add("from sklearn.linear_model import SGDClassifier")
-            cmdLst.Add(Subst("sgd_clf = SGDClassifier(&1)", xParams))
-            cmdLst.Add("sgd_clf.fit(X_train, Y_train)")
-          Case "KNeighbors Classifier"
-            cmdLst.Add("from sklearn.neighbors import KNeighborsClassifier")
-            cmdLst.Add(Subst("knn_clf = KNeighborsClassifier(&1)", xParams))
-            cmdLst.Add("knn_clf.fit(X_train, Y_train)")
-          Case "Linear SVC"
-            cmdLst.Add("from sklearn.svm import LinearSVC")
-            cmdLst.Add(Subst("linsvm_clf = LinearSVC(&1)", xParams))
-            cmdLst.Add("linsvm_clf.fit(X_train, Y_train)")
-          Case "Nonlinear SVC"
-            cmdLst.Add("from sklearn.svm import SVC")
-            cmdLst.Add(Subst("svm_clf = SVC(&1)", xParams))
-            cmdLst.Add("svm_clf.fit(X_train, Y_train)")
-          Case "DecisionTree Classifier"
-            cmdLst.Add("from sklearn.tree import DecisionTreeClassifier")
-            cmdLst.Add(Subst("tree_clf = DecisionTreeClassifier(&1)", xParams))
-            cmdLst.Add("tree_clf.fit(X_train, Y_train)")
-          Case "RandomForest Classifier"
-            cmdLst.Add("from sklearn.ensemble import RandomForestClassifier")
-            cmdLst.Add(Subst("rf_clf = RandomForestClassifier(&1)", xParams))
-            cmdLst.Add("rf_clf.fit(X_train, Y_train)")
-          Case "HGBT Classifier"
-            cmdLst.Add("from sklearn.ensemble import HistGradientBoostingClassifier")
-            cmdLst.Add(Subst("hist_clf = HistGradientBoostingClassifier(&1)", xParams))
-            cmdLst.Add("hist_clf.fit(X_train, Y_train)")
-          Case "LGBM Classifier"
-            cmdLst.Add("from lightgbm import LGBMClassifier")
-            cmdLst.Add(Subst("grad_clf = LGBMClassifier(&1)", xParams))
-            cmdLst.Add("grad_clf.fit(X_train, Y_train)")
-          Case "AdaBoost Classifier"
-            cmdLst.Add("from sklearn.ensemble import AdaBoostClassifier")
-            cmdLst.Add(Subst("ada_clf = AdaBoostClassifier(&1)", xParams))
-            cmdLst.Add("ada_clf.fit(X_train, Y_train)")
-          Case "XGBoost Classifier"
-            cmdLst.Add("from xgboost import XGBClassifier")
-            cmdLst.Add(Subst("xgb_clf = XGBClassifier(&1)", xParams))
-            cmdLst.Add("xgb_clf.fit(X_train, Y_train)")
-        End Select
-      Endif
-
-    Else If rbunsupervis.Value = True Then
-      Select cmbmodel.Text
-        Case "KMeans Clustering"
-          cmdLst.Add("from sklearn.cluster import KMeans")
-          cmdLst.Add(Subst("kmeans = KMeans(&1)", xParams))
-          cmdLst.Add("kmeans.fit(X_train)")
-        Case "DBSCAN"
-          cmdLst.Add("from sklearn.cluster import DBSCAN")
-          cmdLst.Add(Subst("dbscan = DBSCAN(&1)", xParams))
-          cmdLst.Add("dbscan.fit(X_train)")
-        Case "Isolation Forest"
-          cmdLst.Add("from sklearn.ensemble import IsolationForest")
-          cmdLst.Add(Subst("iso_forest = IsolationForest(&1)", xParams))
-          cmdLst.Add("iso_forest.fit(X_train)")
-        Case "Local Outlier Factor"
-          cmdLst.Add("from sklearn.neighbors import LocalOutlierFactor")
-          cmdLst.Add(Subst("loc_out = LocalOutlierFactor(&1, novelty = True)", xParams))
-          cmdLst.Add("loc_out.fit(X_train)")
-      End Select
-
+      TerminalInputList(cmdLst)
     Endif
-    TerminalInputList(cmdLst)
-    Dec Application.Busy
-    btnevaluate.Enabled = True
   Endif
+
+  Inc Application.Busy
+  If rbregression.Value = True Then
+    Select cmbmodel.Text
+      Case "Linear Regression"
+        cmdLst.Add("from sklearn.linear_model import LinearRegression")
+        cmdLst.Add(Subst("lin_reg = LinearRegression(&1)", xParams))
+        cmdLst.Add("lin_reg.fit(X_train, Y_train)")
+        cmdLst.Add("lin_reg.intercept_")
+        cmdLst.Add("lin_reg.coef_")
+      Case "SGD Regression"
+        cmdLst.Add("from sklearn.linear_model import SGDRegressor")
+        cmdLst.Add(Subst("sgd_reg = SGDRegressor(&1)", xParams))             ''
+        cmdLst.Add("sgd_reg.fit(X_train, Y_train.ravel())")
+        cmdLst.Add("sgd_reg.intercept_")
+        cmdLst.Add("sgd_reg.coef_")
+      Case "Ridge Regression"
+        cmdLst.Add("from sklearn.linear_model import Ridge")
+        cmdLst.Add(Subst("ridge_reg = Ridge(&1)", xParams))
+        cmdLst.Add("ridge_reg.fit(X_train, Y_train)")
+        cmdLst.Add("ridge_reg.intercept_")
+        cmdLst.Add("ridge_reg.coef_")
+      Case "Lasso Regression"
+        cmdLst.Add("from sklearn.linear_model import Lasso")
+        cmdLst.Add(Subst("lasso_reg = Lasso(&1)", xParams))
+        cmdLst.Add("lasso_reg.fit(X_train, Y_train)")
+        cmdLst.Add("lasso_reg.intercept_")
+        cmdLst.Add("lasso_reg.coef_")
+      Case "ElasticNet Regression"
+        cmdLst.Add("from sklearn.linear_model import ElasticNet")
+        cmdLst.Add(Subst("elastic_net = ElasticNet(&1)", xParams))
+        cmdLst.Add("elastic_net.fit(X_train, Y_train)")
+        cmdLst.Add("elastic_net.intercept_")
+        cmdLst.Add("elastic_net.coef_")
+      Case "Linear SVR"
+        cmdLst.Add("from sklearn.svm import LinearSVR")
+        cmdLst.Add(Subst("linsvm_reg = LinearSVR(&1)", xParams))
+        cmdLst.Add("linsvm_reg.fit(X_train, Y_train)")
+      Case "Nonlinear SVR"
+        cmdLst.Add("from sklearn.svm import SVR")
+        cmdLst.Add(Subst("svm_reg = SVR(&1)", xParams))
+        cmdLst.Add("svm_reg.fit(X_train, Y_train)")
+      Case "DecisionTree Regression"
+        cmdLst.Add("from sklearn.tree import DecisionTreeRegressor")
+        cmdLst.Add(Subst("tree_reg = DecisionTreeRegressor(&1)", xParams))
+        cmdLst.Add("tree_reg.fit(X_train, Y_train)")
+      Case "RandomForest Regression"
+        cmdLst.Add("from sklearn.ensemble import RandomForestRegressor")
+        cmdLst.Add(Subst("rf_reg = RandomForestRegressor(&1)", xParams))
+        cmdLst.Add("rf_reg.fit(X_train, Y_train)")
+      Case "HGBT Regression"
+        cmdLst.Add("from sklearn.ensemble import HistGradientBoostingRegressor")
+        cmdLst.Add(Subst("hist_reg = HistGradientBoostingRegressor(&1)", xParams))
+        cmdLst.Add("hist_reg.fit(X_train, Y_train)")
+      Case "LGBM Regression"
+        cmdLst.Add("from lightgbm import LGBMRegressor")
+        cmdLst.Add(Subst("grad_reg = LGBMRegressor(&1)", xParams))
+        cmdLst.Add("grad_reg.fit(X_train, Y_train)")
+      Case "AdaBoost Regression"
+        cmdLst.Add("from sklearn.ensemble import AdaBoostRegressor")
+        cmdLst.Add(Subst("ada_reg = AdaBoostRegressor(&1)", xParams))
+        cmdLst.Add("ada_reg.fit(X_train, Y_train)")
+      Case "XGBoost Regression"
+        cmdLst.Add("from xgboost import XGBRegressor")
+        cmdLst.Add(Subst("xgb_reg = XGBRegressor(&1)", xParams))
+        cmdLst.Add("xgb_reg.fit(X_train, Y_train)")
+    End Select
+
+  Else If rbclass.Value = True Then
+    If chkbagging.Value = True Then
+      Select cmbmodel.Text
+        Case "Logistic Regression"
+          cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
+          cmdLst.Add("from sklearn.linear_model import LogisticRegression")
+          cmdLst.Add(Subst("log_clf = BaggingClassifier(LogisticRegression(&1))", xParams))
+          cmdLst.Add("log_clf.fit(X_train, Y_train)")
+        Case "SGD Classifier"
+          cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
+          cmdLst.Add("from sklearn.linear_model import SGDClassifier")
+          cmdLst.Add(Subst("sgd_clf = BaggingClassifier(SGDClassifier(&1))", xParams))
+          cmdLst.Add("sgd_clf.fit(X_train, Y_train)")
+        Case "KNeighbors Classifier"
+          cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
+          cmdLst.Add("from sklearn.neighbors import KNeighborsClassifier")
+          cmdLst.Add(Subst("knn_clf = BaggingClassifier(KNeighborsClassifier(&1))", xParams))
+          cmdLst.Add("knn_clf.fit(X_train, Y_train)")
+        Case "Linear SVC"
+          cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
+          cmdLst.Add("from sklearn.svm import LinearSVC")
+          cmdLst.Add(Subst("linsvm_clf = BaggingClassifier(LinearSVC(&1))", xParams))
+          cmdLst.Add("linsvm_clf.fit(X_train, Y_train)")
+        Case "Nonlinear SVC"
+          cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
+          cmdLst.Add("from sklearn.svm import SVC")
+          cmdLst.Add(Subst("svm_clf = BaggingClassifier(SVC(&1))", xParams))
+          cmdLst.Add("svm_clf.fit(X_train, Y_train)")
+        Case "DecisionTree Classifier"
+          cmdLst.Add("from sklearn.ensemble import BaggingClassifier")
+          cmdLst.Add("from sklearn.tree import DecisionTreeClassifier")
+          cmdLst.Add(Subst("tree_clf = BaggingClassifier(DecisionTreeClassifier(&1))", xParams))
+          cmdLst.Add("tree_clf.fit(X_train, Y_train)")
+          ' Case "RandomForest Classifier"
+          ' Case "HGBT Classifier"
+          ' Case "LGBM Classifier"
+          ' Case "AdaBoost Classifier"
+          ' Case "XGBoost Classifier"
+      End Select
+    Else
+      Select cmbmodel.Text
+        Case "Dummy Classifier"
+          cmdLst.Add("from sklearn.dummy import DummyClassifier")
+          cmdLst.Add(Subst("dummy_clf = DummyClassifier(&1)", xParams))
+          cmdLst.Add("dummy_clf.fit(X_train, Y_train)")
+        Case "Logistic Regression"
+          cmdLst.Add("from sklearn.linear_model import LogisticRegression")
+          cmdLst.Add(Subst("log_clf = LogisticRegression(&1)", xParams))
+          cmdLst.Add("log_clf.fit(X_train, Y_train)")
+        Case "SGD Classifier"
+          cmdLst.Add("from sklearn.linear_model import SGDClassifier")
+          cmdLst.Add(Subst("sgd_clf = SGDClassifier(&1)", xParams))
+          cmdLst.Add("sgd_clf.fit(X_train, Y_train)")
+        Case "KNeighbors Classifier"
+          cmdLst.Add("from sklearn.neighbors import KNeighborsClassifier")
+          cmdLst.Add(Subst("knn_clf = KNeighborsClassifier(&1)", xParams))
+          cmdLst.Add("knn_clf.fit(X_train, Y_train)")
+        Case "Linear SVC"
+          cmdLst.Add("from sklearn.svm import LinearSVC")
+          cmdLst.Add(Subst("linsvm_clf = LinearSVC(&1)", xParams))
+          cmdLst.Add("linsvm_clf.fit(X_train, Y_train)")
+        Case "Nonlinear SVC"
+          cmdLst.Add("from sklearn.svm import SVC")
+          cmdLst.Add(Subst("svm_clf = SVC(&1)", xParams))
+          cmdLst.Add("svm_clf.fit(X_train, Y_train)")
+        Case "DecisionTree Classifier"
+          cmdLst.Add("from sklearn.tree import DecisionTreeClassifier")
+          cmdLst.Add(Subst("tree_clf = DecisionTreeClassifier(&1)", xParams))
+          cmdLst.Add("tree_clf.fit(X_train, Y_train)")
+        Case "RandomForest Classifier"
+          cmdLst.Add("from sklearn.ensemble import RandomForestClassifier")
+          cmdLst.Add(Subst("rf_clf = RandomForestClassifier(&1)", xParams))
+          cmdLst.Add("rf_clf.fit(X_train, Y_train)")
+        Case "HGBT Classifier"
+          cmdLst.Add("from sklearn.ensemble import HistGradientBoostingClassifier")
+          cmdLst.Add(Subst("hist_clf = HistGradientBoostingClassifier(&1)", xParams))
+          cmdLst.Add("hist_clf.fit(X_train, Y_train)")
+        Case "LGBM Classifier"
+          cmdLst.Add("from lightgbm import LGBMClassifier")
+          cmdLst.Add(Subst("grad_clf = LGBMClassifier(&1)", xParams))
+          cmdLst.Add("grad_clf.fit(X_train, Y_train)")
+        Case "AdaBoost Classifier"
+          cmdLst.Add("from sklearn.ensemble import AdaBoostClassifier")
+          cmdLst.Add(Subst("ada_clf = AdaBoostClassifier(&1)", xParams))
+          cmdLst.Add("ada_clf.fit(X_train, Y_train)")
+        Case "XGBoost Classifier"
+          cmdLst.Add("from xgboost import XGBClassifier")
+          cmdLst.Add(Subst("xgb_clf = XGBClassifier(&1)", xParams))
+          cmdLst.Add("xgb_clf.fit(X_train, Y_train)")
+      End Select
+    Endif
+
+  Else If rbunsupervis.Value = True Then
+    Select cmbmodel.Text
+      Case "KMeans Clustering"
+        cmdLst.Add("from sklearn.cluster import KMeans")
+        cmdLst.Add(Subst("kmeans = KMeans(&1)", xParams))
+        cmdLst.Add("kmeans.fit(X_train)")
+      Case "DBSCAN"
+        cmdLst.Add("from sklearn.cluster import DBSCAN")
+        cmdLst.Add(Subst("dbscan = DBSCAN(&1)", xParams))
+        cmdLst.Add("dbscan.fit(X_train)")
+      Case "Isolation Forest"
+        cmdLst.Add("from sklearn.ensemble import IsolationForest")
+        cmdLst.Add(Subst("iso_forest = IsolationForest(&1)", xParams))
+        cmdLst.Add("iso_forest.fit(X_train)")
+      Case "Local Outlier Factor"
+        cmdLst.Add("from sklearn.neighbors import LocalOutlierFactor")
+        cmdLst.Add(Subst("loc_out = LocalOutlierFactor(&1, novelty = True)", xParams))
+        cmdLst.Add("loc_out.fit(X_train)")
+    End Select
+
+  Endif
+  TerminalInputList(cmdLst)
+  Dec Application.Busy
+  btnevaluate.Enabled = True
 
 End
 
 Public Sub btnsavemodel_Click()
 
   Dim cmdLst As New String[]
+  Dim xDir As String
+  Dim xname As String
   Dim xpath As String
+  Dim tuneModel As String
+  Dim tuneToken As String
 
   If cmbmodel.Text Then
     If Dialog.SelectDirectory() Then Return
-    xpath = Dialog.Path &/ "model_" & modMain.GetNowString() & ".pkl"
+    xDir = Dialog.Path
+    xname = modMain.GetNowString()
 
-    Inc Application.Busy
-    cmdLst.Add("import joblib")
-    Select cmbmodel.Text
-      Case "Linear Regression"
-        cmdLst.Add("joblib.dump(lin_reg, '" & xpath & "')")
-      Case "SGD Regression"
-        cmdLst.Add("joblib.dump(sgd_reg, '" & xpath & "')")
-      Case "Ridge Regression"
-        cmdLst.Add("joblib.dump(ridge_reg, '" & xpath & "')")
-      Case "Lasso Regression"
-        cmdLst.Add("joblib.dump(lasso_reg, '" & xpath & "')")
-      Case "ElasticNet Regression"
-        cmdLst.Add("joblib.dump(elastic_net, '" & xpath & "')")
-      Case "Linear SVR"
-        cmdLst.Add("joblib.dump(linsvm_reg, '" & xpath & "')")
-      Case "Nonlinear SVR"
-        cmdLst.Add("joblib.dump(svm_reg, '" & xpath & "')")
-      Case "DecisionTree Regression"
-        cmdLst.Add("joblib.dump(tree_reg, '" & xpath & "')")
-      Case "RandomForest Regression"
-        cmdLst.Add("joblib.dump(rf_reg, '" & xpath & "')")
-      Case "HGBT Regression"
-        cmdLst.Add("joblib.dump(hist_reg, '" & xpath & "')")
-      Case "LGBM Regression"
-        cmdLst.Add("joblib.dump(grad_reg, '" & xpath & "')")
-      Case "AdaBoost Regression"
-        cmdLst.Add("joblib.dump(ada_reg, '" & xpath & "')")
-      Case "XGBoost Regression"
-        cmdLst.Add("joblib.dump(xgb_reg, '" & xpath & "')")
+    If cmbmodel.Text = "Transfer Learning" Then
+      tuneModel = xDir &/ "tuned_model_" & xname
+      tuneToken = xDir &/ "tuned_tokenizer_" & xname
+      cmdLst.Add(Subst("model_save_path = '&1'", tuneModel))
+      cmdLst.Add(Subst("token_save_path = '&1'", tuneToken))
+      cmdLst.Add("fine_model.save_pretrained(model_save_path)")
+      cmdLst.Add("fine_tokenizer.save_pretrained(token_save_path)")
+      TerminalInputList(cmdLst)
 
-      Case "Dummy Classifier"
-        cmdLst.Add("joblib.dump(dummy_clf, '" & xpath & "')")
-      Case "Logistic Regression"
-        cmdLst.Add("joblib.dump(log_clf, '" & xpath & "')")
-      Case "SGD Classifier"
-        cmdLst.Add("joblib.dump(sgd_clf, '" & xpath & "')")
-      Case "KNeighbors Classifier"
-        cmdLst.Add("joblib.dump(knn_clf, '" & xpath & "')")
-      Case "Linear SVC"
-        cmdLst.Add("joblib.dump(linsvm_clf, '" & xpath & "')")
-      Case "Nonlinear SVC"
-        cmdLst.Add("joblib.dump(svm_clf, '" & xpath & "')")
-      Case "DecisionTree Classifier"
-        cmdLst.Add("joblib.dump(tree_clf, '" & xpath & "')")
-      Case "RandomForest Classifier"
-        cmdLst.Add("joblib.dump(rf_clf, '" & xpath & "')")
-      Case "HGBT Classifier"
-        cmdLst.Add("joblib.dump(hist_clf, '" & xpath & "')")
-      Case "LGBM Classifier"
-        cmdLst.Add("joblib.dump(grad_clf, '" & xpath & "')")
-      Case "AdaBoost Classifier"
-        cmdLst.Add("joblib.dump(ada_clf, '" & xpath & "')")
-      Case "XGBoost Classifier"
-        cmdLst.Add("joblib.dump(xgb_clf, '" & xpath & "')")
+    Else
+      xpath = xDir &/ "model_" & xname & ".pkl"
+      Inc Application.Busy
+      cmdLst.Add("import joblib")
+      Select cmbmodel.Text
+        Case "Linear Regression"
+          cmdLst.Add("joblib.dump(lin_reg, '" & xpath & "')")
+        Case "SGD Regression"
+          cmdLst.Add("joblib.dump(sgd_reg, '" & xpath & "')")
+        Case "Ridge Regression"
+          cmdLst.Add("joblib.dump(ridge_reg, '" & xpath & "')")
+        Case "Lasso Regression"
+          cmdLst.Add("joblib.dump(lasso_reg, '" & xpath & "')")
+        Case "ElasticNet Regression"
+          cmdLst.Add("joblib.dump(elastic_net, '" & xpath & "')")
+        Case "Linear SVR"
+          cmdLst.Add("joblib.dump(linsvm_reg, '" & xpath & "')")
+        Case "Nonlinear SVR"
+          cmdLst.Add("joblib.dump(svm_reg, '" & xpath & "')")
+        Case "DecisionTree Regression"
+          cmdLst.Add("joblib.dump(tree_reg, '" & xpath & "')")
+        Case "RandomForest Regression"
+          cmdLst.Add("joblib.dump(rf_reg, '" & xpath & "')")
+        Case "HGBT Regression"
+          cmdLst.Add("joblib.dump(hist_reg, '" & xpath & "')")
+        Case "LGBM Regression"
+          cmdLst.Add("joblib.dump(grad_reg, '" & xpath & "')")
+        Case "AdaBoost Regression"
+          cmdLst.Add("joblib.dump(ada_reg, '" & xpath & "')")
+        Case "XGBoost Regression"
+          cmdLst.Add("joblib.dump(xgb_reg, '" & xpath & "')")
 
-      Case "KMeans Clustering"
-        cmdLst.Add("joblib.dump(kmeans, '" & xpath & "')")
-      Case "DBSCAN"
-        cmdLst.Add("joblib.dump(dbscan, '" & xpath & "')")
-      Case "Isolation Forest"
-        cmdLst.Add("joblib.dump(iso_forest, '" & xpath & "')")
-      Case "Local Outlier Factor"
-        cmdLst.Add("joblib.dump(loc_out, '" & xpath & "')")
-    End Select
-    TerminalInputList(cmdLst)
-    Dec Application.Busy
+        Case "Dummy Classifier"
+          cmdLst.Add("joblib.dump(dummy_clf, '" & xpath & "')")
+        Case "Logistic Regression"
+          cmdLst.Add("joblib.dump(log_clf, '" & xpath & "')")
+        Case "SGD Classifier"
+          cmdLst.Add("joblib.dump(sgd_clf, '" & xpath & "')")
+        Case "KNeighbors Classifier"
+          cmdLst.Add("joblib.dump(knn_clf, '" & xpath & "')")
+        Case "Linear SVC"
+          cmdLst.Add("joblib.dump(linsvm_clf, '" & xpath & "')")
+        Case "Nonlinear SVC"
+          cmdLst.Add("joblib.dump(svm_clf, '" & xpath & "')")
+        Case "DecisionTree Classifier"
+          cmdLst.Add("joblib.dump(tree_clf, '" & xpath & "')")
+        Case "RandomForest Classifier"
+          cmdLst.Add("joblib.dump(rf_clf, '" & xpath & "')")
+        Case "HGBT Classifier"
+          cmdLst.Add("joblib.dump(hist_clf, '" & xpath & "')")
+        Case "LGBM Classifier"
+          cmdLst.Add("joblib.dump(grad_clf, '" & xpath & "')")
+        Case "AdaBoost Classifier"
+          cmdLst.Add("joblib.dump(ada_clf, '" & xpath & "')")
+        Case "XGBoost Classifier"
+          cmdLst.Add("joblib.dump(xgb_clf, '" & xpath & "')")
+
+        Case "KMeans Clustering"
+          cmdLst.Add("joblib.dump(kmeans, '" & xpath & "')")
+        Case "DBSCAN"
+          cmdLst.Add("joblib.dump(dbscan, '" & xpath & "')")
+        Case "Isolation Forest"
+          cmdLst.Add("joblib.dump(iso_forest, '" & xpath & "')")
+        Case "Local Outlier Factor"
+          cmdLst.Add("joblib.dump(loc_out, '" & xpath & "')")
+      End Select
+      TerminalInputList(cmdLst)
+      Dec Application.Busy
+    Endif
   Endif
 
 End
@@ -1862,6 +2037,16 @@ Public Sub btnsaveProcess_Click()
     TerminalInputList(cmdLst)
     Dec Application.Busy
   Endif
+
+End
+
+Public Sub btncommands_Click()
+
+  Dim xPath As String
+
+  If Dialog.SelectDirectory() Then Return
+  xPath = Dialog.Path &/ cmbmodel.Text & modMain.GetNowString() & ".txt"
+  File.Save(xPath, TerminalView1.Text)
 
 End
 

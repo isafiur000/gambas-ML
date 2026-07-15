@@ -31,28 +31,32 @@
           Text = ("Install Libs")
           Border = False
         }
-        { Panel6 Panel
-          MoveScaled(1,10,23,11)
-          { rbregression RadioButton
-            MoveScaled(1,1,21,3)
-            Text = ("Regression")
-            Value = True
-          }
-          { rbclass RadioButton
-            MoveScaled(1,4,21,3)
-            Text = ("Classification")
-          }
-          { rbunsupervis RadioButton
-            MoveScaled(1,7,21,3)
-            Text = ("Unsupervised")
-          }
-        }
         { Label22 Label
           MoveScaled(1,31,23,2)
           Font = Font["-1"]
           Alignment = Align.Center
           Border = Border.Plain
           Text = ("© Safiur Rahman")
+        }
+        { Panel6 Panel
+          MoveScaled(1,10,23,14)
+          { rbregression RadioButton
+            MoveScaled(1,1,18,3)
+            Text = ("Regression")
+          }
+          { rbclass RadioButton
+            MoveScaled(1,4,18,3)
+            Text = ("Classification")
+            Value = True
+          }
+          { rbunsupervis RadioButton
+            MoveScaled(1,7,18,3)
+            Text = ("Unsupervised")
+          }
+          { rbfinetune RadioButton
+            MoveScaled(1,10,18,3)
+            Text = ("Fine Tuning")
+          }
         }
       }
       { Label13 Label
@@ -704,17 +708,22 @@
         }
       }
       { Frame2 Frame
-        MoveScaled(48,4,18,12)
+        MoveScaled(48,4,18,16)
         Text = ("Dump Model")
         { btnsaveProcess Button
           MoveScaled(1,3,16,3)
           Enabled = False
-          Text = ("PreProcessing")
+          Text = ("Processing")
         }
         { btnsavemodel Button
           MoveScaled(1,7,16,3)
           Enabled = False
           Text = ("Model")
+        }
+        { btncommands Button
+          MoveScaled(1,11,16,3)
+          Enabled = False
+          Text = ("Script")
         }
       }
       Index = 6
