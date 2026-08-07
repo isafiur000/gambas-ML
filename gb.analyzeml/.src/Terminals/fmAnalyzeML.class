@@ -1,0 +1,54 @@
+' Gambas class file
+
+Private $hPyTerminal As FmPythonTerminal
+Private $Format As String
+Private $Headers As String[]
+Private $sPath As String
+
+Public Sub _new()
+
+End
+
+Public Sub SetParameters()
+
+  RemoveTerminal()
+  $hPyTerminal = New FmPythonTerminal(Panel1)
+  $hPyTerminal.SetHeaderType($Format)
+  $hPyTerminal.SetHeaderColumns($Headers)
+  $hPyTerminal.SetFilePath($sPath)
+
+End
+
+Public Sub RemoveTerminal()
+
+  If Panel1.Children Then
+    Panel1.Children.Clear()
+  Endif
+
+End
+
+Public Sub mnureload_Click()
+
+  SetParameters()
+
+End
+
+''------------- get values -------------------
+Public Sub SetHeaderType(sForm As String)
+
+  $Format = sForm
+
+End
+
+Public Sub SetHeaderColumns(sHeads As String[])
+
+  $Headers = sHeads
+
+End
+
+Public Sub SetFilePath(sPath As String)
+
+  $sPath = sPath
+  SetParameters()
+
+End

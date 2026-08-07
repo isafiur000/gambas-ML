@@ -10,11 +10,11 @@ Property FileType As String
 Property Headers As String[]
 Property FilePath As String
 
-Private $hPyTerminal As FmPythonTerminal
+Private $hPyTerminal As FmAnalyzeML
 
 Public Sub _new()
 
-  $hPyTerminal = New FmPythonTerminal(Me) As "PyTerminal"
+  $hPyTerminal = New FmAnalyzeML(Me) As "AnalyzeTerm"
 
 End
 
@@ -24,7 +24,7 @@ End
 
 Private Sub FileType_Write(Value As String)
 
-  $hPyTerminal.SetFileType(Value)
+  $hPyTerminal.SetHeaderType(Value)
 
 End
 

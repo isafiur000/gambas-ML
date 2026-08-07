@@ -2,11 +2,20 @@
 
 Public Sub Form_Open()
 
-  ' AnalyzeML1.FileType = "CSV"
-  ' AnalyzeML1.Headers = ["EncID", "Name", "Age", "Gender", "Bilirubin Total", "Bilirubin Direct"]
-  ' AnalyzeML1.FilePath = User.Home &/ "/Project/SISHGAMBAS/ML/data.csv"
+  ' ' AnalyzeML1.SetHeaderType = "CSV"
+  AnalyzeML1.Headers = ["EncID", "Name", "Age", "Gender", "Bilirubin Total", "Bilirubin Direct"]
+  AnalyzeML1.FilePath = User.Home &/ "/Project/SISHGAMBAS/ML/data.csv"
 
-  AnalyzeML1.Headers = ["EncID", "Name", "Age", "Gender", "Final(1)", "Final(2)", "Final", "Provisional(1)", "Provisional(2)", "Provisional", "Nursing", "complaints"]                          ''
-  AnalyzeML1.FilePath = User.Home &/ "/Project/SISHGAMBAS/ML/dataset.json"
+  ' AnalyzeML1.Headers = ["EncID", "Name", "Age", "Gender", "Final(1)", "Final(2)", "Final", "Provisional(1)", "Provisional(2)", "Provisional", "Nursing", "complaints"]                          ''
+  ' AnalyzeML1.FilePath = User.Home &/ "/Project/SISHGAMBAS/ML/dataset.json"
+
+  ' AnalyzeML1.Headers = ["EncID", "Name", "Age", "Gender", "PatNo", "DORec", "Status", "Depart", "Package"]
+  ' AnalyzeML1.FilePath = User.Home &/ "/Project/SISHGAMBAS/ML/newdata.json"
+
+  ' AnalyzeML1.Headers = ["EncID", "Name", "Age", "Gender", "PatNo", "DORec", "Status", "Depart", "Package"]
+  ' AnalyzeML1.FilePath = User.Home &/ "/Project/SISHGAMBAS/ML/dddata.ndjson"
+
+  AnalyzeML1.Headers = ["fldid", "fldencounterval", "fldinput", "flditem", "fldreportquali", "flddetail", "flduserid", "fldtime", "fldcomp", "fldsave", "fldoriguserid", "fldorigtime", "xyz", "fldlocation"]
+  AnalyzeML1.FilePath = User.Home &/ "/Project/SISHGAMBAS/ML/newpahs.ndjson"
 
 End

@@ -1,0 +1,20 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,95,76)
+  Expand = True
+  Text = ("Python3 Terminal")
+  Arrangement = Arrange.Vertical
+  { mnufile Menu
+    Text = ("File")
+    { mnureload Menu
+      Text = ("Reload")
+    }
+  }
+  { !Panel1 Panel
+    MoveScaled(2,2,90,64)
+    #Public = True
+    Expand = True
+    Arrangement = Arrange.Vertical
+  }
+}

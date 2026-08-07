@@ -1,0 +1,83 @@
+' Gambas module file
+
+''Use on comboBox_KeyRelease()
+Public Sub AutoFillComboBox(ComboBoxItems As ComboBox)
+
+  Dim i As Integer
+  Dim textToCursor As String
+  Dim textPosition As Integer
+
+  Inc Application.Busy
+  If Key.Code = Key.Down Then
+    ComboBoxItems.Popup
+    textPosition = ComboBoxItems.Pos
+    textToCursor = Mid(ComboBoxItems.Text, 1, textPosition)
+    For i = 0 To ComboBoxItems.Count - 1
+      If LCase(ComboBoxItems[i].Text) Like LCase(textToCursor) & "*" Then
+        ComboBoxItems.Index = i
+        Break
+      Endif
+    Next
+
+  Else If Key.Code = Key.BackSpace Then
+    If ComboBoxItems.Pos = 0 Then
+    Else
+      textPosition = ComboBoxItems.Pos - 1
+      textToCursor = Mid(ComboBoxItems.Text, 1, textPosition)
+      For i = 0 To ComboBoxItems.Count - 1
+        If LCase(ComboBoxItems[i].Text) Like LCase(textToCursor) & "*" Then
+          ComboBoxItems.Text = ComboBoxItems[i].Text
+          ComboBoxItems.Pos = textPosition
+          ComboBoxItems.Select(textPosition, Len(ComboBoxItems.Text) - textPosition)
+          Break
+        Endif
+      Next
+    Endif
+
+  Else
+    If ComboBoxItems.Pos = 0 Then
+    Else
+      textPosition = ComboBoxItems.Pos
+      textToCursor = Mid(ComboBoxItems.Text, 1, textPosition)
+      For i = 0 To ComboBoxItems.Count - 1
+        If LCase(ComboBoxItems[i].Text) Like LCase(textToCursor) & "*" Then
+          ComboBoxItems.Text = ComboBoxItems[i].Text
+          ComboBoxItems.Pos = textPosition
+          ComboBoxItems.Select(textPosition, Len(ComboBoxItems.Text) - textPosition)
+          Break
+        Endif
+      Next
+    Endif
+
+  Endif
+  Dec Application.Busy
+
+End
+
+Public Sub RestrictComboToContent(ComboBoxItems As ComboBox)
+
+  Dim i As Integer
+  Dim m As Integer
+  Dim n As Integer
+  Dim txt As String
+
+  If Key.Code = Key.Space Then
+    ComboBoxItems.Text = ""
+  Else
+    n = 0
+    txt = Mid(ComboBoxItems.Text, 1, ComboBoxItems.Pos)
+    m = Len(txt)
+    If m > 0 Then
+      For i = 0 To ComboBoxItems.Count - 1
+        If Left(ComboBoxItems[i].Text, m) = txt Then
+          n = n + 1
+        Endif
+      Next
+      If n = 0 Then
+        ComboBoxItems.Text = Left(txt, m - 1)
+        AutoFillComboBox(ComboBoxItems)
+      Endif
+    Endif
+  Endif
+
+End

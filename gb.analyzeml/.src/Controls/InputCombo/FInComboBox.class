@@ -1,0 +1,66 @@
+' Gambas class file
+
+Private $sPrompt As String
+Private $sTitle As String
+Private $defList As String[]
+Private $sValue As String
+Private $comboLock As Boolean
+
+Public Sub Run(sPrompt As String, Optional sTitle As String, Optional sDefault As String[], Optional sValue As String, Optional comboLock As Boolean) As String
+
+  $sPrompt = sPrompt
+  $sTitle = sTitle
+  $defList = sDefault
+
+  txtValue.List = $defList
+  txtValue.Text = sValue
+  $comboLock = comboLock
+
+  If Me.ShowModal() Then Return $sValue
+
+End
+
+Public Sub Form_Open()
+
+  lblMessage.Text = $sPrompt
+  Me.Title = $sTitle
+
+  panBox.W = Max(Desktop.Scale * 24, lblMessage.W)
+  panBox.Arrangement = Arrange.Vertical
+
+  txtValue.SelectAll
+  txtValue.SetFocus
+
+End
+
+Public Sub btnCancel_Click()
+
+  Me.Close
+
+End
+
+Public Sub btnOK_Click()
+
+  Dim xgo As Boolean
+
+  xgo = True
+  If $comboLock = True Then
+    If $defList.Exist(txtValue.Text) = False Then
+      xgo = False
+    Endif
+  Endif
+
+  If xgo = True Then
+    $sValue = txtValue.Text
+    Me.Close(True)
+  Endif
+
+End
+
+Public Sub txtValue_KeyRelease()
+
+  If $comboLock = True Then
+    modFillContainer.RestrictComboToContent(txtValue)
+  Endif
+
+End
