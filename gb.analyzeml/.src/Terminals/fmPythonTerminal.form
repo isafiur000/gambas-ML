@@ -55,7 +55,7 @@
           }
           { rbfinetune RadioButton
             MoveScaled(1,10,18,3)
-            Text = ("Fine Tuning")
+            Text = ("Language Model")
           }
         }
       }
@@ -221,6 +221,10 @@
           MoveScaled(0,0,17,3)
           ReadOnly = True
         }
+      }
+      { btnhelp Button
+        MoveScaled(115,21,4,3)
+        Picture = Picture["icon:/small/help"]
       }
       Index = 1
       Text = ("Processing of Categorical Columns")
@@ -438,7 +442,7 @@
           }
         }
         { Panel28 Panel
-          MoveScaled(0,11,42.875,13.875)
+          MoveScaled(0,11,43,18)
           Arrangement = Arrange.Vertical
           AutoResize = True
           { pnlwordvec Panel
@@ -489,6 +493,19 @@
               MoveScaled(6,0.5,35,3)
               Picture = Picture["icon:/small/copy"]
               ReadOnly = True
+            }
+          }
+          { pnlbertType Panel
+            MoveScaled(0,13,42,3)
+            Visible = False
+            { rbtokenbert RadioButton
+              MoveScaled(0,0,17,3)
+              Text = ("Token BERT")
+            }
+            { rbsentbert RadioButton
+              MoveScaled(21,0,17,3)
+              Text = ("Sentence BERT")
+              Value = True
             }
           }
         }

@@ -1,0 +1,11 @@
+1) Delete Rows with specific value in a column
+$ orig_data.drop(orig_data[orig_data['column_name'] == 'Value'].index, inplace=True)
+
+2) Extract first few characters of a column
+$ orig_data['new_column'] = orig_data['column_name'].str[:n]
+
+3) Delete Rows with specific value in a column if less than a number
+$ orig_data = orig_data[orig_data.groupby('column_name')['column_name'].transform('count') >= n]
+
+4) Delete Rows with value in a column less than a number of characters
+$ orig_data = orig_data[orig_data['column_name'].str.len() >= n]

@@ -10,6 +10,9 @@
     { mnureload Menu
       Text = ("Reload")
     }
+    { mnuselect Menu
+      Text = ("Select")
+    }
   }
   { !Panel1 Panel
     MoveScaled(2,2,90,64)

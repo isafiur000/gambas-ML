@@ -1,0 +1,24 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,80,46)
+  Arrangement = Arrange.Vertical
+  Margin = True
+  { TextArea1 TextArea
+    MoveScaled(0,0,78,41)
+    Expand = True
+  }
+  { Panel1 Panel
+    MoveScaled(0,42,80,4)
+    { btnok Button
+      MoveScaled(63,0.5,14,3)
+      Text = Shortcut(("Save"), "S")
+      Picture = Picture["icon:/small/apply"]
+    }
+    { btnclear Button
+      MoveScaled(1,0.5,14,3)
+      Text = Shortcut(("Clear"), "C")
+      Picture = Picture["icon:/small/cancel"]
+    }
+  }
+}

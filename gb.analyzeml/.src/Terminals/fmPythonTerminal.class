@@ -262,11 +262,13 @@ Public Sub btndataload_Click()
   Dim i As Integer
   Dim xcolm As String
 
-  $Columns = $sHead.Copy()
-  aHead = $sHead.Copy()
-  For i = 0 To aHead.Count - 1
-    aHead[i] = "'" & aHead[i] & "'"
-  Next
+  If $sHead And If $sHead.Count Then
+    $Columns = $sHead.Copy()
+    aHead = $sHead.Copy()
+    For i = 0 To aHead.Count - 1
+      aHead[i] = "'" & aHead[i] & "'"
+    Next
+  Endif
 
   If File.Ext($sPath) = "csv" Then
     cmdLst.Add("columns = " & "[" & aHead.Join(", ") & "]")
@@ -276,7 +278,9 @@ Public Sub btndataload_Click()
       If $pyShell Then
         cmdLst.Add("polars_data = polars.scan_csv(\"" & $sPath & "\", separator = '" & "\\" & "t" & "', ignore_errors = True)")
         cmdLst.Add("orig_data = polars_data.collect().to_pandas()")
-        cmdLst.Add("orig_data.columns = " & "[" & aHead.Join(", ") & "]")
+        If $sHead And If $sHead.Count Then
+          cmdLst.Add("orig_data.columns = " & "[" & aHead.Join(", ") & "]")
+        Endif
       Else
         cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns)")
       Endif
@@ -307,6 +311,24 @@ Public Sub btndataload_Click()
   TerminalInputList(cmdLst)
 
   TerminalInput("orig_data.replace('', numpy.nan, inplace = True)")
+
+  If $sHead And If $sHead.Count Then
+  Else
+    $sHead = GetDataFrameColumns()
+    $Columns = $sHead.Copy()
+  Endif
+
+End
+
+Private Function GetDataFrameColumns() As String[]
+
+  Dim xx As String
+  Dim xList As String[]
+
+  TerminalInput("all_columns = list(orig_data.columns)")
+  xx = GetIpythonOutput("';'.join(str(item) for item in all_columns)")
+  xList = Split(xx, ";")
+  Return xList
 
 End
 
@@ -359,6 +381,7 @@ Private Sub GetModelList() As String[]
     xlst.Add("DBSCAN")
     xlst.Add("Isolation Forest")
     xlst.Add("Local Outlier Factor")
+    xlst.Add("Cosine Similarity")
     valtrain.Value = 100
     valtrain.Enabled = False
     pnlregress.Visible = True
@@ -625,6 +648,16 @@ Public Sub btnfilesave_Click()
   If Dialog.SelectDirectory() Then Return
   xPath = Dialog.Path &/ modMain.GetNowString() & ".txt"
   File.Save(xPath, TerminalView1.Text)
+
+End
+
+Public Sub btnhelp_Click()
+
+  Dim xx As String
+  Dim xsel As String
+
+  xx = File.Load("help.txt")
+  xsel = GetTextArea("Help Manual", xx)
 
 End
 
@@ -1271,9 +1304,11 @@ Public Sub chkusetextmodel_Click()
     pnlwordvec.Visible = False
     pnlhuburl.Visible = True
     txthuburl.Text = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/HubURL")
+    pnlbertType.Visible = True
   Else If chkusetextmodel.Value = False Then
     pnlwordvec.Visible = True
     pnlhuburl.Visible = False
+    pnlbertType.Visible = False
   Endif
 
 End
@@ -1303,6 +1338,7 @@ Public Sub btninstallmodel_Click()
         If $pyShell Then
           TerminalInput("pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu")
           TerminalInput("pip install transformers")
+          TerminalInput("pip install sentence-transformers")
           TerminalInput("pip install datasets")
         Else
         Endif
@@ -1349,11 +1385,17 @@ Private Sub DefineTextVectorization()
       cmdLst.Add("'torch version :', torch.__version__")
       cmdLst.Add("'transformers version :', transformers.__version__")
 
-      cmdLst.Add("from transformers import AutoModel, AutoTokenizer")
-      cmdLst.Add(Subst("model_path = '&1'", xmodel))
-      cmdLst.Add("device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')")
-      cmdLst.Add("nlp_tokenizer = AutoTokenizer.from_pretrained(model_path)")
-      cmdLst.Add("nlp_model = AutoModel.from_pretrained(model_path).to(device)")
+      If rbtokenbert.Value = True Then
+        cmdLst.Add("from transformers import AutoModel, AutoTokenizer")
+        cmdLst.Add(Subst("model_path = '&1'", xmodel))
+        cmdLst.Add("device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')")
+        cmdLst.Add("nlp_tokenizer = AutoTokenizer.from_pretrained(model_path)")
+        cmdLst.Add("nlp_model = AutoModel.from_pretrained(model_path).to(device)")
+      Else If rbsentbert.Value = True Then
+        cmdLst.Add("from sentence_transformers import SentenceTransformer")
+        cmdLst.Add(Subst("model_path = '&1'", xmodel))
+        cmdLst.Add("nlp_model = SentenceTransformer(model_path)")
+      Endif
       TerminalInputList(cmdLst)
       PressEnterKey()
     Endif
@@ -1370,12 +1412,17 @@ Private Sub DefineTextVectorization()
     cmdLst.Add("word_tokens = word_process(tokens)")
     cmdLst.Add("return nlp_model.encode(' '.join(word_tokens))")
   Else If cmbtextvector.Text = "modernbert" Then
-    ModelTorchOutput()
-    cmdLst.Add("nlp_inputs = nlp_tokenizer(tokens, return_tensors = 'pt', padding = True, truncation = True)")
-    cmdLst.Add("nlp_inputs = {k:v.to(device) for k,v in nlp_inputs.items()}")
-    cmdLst.Add("nlp_outputs = get_nlp_outputs(nlp_model, nlp_inputs)")
-    cmdLst.Add("cls_embedding = nlp_outputs.last_hidden_state[:, 0, :].squeeze().numpy()")
-    cmdLst.Add("return cls_embedding.tolist()")
+    If rbtokenbert.Value = True Then
+      ModelTorchOutput()
+      cmdLst.Add("nlp_inputs = nlp_tokenizer(tokens, return_tensors = 'pt', padding = True, truncation = True)")
+      cmdLst.Add("nlp_inputs = {k:v.to(device) for k,v in nlp_inputs.items()}")
+      cmdLst.Add("nlp_outputs = get_nlp_outputs(nlp_model, nlp_inputs)")
+      cmdLst.Add("cls_embedding = nlp_outputs.last_hidden_state[:, 0, :].squeeze().numpy()")
+      cmdLst.Add("return cls_embedding.tolist()")
+    Else If rbsentbert.Value = True Then
+      cmdLst.Add("cls_embedding = nlp_model.encode(tokens)")
+      cmdLst.Add("return cls_embedding.tolist()")
+    Endif
   Endif
   TerminalInputList(cmdLst)
   PressEnterKey()
@@ -2191,6 +2238,9 @@ Private Sub GetPredictionModels()
         cmdLst.Add("from sklearn.neighbors import LocalOutlierFactor")
         cmdLst.Add(Subst("loc_out = LocalOutlierFactor(&1, novelty = True)", xParams))
         cmdLst.Add("loc_out.fit(X_train)")
+      Case "Cosine Similarity"
+        cmdLst.Add("from torch.nn.functional import cosine_similarity")
+        cmdLst.Add("similarities = cosine_similarity(embeddings1, embeddings2)")
     End Select
 
   Endif

@@ -28,6 +28,26 @@ Private Sub PrintValues()
   Dim xval As String
   Dim xshell As String
 
+  Dim xargs1 As String
+  Dim xargs2 As String
+  Dim xargs3 As String
+  Dim xargs4 As String
+  Dim xargs5 As String
+  Dim xargs6 As String
+  Dim xargs7 As String
+  Dim xargs8 As String
+  Dim xargs9 As String
+
+  Dim xnums1 As String
+  Dim xnums2 As String
+  Dim xnums3 As String
+  Dim xnums4 As String
+  Dim xnums5 As String
+  Dim xnums6 As String
+  Dim xnums7 As String
+  Dim xnums8 As String
+  Dim xnums9 As String
+
   If InStr($url, "?") > 0 Then
     yy = Split($url, "?")[1]
     If yy = "upload" Then
@@ -35,6 +55,84 @@ Private Sub PrintValues()
       xargs = Request["args"]
       If xargs Then
         xargLst = Split(xargs, ",")
+      Else
+        xargLst = New String[]
+      Endif
+
+      ''string argument
+      xargs1 = Request["strargs1"]
+      If xargs1 Then
+        xargLst.Add(Quote(xargs1))
+      Endif
+      xargs2 = Request["strargs2"]
+      If xargs2 Then
+        xargLst.Add(Quote(xargs2))
+      Endif
+      xargs3 = Request["strargs3"]
+      If xargs3 Then
+        xargLst.Add(Quote(xargs3))
+      Endif
+      xargs4 = Request["strargs4"]
+      If xargs4 Then
+        xargLst.Add(Quote(xargs4))
+      Endif
+      xargs5 = Request["strargs5"]
+      If xargs5 Then
+        xargLst.Add(Quote(xargs5))
+      Endif
+      xargs6 = Request["strargs6"]
+      If xargs6 Then
+        xargLst.Add(Quote(xargs6))
+      Endif
+      xargs7 = Request["strargs7"]
+      If xargs7 Then
+        xargLst.Add(Quote(xargs7))
+      Endif
+      xargs8 = Request["strargs8"]
+      If xargs8 Then
+        xargLst.Add(Quote(xargs8))
+      Endif
+      xargs9 = Request["strargs9"]
+      If xargs9 Then
+        xargLst.Add(Quote(xargs9))
+      Endif
+
+      ''Numerical arguments
+      xnums1 = Request["numargs1"]
+      If xnums1 Then
+        xargLst.Add(CFloat(xnums1))
+      Endif
+      xnums2 = Request["numargs2"]
+      If xnums2 Then
+        xargLst.Add(CFloat(xnums2))
+      Endif
+      xnums3 = Request["numargs3"]
+      If xnums3 Then
+        xargLst.Add(CFloat(xnums3))
+      Endif
+      xnums4 = Request["numargs4"]
+      If xnums4 Then
+        xargLst.Add(CFloat(xnums4))
+      Endif
+      xnums5 = Request["numargs5"]
+      If xnums5 Then
+        xargLst.Add(CFloat(xnums5))
+      Endif
+      xnums6 = Request["numargs6"]
+      If xnums6 Then
+        xargLst.Add(CFloat(xnums6))
+      Endif
+      xnums7 = Request["numargs7"]
+      If xnums7 Then
+        xargLst.Add(CFloat(xnums7))
+      Endif
+      xnums8 = Request["numargs8"]
+      If xnums8 Then
+        xargLst.Add(CFloat(xnums8))
+      Endif
+      xnums9 = Request["numargs9"]
+      If xnums9 Then
+        xargLst.Add(xnums9)
       Endif
 
       xfileList = New String[]
