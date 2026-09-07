@@ -1,15 +1,87 @@
-1) Set up environment (eg Model name is XRay)
+A. Server side
 
+1) Install Apache2
+$ sudo apt install apache2
+$ sudo a2enmod cgid
+$ sudo a2enmod userdir
+$ systemctl restart apache2
+
+
+2) Create Directory and set permissions
+$ mkdir ~/public_html
+$ chmod 755 ~/public_html
+ 
+Add current user to the www-data group
+$ sudo usermod -a -G <username> www-data
+
+
+3) Setup API used by client to communicate with model
+$ wget https://bitnepal.safiur.com.np/healthyweb/Ubuntu22.04/web-api_0.0.1-0ubuntu1_all.deb
+$ sudo gdebi web-api_0.0.1-0ubuntu1_all.deb
+$ sudo mkdir /var/www/html/docs/uploads
+$ sudo chmod -R a+rwx /var/www/html/docs/uploads
+
+Create symlink to executable
+$ sudo ln -s /usr/bin/web-api /usr/lib/cgi-bin/web-api
+
+4) Create Models directory
+$ mkdir models
+$ cd models
+
+Create folder for individual model
+$ mkdir BioLord
+
+
+5) Set up Python environment 
+$ sudo apt install python3-full python3-pip
 $ cd public_html
-$ python3 -m venv XRay
-$ source XRay/bin/activate
+$ python3 -m venv myenv
+$ source myenv/bin/activate
 
-2) Install dependencies
+
+6) Install dependencies in myenv env terminal
 $ pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 $ pip install transformers
+$ pip install sentence_transformers
 
-3) Download trained model files into a folder
-  Update the model directory in /etc/web-api/XRay/script.py
+Install other dependencies as needed
 
 
+7) Setup hugging face and download model (eg. FremyCompany/BioLORD-2023)
+$ pip install -U huggingface_hub
+$ hf download FremyCompany/BioLORD-2023 --local-dir /home/safiur/models/BioLord
+
+
+8) Configure API
+Edit config file and Provide the complete home folder path instead of ~
+$ sudo nano /etc/web-api/appsettings.conf
+
+it should look as:
+
+[Similarity]
+Shell="/home/safiur/public_html/myenv/bin/python3"
+
+
+9) Update model directory path in required script
+$ sudo nano /etc/web-api/Similarity/script.py
+
+it should look as:
+
+model_path = "/home/safiur/models/BioLord"
+
+
+10) Testing
+i) Through script
+$ /home/safiur/public_html/myenv/bin/python3 /etc/web-api/Similarity/script.py "high blood pressure" "Cholera"
+
+ii) Through API
+$ curl --no-buffer --location http://localhost/cgi-bin/web-api?upload --form 'model="Similarity"' --form 'strargs1="high blood pressure"' --form 'strargs2="Cholera"'
+
+
+B. Client side setup
+Go to Model setting -> Local tab.
+Select Model2 and fill the followings:
+Name: Similarity
+Role: Clinicial
+URL: http://<serverip>/cgi-bin/web-api
 

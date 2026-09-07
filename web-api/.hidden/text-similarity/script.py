@@ -1,8 +1,5 @@
-import torch
 from sentence_transformers import SentenceTransformer
-
 import sys
-from torch.nn.functional import cosine_similarity
 from transformers.utils import logging
 
 # Suppress the "Loading weights" and download progress bars
@@ -30,6 +27,7 @@ embeddings1 = embeddings1.unsqueeze(0)  # Shape: [1, embedding_dim]
 embeddings2 = embeddings2.unsqueeze(0)  # Shape: [1, embedding_dim]
 
 # Calculate cosine similarities
+from torch.nn.functional import cosine_similarity
 similarities = cosine_similarity(embeddings1, embeddings2)
 """
 
@@ -42,16 +40,4 @@ similarities = nlp_model.similarity(embeddings1, embeddings2)
 
 print(similarities.cpu().numpy())
 
-"""
-TO DO IN SERVER SIDE
-$ python3 -m venv modern
-$ source modern/bin/activate
-Then 
-$$ pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-$$ pip install transformers
-$$ pip install sentence_transformers
-
-download trained model files into a folder and update the directory
-https://huggingface.co/lokeshch19/ModernPubMedBERT/tree/main
-"""
-
+# https://huggingface.co/FremyCompany/BioLORD-2023-C

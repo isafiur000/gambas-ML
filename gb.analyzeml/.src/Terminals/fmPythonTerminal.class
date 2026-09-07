@@ -457,7 +457,7 @@ Public Sub btnsettarget_Click()
       pnlprocess.Enabled = True
     Else
       If cmbdependent.Text Then
-        TerminalInput(Subst("orig_data = orig_data.dropna(subset = ['&1'])", cmbdependent.Text))
+        TerminalInput(Subst("orig_data.dropna(subset = ['&1'], inplace = True)", cmbdependent.Text))
         pnlprocess.Enabled = True
       Endif
     Endif
@@ -532,13 +532,13 @@ End
 
 Public Sub btndropmissing_Click()
 
-  TerminalInput("orig_data = orig_data.dropna()")
+  TerminalInput("orig_data.dropna(inplace = True)")
 
 End
 
 Public Sub btnrandomrow_Click()
 
-  TerminalInput("orig_data = orig_data.sample(frac = 1)")
+  TerminalInput("orig_data = orig_data.sample(frac = 1, random_state = 42)")
 
 End
 

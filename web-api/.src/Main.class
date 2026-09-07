@@ -27,6 +27,8 @@ Private Sub PrintValues()
   Dim xargLst As String[]
   Dim xval As String
   Dim xshell As String
+  Dim xexec As String
+  Dim xpyshell As String
 
   Dim xargs1 As String
   Dim xargs2 As String
@@ -52,6 +54,7 @@ Private Sub PrintValues()
     yy = Split($url, "?")[1]
     If yy = "upload" Then
       xmodel = Request["model"]
+      xexec = Request["exec"]
       xargs = Request["args"]
       If xargs Then
         xargLst = Split(xargs, ",")
@@ -149,33 +152,52 @@ Private Sub PrintValues()
         Endif
       Next
 
-      xshell = modSettings.ShowSettingValue($confFile, xmodel &/ "Shell")
-      If xfileList.Count Then
-        xval = ExecuteScript(xmodel, xfileList, xshell)
-      Else If xargLst.Count Then
-        xval = ExecuteScript(xmodel, xargLst, xshell)
+      If xexec = "python" Then
+        xpyshell = modSettings.ShowSettingValue($confFile, xmodel &/ "Shell")
+        If xpyshell Then
+          xshell = xpyshell
+        Else
+          xshell = "python3"
+        Endif
+        If xfileList.Count Then
+          xval = ExecuteScript(xmodel, xfileList, xshell)
+        Else If xargLst.Count Then
+          xval = ExecuteScript(xmodel, xargLst, xshell)
+        Endif
+
+      Else
+        If xfileList.Count Then
+          xval = ExecuteScript(xmodel, xfileList, xexec)
+        Else If xargLst.Count Then
+          xval = ExecuteScript(xmodel, xargLst, xexec)
+        Endif
+
       Endif
 
       Print Trim(xval)
+
+    Else If yy = "models_list" Then
+      xfileList = GetModelsList()
+
+      Print xfileList.Join(";")
+
     Endif
   Endif
 
 End
 
-Private Function ExecuteScript(xModel As String, argsLst As String[], Optional xshell As String) As String
+Private Function ExecuteScript(xModel As String, argsLst As String[], xshell As String) As String
 
   Dim xScript As String
   Dim xcmd As String
   Dim xval As String
 
   xScript = "/etc" &/ Application.Name &/ xModel &/ "script.py"
-  If xshell Then
+  If Exist(xScript) Then
     xcmd = xshell & Space(1) & xScript & Space(1) & argsLst.Join(Space(1))
-  Else
-    xcmd = "python3" & Space(1) & xScript & Space(1) & argsLst.Join(Space(1))
+    ' Print xcmd
+    Shell xcmd To xval
   Endif
-  ' Print xcmd
-  Shell xcmd To xval
 
   Return xval
 
@@ -189,6 +211,18 @@ Private Sub CreateDirectory()
   If Not Exist("/tmp" &/ Application.Name &/ "uploads") Then
     Link $htmldir To "/tmp" &/ Application.Name &/ "uploads"
   Endif
+
+End
+
+Private Function GetModelsList() As String[]
+
+  Dim xdir As String
+  Dim xList As String[]
+
+  xdir = "/etc" &/ Application.Name
+  xList = Dir(xdir, Null, gb.Directory)
+
+  Return xList
 
 End
 

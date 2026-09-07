@@ -1,6 +1,6 @@
 # Gambas Project File 3.0
 Startup=Main
-Version=0.0.1
+Version=0.0.2
 Component=gb.util.web
 Component=gb.settings
 Component=gb.web
@@ -11,11 +11,11 @@ Maintainer=Safiur Rahman
 Address=isafiur000@gmail.com
 Url=https://ml.safiur.com.np/
 License=General Public License
-PackageName=web-api-0.0.1
+PackageName=web-api-0.0.2
 CreateEachDirectory=1
 Packager=1
 Systems=ubuntu
 Menus=ubuntu:"Applications/Data Management"
 Groups=ubuntu:"devel"
-ExtraFiles=ubuntu:"MLTest\t/etc/web-api\nXRay\t/etc/web-api\nModernBERT\t/etc/web-api\nSimilarity\t/etc/web-api\nappsettings.conf\t/etc/web-api\ninstall\t/etc/web-api"
+ExtraFiles=ubuntu:"appsettings.conf\t/etc/web-api\ninstall\t/etc/web-api\nchest-xray-multiple\t/etc/web-api\nchest-xray-tuberculosis\t/etc/web-api\nclinical-modernbert\t/etc/web-api\ntest\t/etc/web-api\ntext-similarity\t/etc/web-api\nvoice-to-text\t/etc/web-api"
 usehttpserver=1

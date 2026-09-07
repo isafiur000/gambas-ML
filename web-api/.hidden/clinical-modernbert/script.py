@@ -1,7 +1,7 @@
-import sys
-import json
-import torch
 from transformers import AutoModel, AutoTokenizer
+import torch
+import json
+import sys
 from transformers.utils import logging
 
 #Model Directory
@@ -43,15 +43,5 @@ json_data = json.dumps(embedding_list)
 
 print(json_data)
 
-"""
-TO DO IN SERVER SIDE
-$ python3 -m venv modern
-$ source modern/bin/activate
-Then 
-$$ pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-$$ pip install transformers
-
-download trained model files into a folder and update the directory
-https://huggingface.co/Simonlee711/Clinical_ModernBERT/tree/main
-"""
+# https://huggingface.co/Simonlee711/Clinical_ModernBERT
 

@@ -1,7 +1,7 @@
-from PIL import Image
-import sys
-import torch
 from transformers import AutoImageProcessor, AutoModelForImageClassification
+from PIL import Image
+import torch
+import sys
 from transformers.utils import logging
 
 #Model Directory
@@ -50,15 +50,4 @@ predicted_class_label = label_columns[predicted_class_idx]
 #print(f"Predicted Class Label: {predicted_class_label}")
 print(predicted_class_label)
 
-
-""" 
-TO DO IN SERVER SIDE
-$ python3 -m venv xray
-$ source xray/bin/activate
-Then 
-$$ pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-$$ pip install transformers
-
-download trained model files into a folder and update the directory
-https://huggingface.co/codewithdark/vit-chest-xray/tree/main
-"""
+# https://huggingface.co/codewithdark/vit-chest-xray
