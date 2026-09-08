@@ -18,19 +18,6 @@ nlp_model = SentenceTransformer(model_path)
 text1 = sys.argv[1]
 text2 = sys.argv[2]
 
-"""
-# Create sentence embeddings
-embeddings1 = nlp_model.encode(text1, convert_to_tensor = True)
-embeddings2 = nlp_model.encode(text2, convert_to_tensor = True)
-
-embeddings1 = embeddings1.unsqueeze(0)  # Shape: [1, embedding_dim]
-embeddings2 = embeddings2.unsqueeze(0)  # Shape: [1, embedding_dim]
-
-# Calculate cosine similarities
-from torch.nn.functional import cosine_similarity
-similarities = cosine_similarity(embeddings1, embeddings2)
-"""
-
 # Create sentence embeddings
 embeddings1 = nlp_model.encode(text1)
 embeddings2 = nlp_model.encode(text2)

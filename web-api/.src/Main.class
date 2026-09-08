@@ -173,15 +173,42 @@ Private Sub PrintValues()
         Endif
 
       Endif
-
       Print Trim(xval)
 
     Else If yy = "models_list" Then
       xfileList = GetModelsList()
-
       Print xfileList.Join(";")
 
+    Else If yy = "start_model" Then
+      xmodel = Request["model"]
+      xexec = Request["exec"]
+      If xexec = "python" Then
+        xpyshell = modSettings.ShowSettingValue($confFile, xmodel &/ "Shell")
+        If xpyshell Then
+          xshell = xpyshell
+        Else
+          xshell = "python3"
+        Endif
+        xval = ExecuteServer(xmodel, xshell)
+        Print xval
+      Endif
+
     Endif
+  Endif
+
+End
+
+Private Sub ExecuteServer(xModel As String, xshell As String) As String
+
+  Dim xScript As String
+  Dim xcmd As String
+
+  xScript = "/etc" &/ Application.Name &/ xModel &/ "server.py"
+  If Exist(xScript) Then
+    xcmd = xshell & Space(1) & xScript
+    Shell xcmd
+
+    Return xModel
   Endif
 
 End
@@ -192,7 +219,7 @@ Private Function ExecuteScript(xModel As String, argsLst As String[], xshell As 
   Dim xcmd As String
   Dim xval As String
 
-  xScript = "/etc" &/ Application.Name &/ xModel &/ "script.py"
+  xScript = "/etc" &/ Application.Name &/ xModel &/ "client.py"
   If Exist(xScript) Then
     xcmd = xshell & Space(1) & xScript & Space(1) & argsLst.Join(Space(1))
     ' Print xcmd
