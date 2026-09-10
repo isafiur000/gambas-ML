@@ -17,5 +17,5 @@ Packager=1
 Systems=ubuntu
 Menus=ubuntu:"Applications/Data Management"
 Groups=ubuntu:"devel"
-ExtraFiles=ubuntu:"appsettings.conf\t/etc/web-api\ninstall\t/etc/web-api\nchest-xray-multiple\t/etc/web-api\nchest-xray-tuberculosis\t/etc/web-api\nclinical-modernbert\t/etc/web-api\ntest\t/etc/web-api\ntext-similarity\t/etc/web-api\nvoice-to-text\t/etc/web-api"
+ExtraFiles=ubuntu:"appsettings.conf\t/etc/web-api\ninstall\t/etc/web-api\nchest-xray-multiple\t/etc/web-api\nchest-xray-tuberculosis\t/etc/web-api\nclinical-modernbert\t/etc/web-api\ntext-similarity\t/etc/web-api\nvoice-to-text\t/etc/web-api\ner-mortality\t/etc/web-api"
 usehttpserver=1
