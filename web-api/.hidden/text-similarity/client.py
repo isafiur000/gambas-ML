@@ -3,7 +3,7 @@ import requests
 import sys
 
 def get_similarity(text1, text2):
-    response = requests.post('http://localhost:5000/similarity', 
+    response = requests.post('http://localhost:5001/similarity', 
                              json={'text1': text1, 'text2': text2})
     return response.json()['similarity']
 

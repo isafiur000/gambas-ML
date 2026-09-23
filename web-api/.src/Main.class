@@ -19,7 +19,6 @@ Private Sub PrintValues()
   Dim xTemp As String
   Dim xfile As String
   Dim xdir As String
-  Dim xfileList As String[]
   Dim i As Integer
 
   Dim xmodel As String
@@ -138,7 +137,6 @@ Private Sub PrintValues()
         xargLst.Add(xnums9)
       Endif
 
-      xfileList = New String[]
       i = 0
       CreateDirectory()
       For Each sFieldName In Request.Files.Keys
@@ -147,7 +145,7 @@ Private Sub PrintValues()
           xdir = "/tmp" &/ Application.Name &/ "uploads"
           xfile = Format(Now(), "yymmddhhhnnssuu") & "_" & CStr(i)
           Copy xTemp To xdir &/ xfile
-          xfileList.Add($htmldir &/ xfile)
+          xargLst.Add($htmldir &/ xfile)
           i = i + 1
         Endif
       Next
@@ -159,25 +157,19 @@ Private Sub PrintValues()
         Else
           xshell = "python3"
         Endif
-        If xfileList.Count Then
-          xval = ExecuteScript(xmodel, xfileList, xshell)
-        Else If xargLst.Count Then
+        If xargLst.Count Then
           xval = ExecuteScript(xmodel, xargLst, xshell)
         Endif
-
       Else
-        If xfileList.Count Then
-          xval = ExecuteScript(xmodel, xfileList, xexec)
-        Else If xargLst.Count Then
+        If xargLst.Count Then
           xval = ExecuteScript(xmodel, xargLst, xexec)
         Endif
-
       Endif
       Print Trim(xval)
 
     Else If yy = "models_list" Then
-      xfileList = GetModelsList()
-      Print xfileList.Join(";")
+      xargLst = GetModelsList()
+      Print xargLst.Join(";")
 
     Else If yy = "start_model" Then
       xmodel = Request["model"]

@@ -44,7 +44,7 @@ def get_prediction():
     
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5250, debug=False)
+    app.run(host='0.0.0.0', port=5006, debug=False)
     
     
     

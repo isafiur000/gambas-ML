@@ -3,7 +3,7 @@ import requests
 import sys
 
 def get_prediction(image_path):
-    response = requests.post('http://localhost:5150/prediction', 
+    response = requests.post('http://localhost:5004/prediction', 
                              json={'image_path': image_path})
     return response.json()['prediction']
 
