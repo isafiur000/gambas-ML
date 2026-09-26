@@ -53,5 +53,3 @@ for n_img, img in enumerate(imgs):
 
 # https://huggingface.co/google/medsiglip-448
 
-#public_html/myenv/bin/python3 '/home/safiur/Project/imagematch.py' '/home/safiur/-5669089898008966381.png' "a photo of an arm with no rash;a photo of an arm with a rash;a photo of a leg with no rash;a photo of a leg with a rash"
-
