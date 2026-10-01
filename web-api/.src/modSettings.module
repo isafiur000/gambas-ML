@@ -16,3 +16,43 @@ Public Function ShowSettingValue(sFile As String, strSetting As String) As Strin
   Return xx
 
 End
+
+Public Function GetModelPath(sModel As String) As String
+
+  Dim i As Integer
+  Dim xfold As String[]
+  Dim xval As String
+
+  For i = 5000 To 5100
+    If Exist("/etc" &/ Application.Name &/ CStr(i)) Then
+      xfold = Dir("/etc" &/ Application.Name &/ CStr(i), Null, gb.Directory)
+      If xfold.Exist(sModel) Then
+        xval = CStr(i)
+        Break
+      Endif
+    Endif
+  Next
+
+  Return xval
+
+End
+
+Public Function GetModelPathList() As String[]
+
+  Dim i As Integer
+  Dim xfold As String[]
+  Dim xval As String[]
+
+  xval = New String[]
+  For i = 5000 To 5100
+    If Exist("/etc" &/ Application.Name &/ CStr(i)) Then
+      xfold = Dir("/etc" &/ Application.Name &/ CStr(i), Null, gb.Directory)
+      If xfold And If xfold.Count Then
+        xval.Insert(xfold)
+      Endif
+    Endif
+  Next
+
+  Return xval
+
+End

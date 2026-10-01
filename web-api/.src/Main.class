@@ -28,6 +28,7 @@ Private Sub PrintValues()
   Dim xshell As String
   Dim xexec As String
   Dim xpyshell As String
+  Dim xport As String
 
   Dim xargs1 As String
   Dim xargs2 As String
@@ -137,51 +138,53 @@ Private Sub PrintValues()
         xargLst.Add(xnums9)
       Endif
 
-      i = 0
       CreateDirectory()
+      xdir = "/tmp" &/ Application.Name &/ "uploads"
       For Each sFieldName In Request.Files.Keys
-        If sFieldName = "files" Then
-          xTemp = Request.Files[sFieldName]
-          xdir = "/tmp" &/ Application.Name &/ "uploads"
-          xfile = Format(Now(), "yymmddhhhnnssuu") & "_" & CStr(i)
-          Copy xTemp To xdir &/ xfile
-          xargLst.Add($htmldir &/ xfile)
-          i = i + 1
-        Endif
+        For i = 1 To 10
+          If sFieldName = "files" & CStr(i) Then
+            xTemp = Request.Files[sFieldName]
+            xfile = Format(Now(), "yymmddhhhnnssuu") & "_" & CStr(i)
+            Copy xTemp To xdir &/ xfile
+            xargLst.Add($htmldir &/ xfile)
+          Endif
+        Next
       Next
 
+      xport = modSettings.GetModelPath(xmodel)
       If xexec = "python" Then
-        xpyshell = modSettings.ShowSettingValue($confFile, xmodel &/ "Shell")
+        xpyshell = modSettings.ShowSettingValue($confFile, xport &/ "Shell")
         If xpyshell Then
           xshell = xpyshell
         Else
           xshell = "python3"
         Endif
         If xargLst.Count Then
-          xval = ExecuteScript(xmodel, xargLst, xshell)
+          xval = ExecuteScript(xmodel, xargLst, xshell, xport)
         Endif
       Else
         If xargLst.Count Then
-          xval = ExecuteScript(xmodel, xargLst, xexec)
+          xval = ExecuteScript(xmodel, xargLst, xexec, xport)
         Endif
       Endif
       Print Trim(xval)
 
     Else If yy = "models_list" Then
-      xargLst = GetModelsList()
+      xargLst = modSettings.GetModelPathList()
       Print xargLst.Join(";")
 
     Else If yy = "start_model" Then
       xmodel = Request["model"]
       xexec = Request["exec"]
       If xexec = "python" Then
-        xpyshell = modSettings.ShowSettingValue($confFile, xmodel &/ "Shell")
+        xport = modSettings.GetModelPath(xmodel)
+        xpyshell = modSettings.ShowSettingValue($confFile, xport &/ "Shell")
         If xpyshell Then
           xshell = xpyshell
         Else
           xshell = "python3"
         Endif
-        xval = ExecuteServer(xmodel, xshell)
+        xval = ExecuteServer(xmodel, xshell, xport)
         Print xval
       Endif
 
@@ -190,12 +193,12 @@ Private Sub PrintValues()
 
 End
 
-Private Sub ExecuteServer(xModel As String, xshell As String) As String
+Private Sub ExecuteServer(xModel As String, xshell As String, xport As String) As String
 
   Dim xScript As String
   Dim xcmd As String
 
-  xScript = "/etc" &/ Application.Name &/ xModel &/ "server.py"
+  xScript = "/etc" &/ Application.Name &/ xport &/ "server.py"
   If Exist(xScript) Then
     xcmd = xshell & Space(1) & xScript
     Shell xcmd
@@ -205,13 +208,13 @@ Private Sub ExecuteServer(xModel As String, xshell As String) As String
 
 End
 
-Private Function ExecuteScript(xModel As String, argsLst As String[], xshell As String) As String
+Private Function ExecuteScript(xModel As String, argsLst As String[], xshell As String, xPort As String) As String
 
   Dim xScript As String
   Dim xcmd As String
   Dim xval As String
 
-  xScript = "/etc" &/ Application.Name &/ xModel &/ "client.py"
+  xScript = "/etc" &/ Application.Name &/ xPort &/ xModel &/ "client.py"
   If Exist(xScript) Then
     xcmd = xshell & Space(1) & xScript & Space(1) & argsLst.Join(Space(1))
     ' Print xcmd
@@ -230,18 +233,6 @@ Private Sub CreateDirectory()
   If Not Exist("/tmp" &/ Application.Name &/ "uploads") Then
     Link $htmldir To "/tmp" &/ Application.Name &/ "uploads"
   Endif
-
-End
-
-Private Function GetModelsList() As String[]
-
-  Dim xdir As String
-  Dim xList As String[]
-
-  xdir = "/etc" &/ Application.Name
-  xList = Dir(xdir, Null, gb.Directory)
-
-  Return xList
 
 End
 
