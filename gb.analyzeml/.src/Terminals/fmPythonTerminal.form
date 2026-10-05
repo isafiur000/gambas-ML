@@ -6,40 +6,38 @@
   Text = ("Python3 Terminal")
   Arrangement = Arrange.Vertical
   { Panel1 Panel
-    MoveScaled(0,0,121,76)
+    MoveScaled(0,0,121,78)
     Expand = True
     Arrangement = Arrange.Vertical
-    { Wizard1 Wizard
-      MoveScaled(0,1,120,44)
-      Count = 8
-      Index = 0
-      Text = ("Feature Selection")
+    { Panel2 Panel
+      MoveScaled(0,1,120,45)
+      Arrangement = Arrange.Horizontal
       { Panel5 Panel
-        MoveScaled(0,0,25,34)
+        MoveScaled(0,0,23,34)
         Border = Border.Plain
         { btndatainit Button
-          MoveScaled(1,1,23,3.5)
+          MoveScaled(1,0.5,21,4)
           Text = ("Initialize")
         }
         { btndataload Button
-          MoveScaled(1,5,23,3.5)
+          MoveScaled(1,5,21,4)
           Enabled = False
           Text = ("Load Data")
         }
         { btndatainstall Button
-          MoveScaled(1,27,23,3.5)
+          MoveScaled(1,27,21,3.5)
           Text = ("Install Libs")
           Border = False
         }
         { Label22 Label
-          MoveScaled(1,31,23,2)
-          Font = Font["-1"]
+          MoveScaled(1,31,21,2)
+          Font = Font["Bold,-1"]
           Alignment = Align.Center
           Border = Border.Plain
           Text = ("© Safiur Rahman")
         }
         { Panel6 Panel
-          MoveScaled(1,10,23,14)
+          MoveScaled(1,10,21,14)
           { rbregression RadioButton
             MoveScaled(1,1,18,3)
             Text = ("Regression")
@@ -59,817 +57,885 @@
           }
         }
       }
-      { Label13 Label
-        MoveScaled(26,1,34,3)
-        Border = Border.Plain
-        Text = ("Drop Selected Columns")
-      }
-      { btndropcolumns ToolButton
-        MoveScaled(61,1,3,3)
-        Picture = Picture["icon:/small/delete"]
-      }
-      { btnshowdata Button
-        MoveScaled(71,21,11,3)
-        Text = ("Data")
-      }
-      { btninfo Button
-        MoveScaled(82,21,11,3)
-        Text = ("Info")
-      }
-      { btnshownull Button
-        MoveScaled(93,21,11,3)
-        Text = ("Null")
-      }
-      { btndetail Button
-        MoveScaled(104,21,11,3)
-        Text = ("Detail")
-      }
-      { btncolcount Button
-        MoveScaled(71,24,11,3)
-        Text = ("Count")
-      }
-      { btndatacorrelation Button
-        MoveScaled(82,24,11,3)
-        Text = ("Corr")
-      }
-      { btnscatter Button
-        MoveScaled(93,24,11,3)
-        Text = ("Plot")
-      }
-      { Label9 Label
-        MoveScaled(26,5,8,3)
-        Border = Border.Plain
-        Text = ("Target")
-      }
-      { cmbdependent ComboBox
-        MoveScaled(35,5,25,3)
-      }
-      { btnsavenew Button
-        MoveScaled(104,24,11,3)
-        Text = ("Save")
-      }
-      { Panel25 Frame
-        MoveScaled(72,9,46,10)
-        Text = ("Text Processing")
-        Alignment = Align.Left
-        { cmbtokenizer ComboBox
-          MoveScaled(14,2.5,31,3)
-        }
-        { btntokendown ToolButton
-          MoveScaled(24,6,3,3)
-          Picture = Picture["icon:/small/exec"]
-        }
-        { chkcleanpara CheckBox
-          MoveScaled(1,6,23,3)
-          Text = ("Clean Paragraph")
-        }
-        { btntokenize Button
-          MoveScaled(30,6,14,3)
-          Text = ("Execute")
-        }
-        { chktokenize CheckBox
-          MoveScaled(1,2.5,12,3)
-          Text = ("Tokenize")
-        }
-      }
-      { btnfilesave Button
-        MoveScaled(115,24,4,3)
-        Picture = Picture["icon:/small/download"]
-      }
-      { btnsettarget ToolButton
-        MoveScaled(61,5,3,3)
-        Picture = Picture["icon:/small/apply"]
-      }
-      { pnlprocess Panel
-        MoveScaled(26,9,40,24)
-        Enabled = False
-        { lbltextnlp Label
-          MoveScaled(0,0,34,3)
-          Border = Border.Plain
-          Text = ("Columns for Text Processing")
-        }
-        { btnparatype ToolButton
-          MoveScaled(35,0,3,3)
-          Picture = Picture["icon:/small/edit"]
-        }
+      { Wizard1 Wizard
+        MoveScaled(23,0,97,44)
+        Count = 8
+        Index = 0
+        Text = ("Data Preprocessing")
         { lblchangefloat Label
-          MoveScaled(0,4,34,3)
+          MoveScaled(1,9,34,3)
           Border = Border.Plain
           Text = ("Change Columns to Float")
         }
         { btnfloadtype ToolButton
-          MoveScaled(35,4,3,3)
+          MoveScaled(36,9,3,3)
           Picture = Picture["icon:/small/edit"]
         }
         { lblchangedate Label
-          MoveScaled(0,8,34,3)
+          MoveScaled(1,13,34,3)
           Border = Border.Plain
           Text = ("Change Columns to Date")
         }
         { btndatetype ToolButton
-          MoveScaled(35,8,3,3)
+          MoveScaled(36,13,3,3)
           Picture = Picture["icon:/small/edit"]
         }
         { lblchangedate2 Label
-          MoveScaled(0,12,34,3)
+          MoveScaled(1,21,34,3)
           Border = Border.Plain
           Text = ("Add Column to mark missing")
         }
         { btnmarkmiss ToolButton
-          MoveScaled(35,12,3,3)
+          MoveScaled(36,21,3,3)
           Picture = Picture["icon:/small/edit"]
         }
-        { Label6 Label
-          MoveScaled(0,16,34,3)
+        { lblchangedate3 Label
+          MoveScaled(1,25,15,3)
           Border = Border.Plain
-          Text = ("Drop Rows with Null Values")
+          Text = ("Missing Values")
         }
-        { btndropmissing ToolButton
-          MoveScaled(35,16,3,3)
-          Picture = Picture["icon:/small/delete"]
+        { cmbprocessmiss ComboBox
+          MoveScaled(17,25,18,3)
+        }
+        { btnprocessmiss ToolButton
+          MoveScaled(36,25,3,3)
+          Picture = Picture["icon:/small/right"]
         }
         { Label7 Label
-          MoveScaled(0,20,34,3)
+          MoveScaled(1,29,34,3)
           Border = Border.Plain
           Text = ("Randomize Row sequence")
         }
         { btnrandomrow ToolButton
-          MoveScaled(35,20,3,3)
+          MoveScaled(36,29,3,3)
           Picture = Picture["icon:/small/apply"]
         }
-      }
-      { Panel31 Panel
-        MoveScaled(72,1,46,4)
+        { ScrollView1 ScrollView
+          MoveScaled(48,1,46,32)
+          Arrangement = Arrange.Vertical
+          { Panel25 Panel
+            MoveScaled(0,0,46,59)
+            Arrangement = Arrange.Vertical
+            { pnldelete Frame
+              MoveScaled(0,0,46,23)
+              Visible = False
+              Text = ("Deletion")
+              Alignment = Align.Left
+              { Label6 Label
+                MoveScaled(1,3,37,3)
+                Border = Border.Plain
+                Text = ("Drop Rows with Null Values in any Column")
+              }
+              { btndropmissing ToolButton
+                MoveScaled(38,3,3,3)
+                Picture = Picture["icon:/small/delete"]
+              }
+              { Label5 Label
+                MoveScaled(1,11,21,3)
+                Border = Border.Plain
+                Text = ("Drop Rows with  Value =")
+              }
+              { btndropsamevalue ToolButton
+                MoveScaled(38,11,3,3)
+                Picture = Picture["icon:/small/delete"]
+              }
+              { Label9 Label
+                MoveScaled(1,7,37,3)
+                Border = Border.Plain
+                Text = ("Drop Rows with Null Values in Columns")
+              }
+              { btndropcolmiss ToolButton
+                MoveScaled(38,7,3,3)
+                Picture = Picture["icon:/small/delete"]
+              }
+              { txtdropvalue TextBox
+                MoveScaled(23,11,15,3)
+              }
+              { Label14 Label
+                MoveScaled(1,15,23,3)
+                Border = Border.Plain
+                Text = ("Drop Rows with  Value <")
+              }
+              { btndropless ToolButton
+                MoveScaled(38,15,3,3)
+                Picture = Picture["icon:/small/delete"]
+              }
+              { ValueBox1 ValueBox
+                MoveScaled(25,15,9,3)
+              }
+              { Label16 Label
+                MoveScaled(1,19,23,3)
+                Border = Border.Plain
+                Text = ("Drop Rows with  Value >")
+              }
+              { ValueBox2 ValueBox
+                MoveScaled(25,19,9,3)
+              }
+              { btndropmore ToolButton
+                MoveScaled(38,19,3,3)
+                Picture = Picture["icon:/small/delete"]
+              }
+            }
+            { pnlcategorical Frame
+              MoveScaled(0,24,46,15)
+              Visible = False
+              Text = ("Categorical")
+              Alignment = Align.Left
+              { lblcategnull Label
+                MoveScaled(1,7,9,3)
+                Border = Border.Plain
+                Text = ("Strategy")
+              }
+              { cmbcatnulstrategy ComboBox
+                MoveScaled(11,7,29,3)
+              }
+              { lblnullmethod2 Label
+                MoveScaled(1,3,9,3)
+                Border = Border.Plain
+                Text = ("Method")
+              }
+              { cmbcatnullmethod ComboBox
+                MoveScaled(11,3,29,3)
+              }
+              { Label23 Label
+                MoveScaled(1,11,9,3)
+                Border = Border.Plain
+                Text = ("Null Val")
+              }
+              { cmbcatnullval ComboBox
+                MoveScaled(11,11,18,3)
+              }
+              { btncatimputenull Button
+                MoveScaled(31,11,10,3)
+                Text = ("Exec")
+                Picture = Picture["icon:/small/apply"]
+              }
+            }
+            { pnlnumerical Frame
+              MoveScaled(0,40,46,16)
+              Visible = False
+              Text = ("Numerical")
+              Alignment = Align.Left
+              { lblnumnull Label
+                MoveScaled(1,7,9,3)
+                Border = Border.Plain
+                Text = ("Strategy")
+              }
+              { cmbnulstrategy ComboBox
+                MoveScaled(11,7,29,3)
+              }
+              { lblnullmethod Label
+                MoveScaled(1,3,9,3)
+                Border = Border.Plain
+                Text = ("Method")
+              }
+              { cmbnullmethod ComboBox
+                MoveScaled(11,3,29,3)
+              }
+              { Label24 Label
+                MoveScaled(1,11,9,3)
+                Border = Border.Plain
+                Text = ("Null Val")
+              }
+              { cmbnullval ComboBox
+                MoveScaled(11,11,18,3)
+              }
+              { btnimputenull Button
+                MoveScaled(30,11,10,3)
+                Text = ("Exec")
+                Picture = Picture["icon:/small/apply"]
+              }
+            }
+          }
+        }
+        { btnparatype ToolButton
+          MoveScaled(36,17,3,3)
+          Picture = Picture["icon:/small/edit"]
+        }
+        { lbltextnlp Label
+          MoveScaled(1,17,34,3)
+          Border = Border.Plain
+          Text = ("Columns for Text Processing")
+        }
+        { lblchangefloat2 Label
+          MoveScaled(1,1,34,3)
+          Border = Border.Plain
+          Text = ("Drop Columns with null values")
+        }
+        { btndropallnull ToolButton
+          MoveScaled(36,1,3,3)
+          Picture = Picture["icon:/small/delete"]
+        }
+        { Label13 Label
+          MoveScaled(1,5,34,3)
+          Border = Border.Plain
+          Text = ("Drop Selected Columns")
+        }
+        { btndropcolumns ToolButton
+          MoveScaled(36,5,3,3)
+          Picture = Picture["icon:/small/delete"]
+        }
+        Index = 1
+        Text = ("Features Processing")
+        { Label25 Label
+          MoveScaled(1,5,8,3)
+          Border = Border.Plain
+          Text = ("Target")
+        }
+        { cmbdependent ComboBox
+          MoveScaled(10,5,25,3)
+        }
+        { btnsettarget ToolButton
+          MoveScaled(36,5,3,3)
+          Picture = Picture["icon:/small/apply"]
+        }
+        { Panel30 Frame
+          MoveScaled(50,1,46,10)
+          Text = ("Text Processing")
+          Alignment = Align.Left
+          { cmbtokenizer ComboBox
+            MoveScaled(14,2.5,31,3)
+          }
+          { btntokendown ToolButton
+            MoveScaled(24,6,3,3)
+            Picture = Picture["icon:/small/exec"]
+          }
+          { chkcleanpara CheckBox
+            MoveScaled(1,6,23,3)
+            Text = ("Clean Paragraph")
+          }
+          { btntokenize Button
+            MoveScaled(30,6,14,3)
+            Text = ("Execute")
+          }
+          { chktokenize CheckBox
+            MoveScaled(1,2.5,12,3)
+            Text = ("Tokenize")
+          }
+        }
+        { btnshowdata Button
+          MoveScaled(0,31,11,3)
+          Text = ("Data")
+          Picture = Picture["icon:/small/database"]
+        }
+        { btninfo Button
+          MoveScaled(11,31,11,3)
+          Text = ("Info")
+          Picture = Picture["icon:/small/book"]
+        }
+        { btnshownull Button
+          MoveScaled(22,31,11,3)
+          Text = ("Null")
+        }
+        { btndetail Button
+          MoveScaled(33,31,11,3)
+          Text = ("Detail")
+        }
+        { btncolcount Button
+          MoveScaled(44,31,11,3)
+          Text = ("Count")
+        }
+        { btndatacorrelation Button
+          MoveScaled(55,31,11,3)
+          Text = ("Corr")
+        }
+        { btnscatter Button
+          MoveScaled(0,27,11,3)
+          Text = ("Plot")
+          Picture = Picture["icon:/small/chart"]
+        }
+        { btnsavenew Button
+          MoveScaled(66,31,11,3)
+          Text = ("Save")
+          Picture = Picture["icon:/small/database"]
+        }
+        { btnfilesave Button
+          MoveScaled(77,31,11,3)
+          Text = ("Save")
+          Picture = Picture["icon:/small/terminal"]
+        }
+        { Panel31 Panel
+          MoveScaled(59,26,37,4)
+          { btnselectfeature Button
+            MoveScaled(18,0,17,3)
+            Text = ("Start")
+            Picture = Picture["icon:/small/right"]
+          }
+          { txtdeptype TextBox
+            MoveScaled(0,0,17,3)
+            ReadOnly = True
+          }
+        }
         { lbltextnlp2 Label
-          MoveScaled(0,0,40,3)
+          MoveScaled(1,1,34,3)
           Border = Border.Plain
           Text = ("Merge Columns to Multilabel Column")
         }
         { btnnewcolumn ToolButton
-          MoveScaled(42,0,3,3)
+          MoveScaled(36,1,3,3)
           Picture = Picture["icon:/small/add"]
         }
-      }
-      { Panel30 Panel
-        MoveScaled(72,29,46,4)
-        { btndepset Button
-          MoveScaled(28,0,16,3)
-          Text = ("Continue")
-          Picture = Picture["icon:/small/right"]
+        Index = 2
+        Text = ("Encoding and Normalization")
+        { Frame4 Frame
+          MoveScaled(1,1,40,30)
+          Arrangement = Arrange.Vertical
+          Text = ("Categorical Variables")
+          Alignment = Align.Left
+          { Panel7 Panel
+            MoveScaled(1,3,38,10)
+            Arrangement = Arrange.Vertical
+            AutoResize = True
+            Margin = True
+            { Panel19 Panel
+              MoveScaled(0,0,32,3.5)
+              { chkcategencode CheckBox
+                MoveScaled(0.5,0,23,3)
+                Text = ("Category Encoding")
+              }
+            }
+            { pnlencode Panel
+              MoveScaled(0,4,37,5)
+              Visible = False
+              { cmbencoding ComboBox
+                MoveScaled(11,1,25,3)
+              }
+              { Label3 Label
+                MoveScaled(1,1,9,3)
+                Border = Border.Plain
+                Text = ("Method")
+              }
+            }
+          }
         }
-        { txtdeptype TextBox
-          MoveScaled(0,0,17,3)
-          ReadOnly = True
+        { Frame5 Frame
+          MoveScaled(46,0,43,34)
+          Arrangement = Arrange.Vertical
+          Text = ("Numerical Variables")
+          Alignment = Align.Left
+          { Panel13 Panel
+            MoveScaled(0,3,42,10)
+            Arrangement = Arrange.Vertical
+            AutoResize = True
+            Margin = True
+            { Panel21 Panel
+              MoveScaled(0,0,33,3.5)
+              { chkpolynomial CheckBox
+                MoveScaled(0.5,0,25,3)
+                Text = ("Polynomial Features")
+              }
+            }
+            { pnlpolynom Panel
+              MoveScaled(0,4,41,5)
+              Visible = False
+              { lblnullmethod4 Label
+                MoveScaled(1,1,9,3)
+                Border = Border.Plain
+                Text = ("Degree")
+              }
+              { txtpolynomial ValueBox
+                MoveScaled(11,1,8,3)
+              }
+            }
+          }
+          { Panel14 Panel
+            MoveScaled(0,15,41,18)
+            Arrangement = Arrange.Vertical
+            AutoResize = True
+            Margin = True
+            { Panel22 Panel
+              MoveScaled(0,0,31.875,3.5)
+              { chkscaling CheckBox
+                MoveScaled(0.5,0,25,3)
+                Text = ("Scaling")
+              }
+            }
+            { pnlscaling Panel
+              MoveScaled(0,4,40,11)
+              Visible = False
+              { cmbscaling ComboBox
+                MoveScaled(11,0.5,25,3)
+              }
+              { Label1 Label
+                MoveScaled(1,0.5,9,3)
+                Border = Border.Plain
+                Text = ("Method")
+              }
+              { lblscale Label
+                MoveScaled(1,7.5,9,3)
+                Visible = False
+                Border = Border.Plain
+                Text = ("Range")
+              }
+              { txtscalerange TextBox
+                MoveScaled(11,7.5,13,3)
+                Visible = False
+              }
+              { chkscaledep CheckBox
+                MoveScaled(1,4,25,3)
+                Text = ("Dependent Variable")
+              }
+            }
+          }
         }
-      }
-      { btnhelp Button
-        MoveScaled(115,21,4,3)
-        Picture = Picture["icon:/small/help"]
-      }
-      Index = 1
-      Text = ("Processing of Categorical Columns")
-      { Panel8 Panel
-        MoveScaled(0,0,37,31)
-        Arrangement = Arrange.Vertical
-        { Panel2 Panel
-          MoveScaled(0,0,34,18)
+        Index = 3
+        Text = ("Processing of Unstructured Text")
+        { Panel26 Panel
+          MoveScaled(51,1,43,31)
           Arrangement = Arrange.Vertical
           AutoResize = True
-          Margin = True
-          { Panel18 Panel
-            MoveScaled(0,0,33,3.5)
-            { chknullcateg CheckBox
-              MoveScaled(0.5,0,25,3)
-              Text = ("Replace Null Values")
+          { Panel27 Panel
+            MoveScaled(0,0,42,4)
+            { Label8 Label
+              MoveScaled(0,0.5,11,3)
+              Border = Border.Plain
+              Text = ("Vectorizer")
+            }
+            { cmbtextvector ComboBox
+              MoveScaled(12,0.5,28,3)
             }
           }
-          { pnlnullcateg Panel
-            MoveScaled(0,4,33,13)
-            Visible = False
-            { lblcategnull Label
-              MoveScaled(1,5,9,3)
-              Border = Border.Plain
-              Text = ("Strategy")
+          { Panel29 Panel
+            MoveScaled(0,5,41,4)
+            { chkusetextmodel CheckBox
+              MoveScaled(0.5,0.5,25,3)
+              Text = ("Use Preatrained Model")
             }
-            { cmbcatnulstrategy ComboBox
-              MoveScaled(11,5,21,3)
+            { btninstallmodel ToolButton
+              MoveScaled(37,0.5,3,3)
+              Picture = Picture["icon:/small/exec"]
             }
-            { lblnullmethod2 Label
-              MoveScaled(1,1,9,3)
-              Border = Border.Plain
-              Text = ("Method")
+          }
+          { Panel28 Panel
+            MoveScaled(0,11,43,18)
+            Arrangement = Arrange.Vertical
+            AutoResize = True
+            { pnlwordvec Panel
+              MoveScaled(0,0,42,9)
+              Visible = False
+              { txtvectorsize ValueBox
+                MoveScaled(12,1,7,3)
+              }
+              { txtwindow ValueBox
+                MoveScaled(32,1,7,3)
+              }
+              { Label20 Label
+                MoveScaled(23,1,8,3)
+                Border = Border.Plain
+                Text = ("window")
+              }
+              { Label15 Label
+                MoveScaled(0,1,11,3)
+                Border = Border.Plain
+                Text = ("vector_size")
+              }
+              { txtmincount ValueBox
+                MoveScaled(12,5,7,3)
+              }
+              { txtsg ValueBox
+                MoveScaled(32,5,7,3)
+              }
+              { Label21 Label
+                MoveScaled(23,5,8,3)
+                Border = Border.Plain
+                Text = ("sg")
+              }
+              { Label19 Label
+                MoveScaled(0,5,11,3)
+                Border = Border.Plain
+                Text = ("min_count")
+              }
             }
-            { cmbcatnullmethod ComboBox
-              MoveScaled(11,1,21,3)
+            { pnlhuburl Panel
+              MoveScaled(0,9,42,4)
+              Visible = False
+              { Label2 Label
+                MoveScaled(0,0.5,5,3)
+                Border = Border.Plain
+                Text = ("Hub")
+              }
+              { txthuburl ButtonBox
+                MoveScaled(6,0.5,35,3)
+                Picture = Picture["icon:/small/copy"]
+                ReadOnly = True
+              }
             }
-            { Label5 Label
-              MoveScaled(1,9,9,3)
-              Border = Border.Plain
-              Text = ("Null Val")
-            }
-            { cmbcatnullval ComboBox
-              MoveScaled(11,9,9,3)
+            { pnlbertType Panel
+              MoveScaled(0,13,42,3)
+              Visible = False
+              { rbtokenbert RadioButton
+                MoveScaled(0,0,17,3)
+                Text = ("Token BERT")
+              }
+              { rbsentbert RadioButton
+                MoveScaled(21,0,17,3)
+                Text = ("Sentence BERT")
+                Value = True
+              }
             }
           }
         }
-        { Panel7 Panel
-          MoveScaled(0,19,34,10)
-          Arrangement = Arrange.Vertical
-          AutoResize = True
-          Margin = True
-          { Panel19 Panel
-            MoveScaled(0,0,32,3.5)
-            { chkcategencode CheckBox
-              MoveScaled(0.5,0,23,3)
-              Text = ("Category Encoding")
-            }
+        { pnltextprocess Panel
+          MoveScaled(1,1,47,32)
+          Visible = False
+          { btndownstop ToolButton
+            MoveScaled(42,0,3,3)
+            Picture = Picture["icon:/small/exec"]
           }
-          { pnlencode Panel
-            MoveScaled(0,4,33.5,5)
-            Visible = False
-            { cmbencoding ComboBox
-              MoveScaled(11,1,21,3)
-            }
-            { Label3 Label
-              MoveScaled(1,1,9,3)
-              Border = Border.Plain
-              Text = ("Method")
-            }
+          { chklowercase CheckBox
+            MoveScaled(0,4,43,3)
+            Text = ("Change to Lower Case")
           }
-        }
-      }
-      Index = 2
-      Text = ("Processing of Numerical Columns")
-      { Panel12 Panel
-        MoveScaled(1,0,37,32)
-        Arrangement = Arrange.Vertical
-        { Panel9 Panel
-          MoveScaled(0,0,34,18)
-          Arrangement = Arrange.Vertical
-          AutoResize = True
-          Margin = True
-          { Panel20 Panel
-            MoveScaled(0,0,33,3.5)
-            { chknullnumber CheckBox
-              MoveScaled(0.5,0,25,3)
-              Text = ("Replace Null Values")
-            }
+          { chkrepeatchar CheckBox
+            MoveScaled(0,8,43,3)
+            Text = ("Remove Repeating Characters")
           }
-          { pnlnullnumber Panel
-            MoveScaled(0,4,33,13)
-            Visible = False
-            { lblnumnull Label
-              MoveScaled(1,5,9,3)
-              Border = Border.Plain
-              Text = ("Strategy")
-            }
-            { cmbnulstrategy ComboBox
-              MoveScaled(11,5,21,3)
-            }
-            { lblnullmethod Label
-              MoveScaled(1,1,9,3)
-              Border = Border.Plain
-              Text = ("Method")
-            }
-            { cmbnullmethod ComboBox
-              MoveScaled(11,1,21,3)
-            }
-            { Label14 Label
-              MoveScaled(1,9,9,3)
-              Border = Border.Plain
-              Text = ("Null Val")
-            }
-            { cmbnullval ComboBox
-              MoveScaled(11,9,9,3)
-            }
+          { chkspelcorrect CheckBox
+            MoveScaled(0,12,40,3)
+            Text = ("Spelling Correction")
+          }
+          { btnenchant ToolButton
+            MoveScaled(42,12,3,3)
+            Picture = Picture["icon:/small/exec"]
+          }
+          { Label17 Label
+            MoveScaled(0,16,15,3)
+            Border = Border.Plain
+            Text = ("Stemming")
+          }
+          { cmbstemming ComboBox
+            MoveScaled(16,16,29,3)
+          }
+          { Label18 Label
+            MoveScaled(0,20,15,3)
+            Border = Border.Plain
+            Text = ("Lemmatization")
+          }
+          { cmblemmatize ComboBox
+            MoveScaled(16,20,29,3)
+          }
+          { chkstopword CheckBox
+            MoveScaled(0,0,40,3)
+            Text = ("Stop Words and Punctuation Removal")
           }
         }
-      }
-      { Panel15 Panel
-        MoveScaled(38,0,37,32)
-        Arrangement = Arrange.Vertical
-        { Panel13 Panel
-          MoveScaled(0,0,34,10)
-          Arrangement = Arrange.Vertical
-          AutoResize = True
-          Margin = True
-          { Panel21 Panel
-            MoveScaled(0,0,33,3.5)
-            { chkpolynomial CheckBox
-              MoveScaled(0.5,0,25,3)
-              Text = ("Polynomial Features")
-            }
+        Index = 4
+        Text = ("Training and Testing Dataset")
+        { Frame1 Frame
+          MoveScaled(1,1,47,7)
+          Text = ("Split Dataset")
+          Alignment = Align.Left
+          { Label10 Label
+            MoveScaled(1,3,12,3)
+            Border = Border.Plain
+            Text = ("Train Data")
           }
-          { pnlpolynom Panel
-            MoveScaled(0,4,33,5)
-            Visible = False
-            { lblnullmethod4 Label
-              MoveScaled(1,1,9,3)
-              Border = Border.Plain
-              Text = ("Degree")
-            }
-            { txtpolynomial ValueBox
-              MoveScaled(11,1,8,3)
-            }
+          { valtrain SpinBox
+            MoveScaled(14,3,10,3)
+            MinValue = 50
+            Value = 80
+          }
+          { btnsplidata Button
+            MoveScaled(31,3,12,3)
+            Text = ("Split")
+          }
+          { Label11 Label
+            MoveScaled(24,3,4,3)
+            Border = Border.Plain
+            Text = ("%")
           }
         }
-        { Panel14 Panel
-          MoveScaled(0,12,34,18)
+        { Panel16 Panel
+          MoveScaled(1,10,47,10)
           Arrangement = Arrange.Vertical
-          AutoResize = True
-          Margin = True
-          { Panel22 Panel
-            MoveScaled(0,0,31.875,3.5)
-            { chkscaling CheckBox
-              MoveScaled(0.5,0,25,3)
-              Text = ("Scaling")
+          { Panel23 Panel
+            MoveScaled(0,0,44,3.5)
+            { chkPCA CheckBox
+              MoveScaled(0.5,0.5,15,3)
+              Text = ("PCA")
             }
           }
-          { pnlscaling Panel
-            MoveScaled(0,4,34,11)
-            Visible = False
-            { cmbscaling ComboBox
-              MoveScaled(11,0.5,21,3)
-            }
-            { Label1 Label
+          { pnlpca Panel
+            MoveScaled(0,4,43,4)
+            { lblnullmethod3 Label
               MoveScaled(1,0.5,9,3)
               Border = Border.Plain
-              Text = ("Method")
+              Text = ("Variance")
             }
-            { lblscale Label
-              MoveScaled(1,7.5,9,3)
-              Visible = False
-              Border = Border.Plain
-              Text = ("Range")
+            { txtpca ValueBox
+              MoveScaled(11,0.5,8,3)
+              Text = ("0.95")
             }
-            { txtscalerange TextBox
-              MoveScaled(11,7.5,13,3)
-              Visible = False
-            }
-            { chkscaledep CheckBox
-              MoveScaled(1,4,25,3)
-              Text = ("Dependent Variable")
+            { btnpca Button
+              MoveScaled(30,0.5,12,3)
+              Text = ("Exec")
             }
           }
         }
-      }
-      Index = 3
-      Text = ("Processing of Unstructured Text")
-      { Panel26 Panel
-        MoveScaled(75,1,43,31)
-        Arrangement = Arrange.Vertical
-        AutoResize = True
-        { Panel27 Panel
-          MoveScaled(0,0,42,4)
-          { Label8 Label
-            MoveScaled(0,0.5,11,3)
+        { Panel24 Panel
+          MoveScaled(1,30,46,4)
+          { cmbsplitdata ComboBox
+            MoveScaled(13,0,16,3)
+          }
+          { btnsplitshow Button
+            MoveScaled(31,0,12,3)
+            Text = ("View")
+          }
+          { Label4 Label
+            MoveScaled(1,0,11,3)
             Border = Border.Plain
-            Text = ("Vectorizer")
-          }
-          { cmbtextvector ComboBox
-            MoveScaled(12,0.5,28,3)
+            Text = ("Show Data")
           }
         }
-        { Panel29 Panel
-          MoveScaled(0,5,41,4)
-          { chkusetextmodel CheckBox
-            MoveScaled(0.5,0.5,25,3)
-            Text = ("Use Preatrained Model")
-          }
-          { btninstallmodel ToolButton
-            MoveScaled(37,0.5,3,3)
-            Picture = Picture["icon:/small/exec"]
-          }
-        }
-        { Panel28 Panel
-          MoveScaled(0,11,43,18)
-          Arrangement = Arrange.Vertical
-          AutoResize = True
-          { pnlwordvec Panel
-            MoveScaled(0,0,42,9)
-            Visible = False
-            { txtvectorsize ValueBox
-              MoveScaled(12,1,7,3)
-            }
-            { txtwindow ValueBox
-              MoveScaled(32,1,7,3)
-            }
-            { Label20 Label
-              MoveScaled(23,1,8,3)
-              Border = Border.Plain
-              Text = ("window")
-            }
-            { Label15 Label
-              MoveScaled(0,1,11,3)
-              Border = Border.Plain
-              Text = ("vector_size")
-            }
-            { txtmincount ValueBox
-              MoveScaled(12,5,7,3)
-            }
-            { txtsg ValueBox
-              MoveScaled(32,5,7,3)
-            }
-            { Label21 Label
-              MoveScaled(23,5,8,3)
-              Border = Border.Plain
-              Text = ("sg")
-            }
-            { Label19 Label
-              MoveScaled(0,5,11,3)
-              Border = Border.Plain
-              Text = ("min_count")
-            }
-          }
-          { pnlhuburl Panel
-            MoveScaled(0,9,42,4)
-            Visible = False
-            { Label2 Label
-              MoveScaled(0,0.5,5,3)
-              Border = Border.Plain
-              Text = ("Hub")
-            }
-            { txthuburl ButtonBox
-              MoveScaled(6,0.5,35,3)
-              Picture = Picture["icon:/small/copy"]
-              ReadOnly = True
-            }
-          }
-          { pnlbertType Panel
-            MoveScaled(0,13,42,3)
-            Visible = False
-            { rbtokenbert RadioButton
-              MoveScaled(0,0,17,3)
-              Text = ("Token BERT")
-            }
-            { rbsentbert RadioButton
-              MoveScaled(21,0,17,3)
-              Text = ("Sentence BERT")
-              Value = True
-            }
-          }
-        }
-      }
-      { pnltextprocess Panel
-        MoveScaled(1,1,52,32)
-        Visible = False
-        { btndownstop ToolButton
-          MoveScaled(47,0,3,3)
-          Picture = Picture["icon:/small/exec"]
-        }
-        { chklowercase CheckBox
-          MoveScaled(0,4,43,3)
-          Text = ("Change to Lower Case")
-        }
-        { chkrepeatchar CheckBox
-          MoveScaled(0,8,43,3)
-          Text = ("Remove Repeating Characters")
-        }
-        { chkspelcorrect CheckBox
-          MoveScaled(0,12,43,3)
-          Text = ("Spelling Correction")
-        }
-        { btnenchant ToolButton
-          MoveScaled(47,12,3,3)
-          Picture = Picture["icon:/small/exec"]
-        }
-        { Label17 Label
-          MoveScaled(0,16,15,3)
+        Index = 5
+        Text = ("Model Training")
+        { Label12 Label
+          MoveScaled(1,1,7,3)
           Border = Border.Plain
-          Text = ("Stemming")
-        }
-        { cmbstemming ComboBox
-          MoveScaled(16,16,29,3)
-        }
-        { Label18 Label
-          MoveScaled(0,20,15,3)
-          Border = Border.Plain
-          Text = ("Lemmatization")
-        }
-        { cmblemmatize ComboBox
-          MoveScaled(16,20,29,3)
-        }
-        { chkstopword CheckBox
-          MoveScaled(0,0,43,3)
-          Text = ("Stop Words and Punctuation Removal")
-        }
-      }
-      Index = 4
-      Text = ("Training and Testing Dataset")
-      { Frame1 Frame
-        MoveScaled(1,1,47,7)
-        Text = ("Split Dataset")
-        Alignment = Align.Left
-        { Label10 Label
-          MoveScaled(1,3,12,3)
-          Border = Border.Plain
-          Text = ("Train Data")
-        }
-        { valtrain SpinBox
-          MoveScaled(14,3,10,3)
-          MinValue = 50
-          Value = 80
-        }
-        { btnsplidata Button
-          MoveScaled(31,3,12,3)
-          Text = ("Split")
-        }
-        { Label11 Label
-          MoveScaled(24,3,4,3)
-          Border = Border.Plain
-          Text = ("%")
-        }
-      }
-      { Panel16 Panel
-        MoveScaled(1,10,47,10)
-        Arrangement = Arrange.Vertical
-        { Panel23 Panel
-          MoveScaled(0,0,44,3.5)
-          { chkPCA CheckBox
-            MoveScaled(0.5,0.5,15,3)
-            Text = ("PCA")
-          }
-        }
-        { pnlpca Panel
-          MoveScaled(0,4,43,4)
-          { lblnullmethod3 Label
-            MoveScaled(1,0.5,9,3)
-            Border = Border.Plain
-            Text = ("Variance")
-          }
-          { txtpca ValueBox
-            MoveScaled(11,0.5,8,3)
-            Text = ("0.95")
-          }
-          { btnpca Button
-            MoveScaled(30,0.5,12,3)
-            Text = ("Exec")
-          }
-        }
-      }
-      { Panel24 Panel
-        MoveScaled(1,30,46,4)
-        { cmbsplitdata ComboBox
-          MoveScaled(13,0,16,3)
-        }
-        { btnsplitshow Button
-          MoveScaled(31,0,12,3)
-          Text = ("View")
-        }
-        { Label4 Label
-          MoveScaled(1,0,11,3)
-          Border = Border.Plain
-          Text = ("Show Data")
-        }
-      }
-      Index = 5
-      Text = ("Model Training")
-      { Label12 Label
-        MoveScaled(1,1,7,3)
-        Border = Border.Plain
-        Text = ("Model")
-      }
-      { cmbmodel ComboBox
-        MoveScaled(9,1,33,3)
-      }
-      { pnlmodel Panel
-        MoveScaled(1,5,45,30)
-        Arrangement = Arrange.Vertical
-        { pnlone Panel
-          MoveScaled(0,0,45,3.5)
-          Visible = False
-          { txtmodelone TextBox
-            MoveScaled(22,0,17,3)
-          }
-          { lblmodelone Label
-            MoveScaled(0,0,21,3)
-            Border = Border.Plain
-            Text = ("Param")
-          }
-          { chkfirst CheckBox
-            MoveScaled(40,0,3,3)
-          }
-        }
-        { pnltwo Panel
-          MoveScaled(0,3.5,45,3.5)
-          Visible = False
-          { txtmodeltwo TextBox
-            MoveScaled(22,0,17,3)
-          }
-          { lblmodeltwo Label
-            MoveScaled(0,0,21,3)
-            Border = Border.Plain
-            Text = ("Param")
-          }
-          { chksecond CheckBox
-            MoveScaled(40,0,3,3)
-          }
-        }
-        { pnlthree Panel
-          MoveScaled(0,7,45,3.5)
-          Visible = False
-          { txtmodelthree TextBox
-            MoveScaled(22,0,17,3)
-          }
-          { lblmodelthree Label
-            MoveScaled(0,0,21,3)
-            Border = Border.Plain
-            Text = ("Param")
-          }
-          { chkthird CheckBox
-            MoveScaled(40,0,3,3)
-          }
-        }
-        { pnlfour Panel
-          MoveScaled(0,10.5,45,3.5)
-          Visible = False
-          { txtmodelfour TextBox
-            MoveScaled(22,0,17,3)
-          }
-          { lblmodelfour Label
-            MoveScaled(0,0,21,3)
-            Border = Border.Plain
-            Text = ("Param")
-          }
-          { chkfour CheckBox
-            MoveScaled(40,0,3,3)
-          }
-        }
-        { pnlfive Panel
-          MoveScaled(0,14,45,3.5)
-          Visible = False
-          { txtmodelfive TextBox
-            MoveScaled(22,0,17,3)
-          }
-          { lblmodelfive Label
-            MoveScaled(0,0,21,3)
-            Border = Border.Plain
-            Text = ("Param")
-          }
-          { chkfive CheckBox
-            MoveScaled(40,0,3,3)
-          }
-        }
-        { pnlsix Panel
-          MoveScaled(0,17.5,45,3.5)
-          Visible = False
-          { txtmodelsix TextBox
-            MoveScaled(22,0,17,3)
-          }
-          { lblmodelsix Label
-            MoveScaled(0,0,21,3)
-            Border = Border.Plain
-            Text = ("Param")
-          }
-          { chksix CheckBox
-            MoveScaled(40,0,3,3)
-          }
-        }
-        { pnlseven Panel
-          MoveScaled(0,21,45,3.5)
-          Visible = False
-          { txtmodelseven TextBox
-            MoveScaled(22,0,17,3)
-          }
-          { lblmodelseven Label
-            MoveScaled(0,0,21,3)
-            Border = Border.Plain
-            Text = ("Param")
-          }
-          { chkseven CheckBox
-            MoveScaled(40,0,3,3)
-          }
-        }
-        { Panel10 Panel
-          MoveScaled(0,25,45,3.5)
-          { btnmodeltrain Button
-            MoveScaled(32,0,12,3)
-            Enabled = False
-            Text = ("Train")
-          }
-          { chkbagging CheckBox
-            MoveScaled(0,0,12,3)
-            Text = ("Bagging")
-          }
-          { btninstmodel ToolButton
-            MoveScaled(28,0,3,3)
-            Picture = Picture["icon:/small/exec"]
-          }
-          { chkmultilabel CheckBox
-            MoveScaled(13,0,13,3)
-            Text = ("MultiLabel")
-          }
-        }
-      }
-      { Frame2 Frame
-        MoveScaled(48,4,18,16)
-        Text = ("Dump Model")
-        { btnsaveProcess Button
-          MoveScaled(1,3,16,3)
-          Enabled = False
-          Text = ("Processing")
-        }
-        { btnsavemodel Button
-          MoveScaled(1,7,16,3)
-          Enabled = False
           Text = ("Model")
         }
-        { btncommands Button
-          MoveScaled(1,11,16,3)
-          Enabled = False
-          Text = ("Script")
+        { cmbmodel ComboBox
+          MoveScaled(9,1,33,3)
         }
-      }
-      Index = 6
-      Text = ("Model Evaluation")
-      { Panel3 Panel
-        MoveScaled(1,0,37,26)
-        Arrangement = Arrange.Vertical
-        { pnlregress Panel
-          MoveScaled(0,0,37,4)
-          Visible = False
-          { chkaccuracy CheckBox
-            MoveScaled(1,0,33,3.5)
-            Text = ("Accuracy Score")
+        { pnlmodel Panel
+          MoveScaled(1,5,45,30)
+          Arrangement = Arrange.Vertical
+          { pnlone Panel
+            MoveScaled(0,0,45,3.5)
+            Visible = False
+            { txtmodelone TextBox
+              MoveScaled(22,0,17,3)
+            }
+            { lblmodelone Label
+              MoveScaled(0,0,21,3)
+              Border = Border.Plain
+              Text = ("Param")
+            }
+            { chkfirst CheckBox
+              MoveScaled(40,0,3,3)
+            }
+          }
+          { pnltwo Panel
+            MoveScaled(0,3.5,45,3.5)
+            Visible = False
+            { txtmodeltwo TextBox
+              MoveScaled(22,0,17,3)
+            }
+            { lblmodeltwo Label
+              MoveScaled(0,0,21,3)
+              Border = Border.Plain
+              Text = ("Param")
+            }
+            { chksecond CheckBox
+              MoveScaled(40,0,3,3)
+            }
+          }
+          { pnlthree Panel
+            MoveScaled(0,7,45,3.5)
+            Visible = False
+            { txtmodelthree TextBox
+              MoveScaled(22,0,17,3)
+            }
+            { lblmodelthree Label
+              MoveScaled(0,0,21,3)
+              Border = Border.Plain
+              Text = ("Param")
+            }
+            { chkthird CheckBox
+              MoveScaled(40,0,3,3)
+            }
+          }
+          { pnlfour Panel
+            MoveScaled(0,10.5,45,3.5)
+            Visible = False
+            { txtmodelfour TextBox
+              MoveScaled(22,0,17,3)
+            }
+            { lblmodelfour Label
+              MoveScaled(0,0,21,3)
+              Border = Border.Plain
+              Text = ("Param")
+            }
+            { chkfour CheckBox
+              MoveScaled(40,0,3,3)
+            }
+          }
+          { pnlfive Panel
+            MoveScaled(0,14,45,3.5)
+            Visible = False
+            { txtmodelfive TextBox
+              MoveScaled(22,0,17,3)
+            }
+            { lblmodelfive Label
+              MoveScaled(0,0,21,3)
+              Border = Border.Plain
+              Text = ("Param")
+            }
+            { chkfive CheckBox
+              MoveScaled(40,0,3,3)
+            }
+          }
+          { pnlsix Panel
+            MoveScaled(0,17.5,45,3.5)
+            Visible = False
+            { txtmodelsix TextBox
+              MoveScaled(22,0,17,3)
+            }
+            { lblmodelsix Label
+              MoveScaled(0,0,21,3)
+              Border = Border.Plain
+              Text = ("Param")
+            }
+            { chksix CheckBox
+              MoveScaled(40,0,3,3)
+            }
+          }
+          { pnlseven Panel
+            MoveScaled(0,21,45,3.5)
+            Visible = False
+            { txtmodelseven TextBox
+              MoveScaled(22,0,17,3)
+            }
+            { lblmodelseven Label
+              MoveScaled(0,0,21,3)
+              Border = Border.Plain
+              Text = ("Param")
+            }
+            { chkseven CheckBox
+              MoveScaled(40,0,3,3)
+            }
+          }
+          { Panel10 Panel
+            MoveScaled(0,25,45,3.5)
+            { btnmodeltrain Button
+              MoveScaled(32,0,12,3)
+              Enabled = False
+              Text = ("Train")
+            }
+            { chkbagging CheckBox
+              MoveScaled(0,0,12,3)
+              Text = ("Bagging")
+            }
+            { btninstmodel ToolButton
+              MoveScaled(28,0,3,3)
+              Picture = Picture["icon:/small/exec"]
+            }
+            { chkmultilabel CheckBox
+              MoveScaled(13,0,13,3)
+              Text = ("MultiLabel")
+            }
           }
         }
-        { pnlclassif Panel
-          MoveScaled(0,4,37,11)
-          Visible = False
-          { chkconfusion CheckBox
-            MoveScaled(1,0,27,3.5)
-            Text = ("Confusion Matrix")
-          }
-          { chkprecision CheckBox
-            MoveScaled(1,4,27,3)
-            Text = ("Precision, Recall, F1 Score")
-          }
-          { lblaverage Label
-            MoveScaled(1,7.5,10,3)
-            Border = Border.Plain
-            Text = ("Average")
-          }
-          { cmbscoreaverage ComboBox
-            MoveScaled(12,7.5,18,3)
-          }
-        }
-        { Panel11 Panel
-          MoveScaled(1,15,35,4)
-          { btnevaluate Button
-            MoveScaled(6,0.5,17,3)
+        { Frame2 Frame
+          MoveScaled(48,4,18,16)
+          Text = ("Dump Model")
+          { btnsaveProcess Button
+            MoveScaled(1,3,16,3)
             Enabled = False
-            Text = ("Calculate")
+            Text = ("Processing")
+          }
+          { btnsavemodel Button
+            MoveScaled(1,7,16,3)
+            Enabled = False
+            Text = ("Model")
+          }
+          { btncommands Button
+            MoveScaled(1,11,16,3)
+            Enabled = False
+            Text = ("Script")
           }
         }
-        { pnlunsuper Panel
-          MoveScaled(1,21,35,4)
-          Visible = False
-          { btnunsupervised Button
-            MoveScaled(18,0.5,14,3)
-            Text = ("Dataset")
+        Index = 6
+        Text = ("Model Evaluation")
+        { Panel3 Panel
+          MoveScaled(1,0,37,26)
+          Arrangement = Arrange.Vertical
+          { pnlregress Panel
+            MoveScaled(0,0,37,4)
+            Visible = False
+            { chkaccuracy CheckBox
+              MoveScaled(1,0,33,3.5)
+              Text = ("Accuracy Score")
+            }
           }
-          { chksavefile CheckBox
-            MoveScaled(1,0.5,13,3)
-            Text = ("Save File")
+          { pnlclassif Panel
+            MoveScaled(0,4,37,11)
+            Visible = False
+            { chkconfusion CheckBox
+              MoveScaled(1,0,27,3.5)
+              Text = ("Confusion Matrix")
+            }
+            { chkprecision CheckBox
+              MoveScaled(1,4,27,3)
+              Text = ("Precision, Recall, F1 Score")
+            }
+            { lblaverage Label
+              MoveScaled(1,7.5,10,3)
+              Border = Border.Plain
+              Text = ("Average")
+            }
+            { cmbscoreaverage ComboBox
+              MoveScaled(12,7.5,18,3)
+            }
+          }
+          { Panel11 Panel
+            MoveScaled(1,15,35,4)
+            { btnevaluate Button
+              MoveScaled(6,0.5,17,3)
+              Enabled = False
+              Text = ("Calculate")
+            }
+          }
+          { pnlunsuper Panel
+            MoveScaled(1,21,35,4)
+            Visible = False
+            { btnunsupervised Button
+              MoveScaled(18,0.5,14,3)
+              Text = ("Dataset")
+            }
+            { chksavefile CheckBox
+              MoveScaled(1,0.5,13,3)
+              Text = ("Save File")
+            }
           }
         }
-      }
-      { Panel17 Panel
-        MoveScaled(1,28,37,4)
-        { btnopen ToolButton
-          MoveScaled(25,0.5,3,3)
-          Picture = Picture["icon:/small/image"]
+        { Panel17 Panel
+          MoveScaled(1,28,37,4)
+          { btnopen ToolButton
+            MoveScaled(25,0.5,3,3)
+            Picture = Picture["icon:/small/image"]
+          }
+          { chkpredictplot CheckBox
+            MoveScaled(1,0.5,17,3)
+            Text = ("Plot Output")
+          }
+          { btnshowscatterplot ToolButton
+            MoveScaled(20,0.5,3.5,3)
+            Picture = Picture["icon:/small/apply"]
+          }
+          { btntreeinstal ToolButton
+            MoveScaled(33,0.5,3,3)
+            Picture = Picture["icon:/small/exec"]
+          }
         }
-        { chkpredictplot CheckBox
-          MoveScaled(1,0.5,17,3)
-          Text = ("Plot Output")
-        }
-        { btnshowscatterplot ToolButton
-          MoveScaled(20,0.5,3.5,3)
-          Picture = Picture["icon:/small/apply"]
-        }
-        { btntreeinstal ToolButton
-          MoveScaled(33,0.5,3,3)
-          Picture = Picture["icon:/small/exec"]
-        }
-      }
-      Index = 7
-      Text = ("Prediction")
-      { btnpredict Button
-        MoveScaled(1,1,15,3)
+        Index = 7
         Text = ("Prediction")
+        { btnpredict Button
+          MoveScaled(1,1,15,3)
+          Text = ("Prediction")
+        }
+        { txtpredict TextBox
+          MoveScaled(17,1,26,3)
+        }
+        { Button1 Button
+          MoveScaled(17,5,25,4)
+          Text = ("Dump Outputs")
+        }
+        Index = 0
       }
-      { txtpredict TextBox
-        MoveScaled(17,1,26,3)
-      }
-      { Button1 Button
-        MoveScaled(17,5,25,4)
-        Text = ("Dump Outputs")
-      }
-      Index = 0
     }
     { Panel4 Panel
-      MoveScaled(-1,44,121,30)
+      MoveScaled(-1,47,121,30)
       Expand = True
       Arrangement = Arrange.Vertical
       { TerminalView1 TerminalView

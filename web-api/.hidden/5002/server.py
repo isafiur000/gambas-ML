@@ -15,6 +15,9 @@ processor = AutoProcessor.from_pretrained(model_path)
 model = AutoModelForTDT.from_pretrained(model_path, dtype = "auto", device_map = device)
 print("Model loaded!")
 
+# ------------------------------------------------------------------
+# ROUTES
+# ------------------------------------------------------------------
 @app.route('/transcribe', methods=['POST'])
 def get_transcribe():
     data = request.json
@@ -36,7 +39,10 @@ def get_transcribe():
     text = processor.decode(output.sequences, skip_special_tokens = True)
     
     return jsonify({'transcribe': text[0]})
-    
+
+# ------------------------------------------------------------------
+# CLIENT CALL
+# ------------------------------------------------------------------       
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=False)
     

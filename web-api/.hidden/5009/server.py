@@ -15,6 +15,9 @@ processor = AutoProcessor.from_pretrained(model_path)
 model = AutoModelForCTC.from_pretrained(model_path).to(device)
 print("Model loaded!")
 
+# ------------------------------------------------------------------
+# ROUTES
+# ------------------------------------------------------------------
 @app.route('/transcribe', methods=['POST'])
 def get_transcribe():
     data = request.json
@@ -47,7 +50,10 @@ def get_transcribe():
     # 4. Decode the cleaned sequence
     decoded_text = processor.batch_decode([collapsed_ids], skip_special_tokens=True)[0]
     return jsonify({'transcribe': decoded_text})
-    
+
+# ------------------------------------------------------------------
+# CLIENT CALL
+# ------------------------------------------------------------------    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5009, debug=False)
 

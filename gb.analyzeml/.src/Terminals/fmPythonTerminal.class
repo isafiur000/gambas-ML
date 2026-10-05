@@ -13,7 +13,6 @@ Private $sHead As String[]
 Private $sPath As String
 Private $hProcess As Process
 Private $pyShell As String
-Private $isOldVersion As Boolean
 
 Private $Columns As String[]
 Private $IndepCol As String[]
@@ -45,9 +44,7 @@ Public Sub _new()
     $hProcess = TerminalView1.Shell("ipython3")
   Endif
 
-  cmbmodel.List = GetModelList()
-  cmbsplitdata.List = ["X_train.shape", "X_test.shape", "Y_train.shape", "Y_test.shape"]
-
+  cmbprocessmiss.List = ["Delete", "Impute"]
   cmbnullmethod.List = ["SimpleImputer", "KNNImputer", "IterativeImputer"]
   cmbcatnullmethod.List = ["SimpleImputer", "KNNImputer", "IterativeImputer"]
   cmbnullval.List = ["Null", "Zero"]
@@ -62,8 +59,10 @@ Public Sub _new()
   cmbtokenizer.List = ["word_tokenize", "TreebankWordTokenizer", "WhitespaceTokenizer", "SpaceTokenizer", "WordPunctTokenizer", "ToktokTokenizer", "RegexpTokenizer"]
   cmbstemming.List = ["PorterStemmer", "LancasterStemmer", "RegexpStemmer", "SnowballStemmer"]
   cmblemmatize.List = ["WordNetLemmatizer"]
-
   $vecModels = ["word2vec", "model2vec", "modernbert"]
+
+  cmbmodel.List = GetModelList()
+  cmbsplitdata.List = ["X_train.shape", "X_test.shape", "Y_train.shape", "Y_test.shape"]
 
 End
 
@@ -88,41 +87,6 @@ End
 Public Sub Form_Close()
 
   TerminalInput("exit")
-
-End
-
-Public Sub btndatainstall_Click()
-
-  Dim yList As String[]
-  Dim xList As String[]
-
-  yList = New String[]
-  yList.Add("python3-full")
-  yList.Add("python3-pip")
-  modMain.InstallSelectedApplication(xList)
-
-  xList = New String[]
-  If $pyShell Then
-    xList.Add("numpy")
-    xList.Add("pandas")
-    xList.Add("polars")
-    xList.Add("scikit-learn")
-    xList.Add("matplotlib")
-    xList.Add("python-dateutil")
-    xList.Add("nltk")
-    xList.Add("beautifulsoup4")
-    TerminalInput(modMain.PipSelectedApplication(xList))
-  Else
-    xList.Add("ipython3")
-    xList.Add("python3-numpy")
-    xList.Add("python3-pandas")
-    xList.Add("python3-sklearn")
-    xList.Add("python3-matplotlib")
-    xList.Add("python3-dateutil")
-    xList.Add("python3-nltk")
-    xList.Add("python3-bs4")
-    modMain.InstallSelectedApplication(xList)
-  Endif
 
 End
 
@@ -169,19 +133,6 @@ Private Function GetIpythonOutput(sOutput As String) As String
 
 End
 
-Private Sub GetVersion()
-
-  Dim xver As String
-
-  xver = modMain.DistributionVendor()
-  If xver = "Ubuntu22.04" Then
-    $isOldVersion = True
-  Else
-    $isOldVersion = False
-  Endif
-
-End
-
 Public Sub Button1_Click()
 
   If Dialog.SelectDirectory() Then Return
@@ -189,149 +140,17 @@ Public Sub Button1_Click()
 
 End
 
-''================================= Load data ===============
-Public Sub btndatainit_Click()
+Public Sub Wizard1_Cancel()
 
-  Dim cmdLst As New String[]
-  Dim xlibs As String[] = ["import numpy", "import pandas", "import sklearn", "import matplotlib", "import sys"]
-
-  $Columns = New String[]
-  $IndepCol = New String[]
-  $paraCol = New String[]
-  $numbCol = New String[]
-  $catgCol = New String[]
-  If $pyShell Then
-    xlibs.Add("import polars")
-  Endif
-  TerminalInputList(xlibs)
-  TerminalInput("sys.path.append('/usr/local/bin/analyzeml')")
-
-  $libprocess = New String[]
-  $textProcess = New String[]
-  $catXStr = ""
-  $numXStr = ""
-  $numYStr = ""
-  $defined = False
-
-  cmdLst.Add("'numpy version :', numpy.__version__")
-  cmdLst.Add("'pandas version :', pandas.__version__")
-  If $pyShell Then
-    cmdLst.Add("'polars version :', polars.__version__")
-  Endif
-  cmdLst.Add("'sklearn version :', sklearn.__version__")
-  cmdLst.Add("'matplotlib version :', matplotlib.__version__")
-  TerminalInputList(cmdLst)
-  btndataload.Enabled = True
-  Wizard1.ShowButton = False
+  TerminalView1.Clear()
+  ' $hProcess.Kill()
+  Wizard1.Index = 0
+  btndatainit_Click()
+  ' $hProcess = TerminalView1.Shell("ipython3")
 
 End
 
-Public Sub btninstmodel_Click()
-
-  Dim xList As String[]
-
-  xList = New String[]
-  Select cmbmodel.Text
-    Case "XGBoost Regression", "XGBoost Classifier"
-      If $pyShell Then
-        TerminalInput("pip install xgboost")
-      Else
-        xList.Add("python3-xgboost")
-        modMain.InstallSelectedApplication(xList)
-      Endif
-    Case "LGBM Classifier", "LGBM Regression"
-      If $pyShell Then
-        TerminalInput("pip install 'lightgbm[scikit-learn]'")
-      Endif
-    Case "TabNetRegressor", "TabNetClassifier"
-      If $pyShell Then
-        TerminalInput("pip install pytorch-tabnet")
-      Endif
-    Case "Transfer Learning"
-      If $pyShell Then
-        TerminalInput("pip install 'accelerate>=1.1.0'")
-      Endif
-  End Select
-
-End
-
-Public Sub btndataload_Click()
-
-  Dim cmdLst As New String[]
-  Dim aHead As String[]
-  Dim i As Integer
-  Dim xcolm As String
-
-  If $sHead And If $sHead.Count Then
-    $Columns = $sHead.Copy()
-    aHead = $sHead.Copy()
-    For i = 0 To aHead.Count - 1
-      aHead[i] = "'" & aHead[i] & "'"
-    Next
-  Endif
-
-  If File.Ext($sPath) = "csv" Then
-    cmdLst.Add("columns = " & "[" & aHead.Join(", ") & "]")
-    If $HasHead = "CSV" Then
-      cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns, header = 0)")
-    Else
-      If $pyShell Then
-        cmdLst.Add("polars_data = polars.scan_csv(\"" & $sPath & "\", separator = '" & "\\" & "t" & "', ignore_errors = True)")
-        cmdLst.Add("orig_data = polars_data.collect().to_pandas()")
-        If $sHead And If $sHead.Count Then
-          cmdLst.Add("orig_data.columns = " & "[" & aHead.Join(", ") & "]")
-        Endif
-      Else
-        cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns)")
-      Endif
-    Endif
-
-  Else If File.Ext($sPath) = "ndjson" Then
-    If $pyShell Then
-      cmdLst.Add("polars_data = polars.scan_ndjson(\"" & $sPath & "\", ignore_errors = True)")
-      cmdLst.Add("orig_data = polars_data.collect().to_pandas()")
-    Endif
-
-  Else
-    If $pyShell Then
-      cmdLst.Add("polars_data = polars.read_json(\"" & $sPath & "\", infer_schema_length = 10000)")
-      cmdLst.Add("orig_data = polars_data.to_pandas()")
-    Else
-      cmdLst.Add("orig_data = pandas.read_json(\"" & $sPath & "\")")
-    Endif
-    ' cmdLst.Add("orig_data.columns = " & "[" & aHead.Join(", ") & "]")
-
-  Endif
-  TerminalInputList(cmdLst)
-
-  For Each xcolm In $Columns
-    cmdLst.Add(Subst("orig_data['&1'].mask(orig_data['&1'] == '__', None, inplace=True)", xcolm))
-  Next
-  cmdLst.Add("orig_data")
-  TerminalInputList(cmdLst)
-
-  TerminalInput("orig_data.replace('', numpy.nan, inplace = True)")
-
-  If $sHead And If $sHead.Count Then
-  Else
-    $sHead = GetDataFrameColumns()
-    $Columns = $sHead.Copy()
-  Endif
-
-End
-
-Private Function GetDataFrameColumns() As String[]
-
-  Dim xx As String
-  Dim xList As String[]
-
-  TerminalInput("all_columns = list(orig_data.columns)")
-  xx = GetIpythonOutput("';'.join(str(item) for item in all_columns)")
-  xList = Split(xx, ";")
-  Return xList
-
-End
-
+''========================= Model Options ===============================
 Private Sub GetModelList() As String[]
 
   Dim xlst As String[]
@@ -425,6 +244,263 @@ Public Sub rbfinetune_Click()
 
 End
 
+''============================ Install Packages ============================
+''general
+Public Sub btndatainstall_Click()
+
+  Dim yList As String[]
+  Dim xList As String[]
+
+  yList = New String[]
+  yList.Add("python3-full")
+  yList.Add("python3-pip")
+  modMain.InstallSelectedApplication(xList)
+
+  xList = New String[]
+  If $pyShell Then
+    xList.Add("numpy")
+    xList.Add("pandas")
+    xList.Add("polars")
+    xList.Add("scikit-learn")
+    xList.Add("matplotlib")
+    xList.Add("python-dateutil")
+    xList.Add("nltk")
+    xList.Add("beautifulsoup4")
+    TerminalInput(modMain.PipSelectedApplication(xList))
+  Else
+    xList.Add("ipython3")
+    xList.Add("python3-numpy")
+    xList.Add("python3-pandas")
+    xList.Add("python3-sklearn")
+    xList.Add("python3-matplotlib")
+    xList.Add("python3-dateutil")
+    xList.Add("python3-nltk")
+    xList.Add("python3-bs4")
+    modMain.InstallSelectedApplication(xList)
+  Endif
+
+End
+
+''NLP
+Public Sub btndownstop_Click()
+
+  TerminalInput("nltk.download('stopwords')")
+
+End
+
+Public Sub btnenchant_Click()
+
+  Dim xList As String[]
+
+  xList = New String[]
+  If $pyShell Then
+    TerminalInput("pip install pyenchant")
+  Else
+    xList.Add("python3-enchant")
+    xList.Add("libenchant-2-2")
+    modMain.InstallSelectedApplication(xList)
+  Endif
+
+End
+
+Public Sub btntokendown_Click()
+
+  TerminalInput("nltk.download('punkt')")
+  TerminalInput("nltk.download('punkt_tab')")
+  TerminalInput("nltk.download('wordnet')")
+
+End
+
+''text embeddings
+Public Sub btninstallmodel_Click()
+
+  Dim xList As String[]
+
+  If cmbtextvector.Text Then
+    xList = New String[]
+    Select cmbtextvector.Text
+      Case "word2vec", "model2vec"
+        If $pyShell Then
+          TerminalInput("pip install gensim")
+        Else
+          xList.Add("python3-gensim")
+          modMain.InstallSelectedApplication(xList)
+        Endif
+
+      Case "modernbert"
+        If $pyShell Then
+          TerminalInput("pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu")
+          TerminalInput("pip install transformers")
+          TerminalInput("pip install sentence-transformers")
+          TerminalInput("pip install datasets")
+        Else
+        Endif
+    End Select
+
+  Endif
+
+End
+
+''ML algorithms
+Public Sub btninstmodel_Click()
+
+  Dim xList As String[]
+
+  xList = New String[]
+  Select cmbmodel.Text
+    Case "XGBoost Regression", "XGBoost Classifier"
+      If $pyShell Then
+        TerminalInput("pip install xgboost")
+      Else
+        xList.Add("python3-xgboost")
+        modMain.InstallSelectedApplication(xList)
+      Endif
+    Case "LGBM Classifier", "LGBM Regression"
+      If $pyShell Then
+        TerminalInput("pip install 'lightgbm[scikit-learn]'")
+      Endif
+    Case "TabNetRegressor", "TabNetClassifier"
+      If $pyShell Then
+        TerminalInput("pip install pytorch-tabnet")
+      Endif
+    Case "Transfer Learning"
+      If $pyShell Then
+        TerminalInput("pip install 'accelerate>=1.1.0'")
+      Endif
+  End Select
+
+End
+
+''tree chart
+Public Sub btntreeinstal_Click()
+
+  Dim xList As String[]
+
+  xList = New String[]
+  If $pyShell Then
+    TerminalInput("pip install graphviz")
+  Else
+    xList.Add("python3-graphviz")
+    modMain.InstallSelectedApplication(xList)
+  Endif
+
+End
+
+''================================= Load data ===============
+Public Sub btndatainit_Click()
+
+  Dim cmdLst As New String[]
+  Dim xlibs As String[] = ["import numpy", "import pandas", "import sklearn", "import matplotlib", "import sys"]
+
+  $Columns = New String[]
+  $IndepCol = New String[]
+  $paraCol = New String[]
+  $numbCol = New String[]
+  $catgCol = New String[]
+  If $pyShell Then
+    xlibs.Add("import polars")
+  Endif
+
+  TerminalInput("#Import essential libraries")
+  TerminalInputList(xlibs)
+  TerminalInput("sys.path.append('/usr/local/bin/analyzeml')")
+
+  $libprocess = New String[]
+  $textProcess = New String[]
+  $catXStr = ""
+  $numXStr = ""
+  $numYStr = ""
+  $defined = False
+
+  TerminalInput("#Showing version value of libraries")
+  cmdLst.Add("'numpy version :', numpy.__version__")
+  cmdLst.Add("'pandas version :', pandas.__version__")
+  If $pyShell Then
+    cmdLst.Add("'polars version :', polars.__version__")
+  Endif
+  cmdLst.Add("'sklearn version :', sklearn.__version__")
+  cmdLst.Add("'matplotlib version :', matplotlib.__version__")
+  TerminalInputList(cmdLst)
+  btndataload.Enabled = True
+  ' Wizard1.ShowButton = False
+
+End
+
+Public Sub btndataload_Click()
+
+  Dim cmdLst As New String[]
+  Dim aHead As String[]
+  Dim i As Integer
+  Dim xcolm As String
+
+  If $sHead And If $sHead.Count Then
+    aHead = $sHead.Copy()
+    For i = 0 To aHead.Count - 1
+      aHead[i] = "'" & aHead[i] & "'"
+    Next
+  Endif
+
+  TerminalInput("#Importing Dataset")
+  If File.Ext($sPath) = "csv" Then
+    cmdLst.Add("columns = " & "[" & aHead.Join(", ") & "]")
+    If $HasHead = "CSV" Then
+      cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns, header = 0)")
+    Else
+      If $pyShell Then
+        cmdLst.Add("polars_data = polars.scan_csv(\"" & $sPath & "\", separator = '" & "\\" & "t" & "', ignore_errors = True)")
+        cmdLst.Add("orig_data = polars_data.collect().to_pandas()")
+        If $sHead And If $sHead.Count Then
+          cmdLst.Add("orig_data.columns = " & "[" & aHead.Join(", ") & "]")
+        Endif
+      Else
+        cmdLst.Add("orig_data = pandas.read_csv(\"" & $sPath & "\", sep = '" & "\\" & "t" & "', names = columns)")
+      Endif
+    Endif
+
+  Else If File.Ext($sPath) = "ndjson" Then
+    If $pyShell Then
+      cmdLst.Add("polars_data = polars.scan_ndjson(\"" & $sPath & "\", ignore_errors = True)")
+      cmdLst.Add("orig_data = polars_data.collect().to_pandas()")
+    Endif
+
+  Else
+    If $pyShell Then
+      cmdLst.Add("polars_data = polars.read_json(\"" & $sPath & "\", infer_schema_length = 10000)")
+      cmdLst.Add("orig_data = polars_data.to_pandas()")
+    Else
+      cmdLst.Add("orig_data = pandas.read_json(\"" & $sPath & "\")")
+    Endif
+    ' cmdLst.Add("orig_data.columns = " & "[" & aHead.Join(", ") & "]")
+
+  Endif
+  TerminalInputList(cmdLst)
+  $Columns = GetDataFrameColumns()
+
+  TerminalInput("#Processing __ as None")
+  For Each xcolm In $Columns
+    cmdLst.Add(Subst("orig_data.loc[orig_data['&1'] == '__', '&1'] = None", xcolm))
+    ' cmdLst.Add(Subst("orig_data['&1'].mask(orig_data['&1'] == '__', None, inplace=True)", xcolm))
+  Next
+  cmdLst.Add("orig_data")
+  TerminalInputList(cmdLst)
+
+  TerminalInput("#Processing Null value as None")
+  TerminalInput("orig_data.replace('', numpy.nan, inplace = True)")
+
+End
+
+Private Function GetDataFrameColumns() As String[]
+
+  Dim xx As String
+  Dim xList As String[]
+
+  TerminalInput("all_columns = list(orig_data.columns)")
+  xx = GetIpythonOutput("';'.join(str(item) for item in all_columns)")
+  xList = Split(xx, ";")
+  Return xList
+
+End
+
 ''======================== Pre Processing ===========================
 Public Sub btndropcolumns_Click()
 
@@ -435,60 +511,21 @@ Public Sub btndropcolumns_Click()
   xList = SelectListView("Columns to drop", $Columns, False)
   If xList And If xList.Count Then
     For i = 0 To xList.Count - 1
-      $Columns.Remove($Columns.Find(xList[i]))
       xList[i] = "'" & xList[i] & "'"
     Next
+    TerminalInput("#Drop selected columns")
     xcmd = "orig_data = orig_data.drop([" & xList.Join(", ") & "], axis = 1)"
     TerminalInput(xcmd)
+    $Columns = GetDataFrameColumns()
   Endif
 
 End
 
-Public Sub cmbdependent_GotFocus()
+Public Sub btndropallnull_Click()
 
-  cmbdependent.List = $Columns
-
-End
-
-Public Sub btnsettarget_Click()
-
-  If cmbdependent.List.Count Then
-    If rbunsupervis.Value = True Then
-      pnlprocess.Enabled = True
-    Else
-      If cmbdependent.Text Then
-        TerminalInput(Subst("orig_data.dropna(subset = ['&1'], inplace = True)", cmbdependent.Text))
-        pnlprocess.Enabled = True
-      Endif
-    Endif
-
-  Else
-    cmbdependent.List = $Columns
-  Endif
-
-End
-
-Public Sub btnparatype_Click()
-
-  Dim paraLst As String[]
-  Dim i As Integer
-  Dim j As Integer
-
-  paraLst = SelectListView("Columns with Unstructured Text", $Columns, False)
-  If paraLst And If paraLst.Count Then
-    $paraCol = paraLst
-
-    For i = 0 To paraLst.Count - 1
-      $Columns.Remove($Columns.Find(paraLst[i]))
-    Next
-
-    For j = 0 To paraLst.Count - 1
-      paraLst[j] = "'" & paraLst[j] & "'"
-    Next
-
-    TerminalInput("para_columns = " & "[" & paraLst.Join(", ") & "]")
-    lbltextnlp.Font.Bold = True
-  Endif
+  TerminalInput("#Delete if null value in any column")
+  TerminalInput("orig_data.dropna(how = 'all', axis = 1, inplace = True)")
+  $Columns = GetDataFrameColumns()
 
 End
 
@@ -505,6 +542,7 @@ Public Sub btnfloadtype_Click()
       cmdLst.Add(Subst("orig_data['&1'] = orig_data['&1'].astype(float)", xcolm))
     Next
 
+    TerminalInput("#Mark selected columns as Float")
     TerminalInputList(cmdLst)
     lblchangefloat.Font.Bold = True
   Endif
@@ -524,38 +562,28 @@ Public Sub btndatetype_Click()
       cmdLst.Add(Subst("orig_data['&1'] = orig_data['&1'].apply(parser.parse)", xcolm))
     Next
 
+    TerminalInput("#Mark selected columns as DateTime")
     TerminalInputList(cmdLst)
     lblchangedate.Font.Bold = True
   Endif
 
 End
 
-Public Sub btndropmissing_Click()
-
-  TerminalInput("orig_data.dropna(inplace = True)")
-
-End
-
-Public Sub btnrandomrow_Click()
-
-  TerminalInput("orig_data = orig_data.sample(frac = 1, random_state = 42)")
-
-End
-
-Public Sub btnnewcolumn_Click()
+Public Sub btnparatype_Click()
 
   Dim xList As String[]
   Dim i As Integer
 
-  xList = SelectListView("Merge Columns to New Column", $Columns, False)
+  xList = SelectListView("Columns with Unstructured Text", $Columns, False)
   If xList And If xList.Count Then
+    $paraCol = xList  'Text Processing columns
     For i = 0 To xList.Count - 1
-      $Columns.Remove($Columns.Find(xList[i]))
       xList[i] = "'" & xList[i] & "'"
     Next
-    TerminalInput("orig_data['MultiLabel'] = orig_data[[" & xList.Join(", ") & "]].values.tolist()")
-    TerminalInput("orig_data = orig_data.drop([" & xList.Join(", ") & "], axis = 1)")
-    $Columns.Add("MultiLabel")
+
+    TerminalInput("#Mark selected columns as Text Processing")
+    TerminalInput("para_columns = " & "[" & xList.Join(", ") & "]")
+    lbltextnlp.Font.Bold = True
   Endif
 
 End
@@ -567,6 +595,7 @@ Public Sub btnmarkmiss_Click()
 
   xList = SelectListView("Columns to Flag Present", $Columns, False)
   If xList And If xList.Count Then
+    TerminalInput("#Mark missing value in selected columns")
     For i = 0 To xList.Count - 1
       TerminalInput(Subst("orig_data['&1' + '_present'] = orig_data['&1'].notna()", xList[i]))
       $Columns.Add(xList[i] & "_present")
@@ -575,211 +604,13 @@ Public Sub btnmarkmiss_Click()
 
 End
 
-Public Sub btnshowdata_Click()
-
-  TerminalInput("orig_data")
-
-End
-
-Public Sub btninfo_Click()
-
-  TerminalInput("orig_data.info()")
-
-End
-
-Public Sub btnshownull_Click()
-
-  Dim xList As String[]
-  Dim xcolm As String
-
-  xList = SelectListView("Columns with Empty Values", $Columns, False)
-  If xList And If xList.Count Then
-    For Each xcolm In xList
-      TerminalInput(Subst("orig_data['&1'].isnull().sum()", xcolm))
-    Next
-  Endif
-
-End
-
-Public Sub btndetail_Click()
-
-  TerminalInput("orig_data.describe()")
-
-End
-
-Public Sub btncolcount_Click()
-
-  Dim xList As String[]
-  Dim xcolm As String
-
-  xList = SelectListView("Columns to count", $Columns, False)
-  If xList And If xList.Count Then
-    For Each xcolm In xList
-      TerminalInput(Subst("orig_data['&1'].value_counts()", xcolm))
-    Next
-  Endif
-
-End
-
-Public Sub btndatacorrelation_Click()
-
-  Dim cmdLst As New String[]
-
-  cmdLst.Add("corr_data = orig_data.select_dtypes(include = [numpy.number])")
-  cmdLst.Add("corr_data.corr()")
-  TerminalInputList(cmdLst)
-
-End
-
-Public Sub btnsavenew_Click()
-
-  Dim xPath As String
-
-  If Dialog.SelectDirectory() Then Return
-  xPath = Dialog.Path &/ modMain.GetNowString() & ".csv"
-  TerminalInput(Subst("orig_data.to_csv('&1', sep ='" & "\\" & "t" & "')", xPath))
-
-End
-
-Public Sub btnfilesave_Click()
-
-  Dim xPath As String
-
-  If Dialog.SelectDirectory() Then Return
-  xPath = Dialog.Path &/ modMain.GetNowString() & ".txt"
-  File.Save(xPath, TerminalView1.Text)
-
-End
-
-Public Sub btnhelp_Click()
-
-  Dim xx As String
-  Dim xsel As String
-
-  xx = File.Load("help.txt")
-  xsel = GetTextArea("Help Manual", xx)
-
-End
-
-Public Sub btnscatter_Click()
-
-  Dim cmdLst As New String[]
-  Dim xPath As String
-
-  xPath = Temp() & ".png"
-  cmdLst.Add("from matplotlib import pyplot")
-  cmdLst.Add("from pandas.plotting import scatter_matrix")
-  cmdLst.Add("numeric_cols = orig_data.select_dtypes(include = [numpy.number]).columns")
-  cmdLst.Add("scatter_matrix(orig_data[numeric_cols], alpha = 0.8, figsize = (8, 8), diagonal = 'hist')")
-  cmdLst.Add("pyplot.savefig('" & xPath & "', format = 'png')")
-  TerminalInputList(cmdLst)
-
-  While (Exist(xPath) = False)
-    Wait 0.5
-  Wend
-  Desktop.Open(xPath)
-
-End
-
-Public Sub chktokenize_Click()
-
-  cmbtokenizer.Text = "word_tokenize"
-
-End
-
-Public Sub btntokenize_Click()
-
-  Dim cmdLst As String[]
-  Dim xlibs As String[] = ["import nltk"]
-
-  TerminalInputList(xlibs)
-  If $useGensim = True Then
-    TerminalInput("import gensim")
-  Endif
-
-  cmdLst = New String[]
-  cmdLst.Add("'nltk version :', nltk.__version__")
-  If $useGensim = True Then
-    cmdLst.Add("'gensim version :', gensim.__version__")
-  Endif
-  TerminalInputList(cmdLst)
-
-  If $paraCol.Count Then
-
-    If chkcleanpara.Value = True Then
-      cmdLst = New String[]
-      cmdLst.Add("def clean_html_text(nlp_text):")
-      cmdLst.Add("from bs4 import BeautifulSoup")
-      cmdLst.Add("soup = BeautifulSoup(nlp_text, 'html.parser')")
-      cmdLst.Add("clean_text = soup.get_text()")
-      cmdLst.Add("return clean_text")
-      TerminalInputList(cmdLst)
-      PressEnterKey()
-    Endif
-
-    If chktokenize.Value = True Then
-      cmdLst = New String[]
-      cmdLst.Add("def tokenize_text(nlp_text):")
-      If cmbtokenizer.Text = "word_tokenize" Then
-        cmdLst.Add("from nltk.tokenize import word_tokenize")
-        cmdLst.Add("tokens = word_tokenize(nlp_text)")
-      Else
-        Select cmbtokenizer.Text
-          Case "TreebankWordTokenizer"
-            cmdLst.Add("from nltk.tokenize import TreebankWordTokenizer")
-            cmdLst.Add("tokenizer = TreebankWordTokenizer()")
-          Case "WhitespaceTokenizer"
-            cmdLst.Add("from nltk.tokenize import WhitespaceTokenizer")
-            cmdLst.Add("tokenizer = WhitespaceTokenizer()")
-          Case "SpaceTokenizer"
-            cmdLst.Add("from nltk.tokenize import SpaceTokenizer")
-            cmdLst.Add("tokenizer = SpaceTokenizer()")
-          Case "WordPunctTokenizer"
-            cmdLst.Add("from nltk.tokenize import WordPunctTokenizer")
-            cmdLst.Add("tokenizer = WordPunctTokenizer()")
-          Case "ToktokTokenizer"
-            cmdLst.Add("from nltk.tokenize import ToktokTokenizer")
-            cmdLst.Add("tokenizer = ToktokTokenizer()")
-          Case "RegexpTokenizer"
-            cmdLst.Add("from nltk.tokenize import RegexpTokenizer")
-            cmdLst.Add("tokenizer = RegexpTokenizer('[" & "\\" & "w']+')")
-        End Select
-        cmdLst.Add("tokens = tokenizer.tokenize(nlp_text)")
-      Endif
-      cmdLst.Add("return tokens")
-      TerminalInputList(cmdLst)
-      PressEnterKey()
-    Endif
-
-    cmdLst = New String[]
-    cmdLst.Add("for col in para_columns:")
-    cmdLst.Add("orig_data.replace(numpy.nan, 'No Data', inplace = True)")
-    If chkcleanpara.Value = True Then
-      cmdLst.Add("orig_data[col] = orig_data[col].apply(clean_html_text)")
-    Endif
-    If chktokenize.Value = True Then
-      cmdLst.Add("orig_data[col] = orig_data[col].apply(tokenize_text)")
-      pnltextprocess.Visible = True
-    Else
-      pnltextprocess.Visible = False
-    Endif
-    If chkcleanpara.Value Or If chktokenize.Value Then
-      TerminalInputList(cmdLst)
-      PressEnterKey()
-    Endif
-
-  Endif
-
-End
-
-''--------------- Setting Variables
-Private Function GetCategColumns(indepCol As String[]) As String[]
+Private Function GetCategColumns(totCols As String[]) As String[]
 
   Dim xList As String[]
   Dim col As Integer
   Dim catList As String[]
 
-  xList = indepCol.Copy()
+  xList = totCols.Copy()
   catList = New String[]
   If xList And If xList.Count Then
     For col = 0 To xList.Count - 1
@@ -793,7 +624,7 @@ Private Function GetCategColumns(indepCol As String[]) As String[]
 
 End
 
-Private Sub SelectColumns()
+Private Sub DefineColumns()
 
   Dim cmdLst As New String[]
   Dim aList As String[]
@@ -802,7 +633,8 @@ Private Sub SelectColumns()
   Dim k As Integer
 
   aList = $numbCol.Copy()
-  cList = $catgCol.Copy()
+  cList = GetCategColumns($Columns)
+  $catgCol = cList.Copy()
 
   If aList.Count Then
     For i = 0 To aList.Count - 1
@@ -815,6 +647,7 @@ Private Sub SelectColumns()
     Next
   Endif
 
+  TerminalInput("#Showing Column titles")
   cmdLst.Add("num_columns = " & "[" & aList.Join(", ") & "]")
   cmdLst.Add("categ_columns = " & "[" & cList.Join(", ") & "]")
   TerminalInputList(cmdLst)
@@ -827,134 +660,77 @@ Private Sub SelectColumns()
 
 End
 
-Private Sub SetIndependentVars(indepCol As String[])
+Public Sub btnprocessmiss_Click()
 
-  Dim cmdLst As New String[]
-  Dim xFields As String[]
+  DefineColumns()
+  If cmbprocessmiss.Text = "Delete" Then
+    pnldelete.Visible = True
+    pnlcategorical.Visible = False
+    pnlnumerical.Visible = False
+  Else If cmbprocessmiss.Text = "Impute" Then
+    pnldelete.Visible = False
+    pnlcategorical.Visible = True
+    pnlnumerical.Visible = True
+  Endif
+
+End
+
+Public Sub btnrandomrow_Click()
+
+  TerminalInput("#Randomize Row sequence")
+  TerminalInput("orig_data = orig_data.sample(frac = 1, random_state = 42)")
+
+End
+
+''======================= Deletion ====================
+Public Sub btndropmissing_Click()
+
+  TerminalInput("#Delete if null value in any column")
+  TerminalInput("orig_data.dropna(inplace = True)")
+
+End
+
+Public Sub btndropcolmiss_Click()
+
+  Dim xList As String[]
   Dim i As Integer
 
-  If indepCol.Count Then
-    xFields = indepCol.Copy()
-    For i = 0 To xFields.Count - 1
-      xFields[i] = "'" & xFields[i] & "'"
+  xList = SelectListView("Select Columns", $Columns, False)
+  If xList And If xList.Count Then
+    For i = 0 To xList.Count - 1
+      xList[i] = "'" & xList[i] & "'"
     Next
-    cmdLst.Add("indep_columns = " & "[" & xFields.Join(", ") & "]")
-    cmdLst.Add("X_data = orig_data.loc[:, indep_columns]")
-    ' cmdLst.Add("X_data = orig_data.drop(['" & cmbdependent.Text & "'], axis = 1)")
-  Else
-    cmdLst.Add("X_data = pandas.DataFrame()")
-  Endif
 
-  If $paraCol.Count Then
-    cmdLst.Add("para_data = orig_data.loc[:, para_columns]")
-  Endif
-  TerminalInputList(cmdLst)
-
-End
-
-Public Sub btndepset_Click()
-
-  If rbunsupervis.Value = True Then
-    $IndepCol = $Columns.Copy()
-    $catgCol = GetCategColumns($IndepCol)
-    SelectColumns()
-    SetIndependentVars($IndepCol)
-    GetTextProcessModels()
-    Wizard1.ShowButton = True
-
-  Else
-    If cmbdependent.Text Then
-      If $Columns.Count Then
-        $IndepCol = $Columns.Copy()
-        $IndepCol.Remove($IndepCol.Find(cmbdependent.Text))
-      Else
-        $IndepCol = New String[]
-      Endif
-
-      $catgCol = GetCategColumns($IndepCol)
-      If $numbCol.Exist(cmbdependent.Text) Then
-        $numbCol.Remove($numbCol.Find(cmbdependent.Text))
-      Endif
-      If $catgCol.Exist(cmbdependent.Text) Then
-        $catgCol.Remove($catgCol.Find(cmbdependent.Text))
-      Endif
-      SelectColumns()
-      TerminalInput("Y_data = orig_data['" & cmbdependent.Text & "']")
-
-      SetIndependentVars($IndepCol)
-      txtdeptype.Text = GetIpythonOutput("str(orig_data.dtypes['" & cmbdependent.Text & "'])")
-      GetTextProcessModels()
-      Wizard1.ShowButton = True
-    Endif
-
+    TerminalInput("#Delete if null value in selected column")
+    TerminalInput("orig_data.dropna(subset = " & "[" & xList.Join(", ") & "], inplace = True)")
   Endif
 
 End
 
-Private Sub GetTextProcessModels()
+Public Sub btndropsamevalue_Click()
 
-  If chktokenize.Value = True Then
-    cmbtextvector.List = ["word2vec", "model2vec"]
-    cmbtextvector.Text = "word2vec"
-    pnlwordvec.Visible = True
-    pnlhuburl.Visible = False
-    GetNLPParameters()
+  Dim xList As String[]
+  Dim i As Integer
 
-  Else
-    cmbtextvector.List = ["modernbert"]
-
+  xList = SelectListView("Select Columns", $Columns, False)
+  If xList And If xList.Count Then
+    TerminalInput(Subst("#Delete if value equal to &1", Trim(txtdropvalue.Text)))
+    For i = 0 To xList.Count - 1
+      TerminalInput(Subst("orig_data.drop(orig_data[orig_data['&1'] == '&2'].index, inplace = True)", xList[i], Trim(txtdropvalue.Text)))
+    Next
   Endif
 
 End
 
-''=================== Changes ==============================
-Public Sub Wizard1_Cancel()
-
-  TerminalView1.Clear()
-  ' $hProcess.Kill()
-  Wizard1.Index = 0
-  btndatainit_Click()
-  ' $hProcess = TerminalView1.Shell("ipython3")
+Public Sub btndropless_Click()
 
 End
 
-''---------- Show Visibility -----------------
-Public Sub chkscaling_Click()
-
-  pnlscaling.Visible = chkscaling.Value
+Public Sub btndropmore_Click()
 
 End
 
-Public Sub chknullnumber_Click()
-
-  pnlnullnumber.Visible = chknullnumber.Value
-
-End
-
-Public Sub chkpolynomial_Click()
-
-  pnlpolynom.Visible = chkpolynomial.Value
-
-End
-
-Public Sub chkPCA_Click()
-
-  chkpolynomial.Visible = chkPCA.Value
-
-End
-
-Public Sub chkcategencode_Click()
-
-  pnlencode.Visible = chkcategencode.Value
-
-End
-
-Public Sub chknullcateg_Click()
-
-  pnlnullcateg.Visible = chknullcateg.Value
-
-End
-
+''====================== Imputation =====================
 Public Sub cmbcatnullmethod_Click()
 
   If cmbcatnullmethod.Text = "SimpleImputer" Then
@@ -985,6 +761,433 @@ Public Sub cmbnullmethod_Click()
 
 End
 
+Public Sub btncatimputenull_Click()
+
+  Dim ynull As String
+  Dim cmdLst As New String[]
+
+  If cmbcatnullval.Text = "Null" Then
+    ynull = "numpy.nan"
+  Else
+    ynull = "numpy.nan"
+  Endif
+
+  TerminalInput("#Imputation of categorical variables")
+  If cmbcatnullmethod.Text = "SimpleImputer" Then
+    cmdLst.Add("from sklearn.impute import SimpleImputer")
+    If cmbcatnulstrategy.Text = "constant" Then
+      cmdLst.Add(Subst("cat_imputer = SimpleImputer(missing_values = &1, strategy = '&2', fill_value='Missing Data')", ynull, cmbcatnulstrategy.Text))
+    Else
+      cmdLst.Add(Subst("cat_imputer = SimpleImputer(missing_values = &1, strategy = '&2')", ynull, cmbcatnulstrategy.Text))
+    Endif
+
+  Else If cmbcatnullmethod.Text = "KNNImputer" Then
+    cmdLst.Add("from sklearn.impute import KNNImputer")
+    cmdLst.Add(Subst("cat_imputer = KNNImputer(missing_values = &1, weights = '&2')", ynull, cmbcatnulstrategy.Text))
+
+  Else If cmbcatnullmethod.Text = "IterativeImputer" Then
+    cmdLst.Add("from sklearn.impute import IterativeImputer")
+    cmdLst.Add(Subst("cat_imputer = IterativeImputer(missing_values = &1, initial_strategy = '&2')", ynull, cmbcatnulstrategy.Text))
+
+  Endif
+  cmdLst.Add("orig_data[categ_columns] = cat_imputer.fit_transform(orig_data[categ_columns])")
+  TerminalInputList(cmdLst)
+
+End
+
+Public Sub btnimputenull_Click()
+
+  Dim xnull As String
+  Dim cmdLst As New String[]
+
+  If cmbnullval.Text = "Null" Then
+    xnull = "numpy.nan"
+  Else
+    xnull = "0"
+  Endif
+
+  TerminalInput("#Imputation of numerical variables")
+  If cmbnullmethod.Text = "SimpleImputer" Then
+    cmdLst.Add("from sklearn.impute import SimpleImputer")
+    If cmbnulstrategy.Text = "constant" Then
+      cmdLst.Add(Subst("num_imputer = SimpleImputer(missing_values = &1, strategy = '&2', fill_value = -9999)", xnull, cmbnulstrategy.Text))
+    Else
+      cmdLst.Add(Subst("num_imputer = SimpleImputer(missing_values = &1, strategy = '&2')", xnull, cmbnulstrategy.Text))
+    Endif
+
+  Else If cmbnullmethod.Text = "KNNImputer" Then
+    cmdLst.Add("from sklearn.impute import KNNImputer")
+    cmdLst.Add(Subst("num_imputer = KNNImputer(missing_values = &1, weights = '&2')", xnull, cmbnulstrategy.Text))
+
+  Else If cmbnullmethod.Text = "IterativeImputer" Then
+    cmdLst.Add("from sklearn.impute import IterativeImputer")
+    cmdLst.Add(Subst("num_imputer = IterativeImputer(missing_values = &1, initial_strategy = '&2')", xnull, cmbnulstrategy.Text))
+
+  Endif
+  cmdLst.Add("orig_data[num_columns] = num_imputer.fit_transform(orig_data[num_columns])")
+  TerminalInputList(cmdLst)
+
+End
+
+''============================= Feature Processing ======================
+Public Sub btnnewcolumn_Click()
+
+  Dim xList As String[]
+
+  xList = SelectListView("Merge Columns to New Column", $Columns, False)
+  If xList And If xList.Count Then
+    TerminalInput("#Merge selected columns into a new column")
+    TerminalInput("orig_data['MultiLabel'] = orig_data[[" & xList.Join(", ") & "]].values.tolist()")
+    TerminalInput("orig_data = orig_data.drop([" & xList.Join(", ") & "], axis = 1)")
+    $Columns.Add("MultiLabel")
+    $Columns = GetDataFrameColumns()
+  Endif
+
+End
+
+Public Sub cmbdependent_GotFocus()
+
+  cmbdependent.List = $Columns
+
+End
+
+Public Sub btnsettarget_Click()
+
+  If cmbdependent.List.Count Then
+    If rbunsupervis.Value = True Then
+    Else
+      If cmbdependent.Text Then
+        $Columns.Remove($Columns.Find(cmbdependent.Text))
+        TerminalInput(Subst("orig_data.dropna(subset = ['&1'], inplace = True)", cmbdependent.Text))
+      Endif
+    Endif
+
+  Else
+    cmbdependent.List = $Columns
+  Endif
+
+End
+
+''==================== Data Visualization ==============================
+Public Sub btnshowdata_Click()
+
+  TerminalInput("orig_data")
+
+End
+
+Public Sub btninfo_Click()
+
+  TerminalInput("#Show DataFrame")
+  TerminalInput("orig_data.info()")
+
+End
+
+Public Sub btnshownull_Click()
+
+  Dim xList As String[]
+  Dim xcolm As String
+
+  xList = SelectListView("Columns with Empty Values", $Columns, False)
+  If xList And If xList.Count Then
+    TerminalInput("#Show Columns with null values")
+    For Each xcolm In xList
+      TerminalInput(Subst("orig_data['&1'].isnull().sum()", xcolm))
+    Next
+  Endif
+
+End
+
+Public Sub btndetail_Click()
+
+  TerminalInput("#Describe DataFrame")
+  TerminalInput("orig_data.describe()")
+
+End
+
+Public Sub btncolcount_Click()
+
+  Dim xList As String[]
+  Dim xcolm As String
+
+  xList = SelectListView("Columns to count", $Columns, False)
+  If xList And If xList.Count Then
+    TerminalInput("#Count values in DataFrame")
+    For Each xcolm In xList
+      TerminalInput(Subst("orig_data['&1'].value_counts()", xcolm))
+    Next
+  Endif
+
+End
+
+Public Sub btndatacorrelation_Click()
+
+  Dim cmdLst As New String[]
+
+  TerminalInput("#Show Correlations")
+  cmdLst.Add("corr_data = orig_data.select_dtypes(include = [numpy.number])")
+  cmdLst.Add("corr_data.corr()")
+  TerminalInputList(cmdLst)
+
+End
+
+Public Sub btnsavenew_Click()
+
+  Dim xPath As String
+
+  If Dialog.SelectDirectory() Then Return
+  xPath = Dialog.Path &/ modMain.GetNowString() & ".csv"
+  TerminalInput(Subst("orig_data.to_csv('&1', sep ='" & "\\" & "t" & "')", xPath))
+
+End
+
+Public Sub btnfilesave_Click()
+
+  Dim xPath As String
+
+  If Dialog.SelectDirectory() Then Return
+  xPath = Dialog.Path &/ modMain.GetNowString() & ".txt"
+  File.Save(xPath, TerminalView1.Text)
+
+End
+
+Public Sub btnscatter_Click()
+
+  Dim cmdLst As New String[]
+  Dim xPath As String
+
+  xPath = Temp() & ".png"
+  TerminalInput("#Showing Scatter Plot")
+  cmdLst.Add("from matplotlib import pyplot")
+  cmdLst.Add("from pandas.plotting import scatter_matrix")
+  cmdLst.Add("numeric_cols = orig_data.select_dtypes(include = [numpy.number]).columns")
+  cmdLst.Add("scatter_matrix(orig_data[numeric_cols], alpha = 0.8, figsize = (8, 8), diagonal = 'hist')")
+  cmdLst.Add("pyplot.savefig('" & xPath & "', format = 'png')")
+  TerminalInputList(cmdLst)
+
+  While (Exist(xPath) = False)
+    Wait 0.5
+  Wend
+  Desktop.Open(xPath)
+
+End
+
+Public Sub btnsplitshow_Click()
+
+  If cmbsplitdata.Text Then
+    TerminalInput(cmbsplitdata.Text)
+  Endif
+
+End
+
+''======================== Text Cleaning and Tokenization ================================
+Public Sub chktokenize_Click()
+
+  cmbtokenizer.Text = "word_tokenize"
+
+End
+
+Private Sub CleanHTMLText()
+
+  Dim cmdLst As String[]
+
+  TerminalInput("#Clean HTML Syntax")
+  cmdLst = New String[]
+  cmdLst.Add("def clean_html_text(nlp_text):")
+  cmdLst.Add("from bs4 import BeautifulSoup")
+  cmdLst.Add("soup = BeautifulSoup(nlp_text, 'html.parser')")
+  cmdLst.Add("clean_text = soup.get_text()")
+  cmdLst.Add("return clean_text")
+  TerminalInputList(cmdLst)
+  PressEnterKey()
+
+End
+
+Private Sub TokenizeTextData()
+
+  Dim cmdLst As String[]
+
+  TerminalInput("#Tokenize text using selected method")
+  cmdLst = New String[]
+  cmdLst.Add("def tokenize_text(nlp_text):")
+  If cmbtokenizer.Text = "word_tokenize" Then
+    cmdLst.Add("from nltk.tokenize import word_tokenize")
+    cmdLst.Add("tokens = word_tokenize(nlp_text)")
+  Else
+    Select cmbtokenizer.Text
+      Case "TreebankWordTokenizer"
+        cmdLst.Add("from nltk.tokenize import TreebankWordTokenizer")
+        cmdLst.Add("tokenizer = TreebankWordTokenizer()")
+      Case "WhitespaceTokenizer"
+        cmdLst.Add("from nltk.tokenize import WhitespaceTokenizer")
+        cmdLst.Add("tokenizer = WhitespaceTokenizer()")
+      Case "SpaceTokenizer"
+        cmdLst.Add("from nltk.tokenize import SpaceTokenizer")
+        cmdLst.Add("tokenizer = SpaceTokenizer()")
+      Case "WordPunctTokenizer"
+        cmdLst.Add("from nltk.tokenize import WordPunctTokenizer")
+        cmdLst.Add("tokenizer = WordPunctTokenizer()")
+      Case "ToktokTokenizer"
+        cmdLst.Add("from nltk.tokenize import ToktokTokenizer")
+        cmdLst.Add("tokenizer = ToktokTokenizer()")
+      Case "RegexpTokenizer"
+        cmdLst.Add("from nltk.tokenize import RegexpTokenizer")
+        cmdLst.Add("tokenizer = RegexpTokenizer('[" & "\\" & "w']+')")
+    End Select
+    cmdLst.Add("tokens = tokenizer.tokenize(nlp_text)")
+  Endif
+  cmdLst.Add("return tokens")
+  TerminalInputList(cmdLst)
+  PressEnterKey()
+
+End
+
+Public Sub btntokenize_Click()
+
+  Dim cmdLst As String[]
+  Dim xlibs As String[] = ["import nltk"]
+
+  TerminalInput("#Import NLP libraries")
+  TerminalInputList(xlibs)
+  If $useGensim = True Then
+    TerminalInput("import gensim")
+  Endif
+
+  cmdLst = New String[]
+  cmdLst.Add("'nltk version :', nltk.__version__")
+  If $useGensim = True Then
+    cmdLst.Add("'gensim version :', gensim.__version__")
+  Endif
+  TerminalInputList(cmdLst)
+
+  If $paraCol.Count Then
+    If chkcleanpara.Value = True Then
+      CleanHTMLText()
+    Endif
+    If chktokenize.Value = True Then
+      TokenizeTextData()
+    Endif
+
+    TerminalInput("#Apply selected NLP Procedures")
+    cmdLst = New String[]
+    cmdLst.Add("for col in para_columns:")
+    cmdLst.Add("orig_data.replace(numpy.nan, 'No Data', inplace = True)")
+    If chkcleanpara.Value = True Then
+      cmdLst.Add("orig_data[col] = orig_data[col].apply(clean_html_text)")
+    Endif
+    If chktokenize.Value = True Then
+      cmdLst.Add("orig_data[col] = orig_data[col].apply(tokenize_text)")
+      pnltextprocess.Visible = True
+    Else
+      pnltextprocess.Visible = False
+    Endif
+    If chkcleanpara.Value Or If chktokenize.Value Then
+      TerminalInputList(cmdLst)
+      PressEnterKey()
+    Endif
+
+  Endif
+
+End
+
+''=================== Final Variables =========================================
+Private Sub GetTextProcessModels()
+
+  If chktokenize.Value = True Then
+    cmbtextvector.List = ["word2vec", "model2vec"]
+    cmbtextvector.Text = "word2vec"
+    pnlwordvec.Visible = True
+    pnlhuburl.Visible = False
+    GetNLPParameters()
+
+  Else
+    cmbtextvector.List = ["modernbert"]
+
+  Endif
+
+End
+
+Private Sub SetIndependentVars(indepCol As String[])
+
+  Dim cmdLst As New String[]
+  Dim xFields As String[]
+  Dim i As Integer
+
+  If indepCol.Count Then
+    xFields = indepCol.Copy()
+    For i = 0 To xFields.Count - 1
+      xFields[i] = "'" & xFields[i] & "'"
+    Next
+    cmdLst.Add("indep_columns = " & "[" & xFields.Join(", ") & "]")
+    cmdLst.Add("X_data = orig_data.loc[:, indep_columns]")
+    ' cmdLst.Add("X_data = orig_data.drop(['" & cmbdependent.Text & "'], axis = 1)")
+  Else
+    cmdLst.Add("X_data = pandas.DataFrame()")
+  Endif
+
+  If $paraCol.Count Then
+    cmdLst.Add("para_data = orig_data.loc[:, para_columns]")
+  Endif
+  TerminalInputList(cmdLst)
+
+End
+
+Public Sub btnselectfeature_Click()
+
+  Dim xindep As String[]
+
+  xindep = New String[]
+  xindep.Insert($numbCol)
+  xindep.Insert($catgCol)
+  $IndepCol = xindep
+
+  If rbunsupervis.Value = True Then
+    SetIndependentVars($IndepCol)
+    GetTextProcessModels()
+    ' Wizard1.ShowButton = True
+
+  Else
+    If cmbdependent.Text Then
+      If $IndepCol.Exist(cmbdependent.Text) Then
+        $IndepCol.Remove($IndepCol.Find(cmbdependent.Text))
+      Endif
+      If $numbCol.Exist(cmbdependent.Text) Then
+        $numbCol.Remove($numbCol.Find(cmbdependent.Text))
+      Endif
+      If $catgCol.Exist(cmbdependent.Text) Then
+        $catgCol.Remove($catgCol.Find(cmbdependent.Text))
+      Endif
+      DefineColumns()
+
+      TerminalInput("Y_data = orig_data['" & cmbdependent.Text & "']")
+      SetIndependentVars($IndepCol)
+      txtdeptype.Text = GetIpythonOutput("str(orig_data.dtypes['" & cmbdependent.Text & "'])")
+      GetTextProcessModels()
+      ' Wizard1.ShowButton = True
+    Endif
+
+  Endif
+
+End
+
+''=================== Encoding and Normalization ==============================
+Public Sub chkscaling_Click()
+
+  pnlscaling.Visible = chkscaling.Value
+
+End
+
+Public Sub chkpolynomial_Click()
+
+  pnlpolynom.Visible = chkpolynomial.Value
+
+End
+
+Public Sub chkcategencode_Click()
+
+  pnlencode.Visible = chkcategencode.Value
+
+End
+
 Public Sub cmbscaling_Click()
 
   If cmbscaling.Text = "MinMaxScaler" Then
@@ -998,89 +1201,43 @@ Public Sub cmbscaling_Click()
 
 End
 
-Private Sub GetPreprocessing()
+Private Sub GetEncodings()
 
   Dim catgXLst As New String[]
   Dim numXLst As New String[]
-
-  Dim ynull As String
-  Dim xnull As String
 
   $libprocess.Add("from sklearn.pipeline import make_pipeline")
   $libprocess.Add("from sklearn.compose import make_column_selector, make_column_transformer")
 
   ''---------------- categorical processing -------------------------
-  If cmbcatnullval.Text = "Null" Then
-    ynull = "numpy.nan"
-  Else
-    ynull = "numpy.nan"
-  Endif
-
-  If chknullcateg.Value = True Then
-    If cmbcatnullmethod.Text = "SimpleImputer" Then
-      $libprocess.Add("from sklearn.impute import SimpleImputer")
-      If cmbcatnulstrategy.Text = "constant" Then
-        catgXLst.Add(Subst("SimpleImputer(missing_values = &1, strategy = '&2', fill_value='Missing Data')", ynull, cmbcatnulstrategy.Text))
-      Else
-        catgXLst.Add(Subst("SimpleImputer(missing_values = &1, strategy = '&2')", ynull, cmbcatnulstrategy.Text))
-      Endif
-    Else If cmbcatnullmethod.Text = "KNNImputer" Then
-      $libprocess.Add("from sklearn.impute import KNNImputer")
-      catgXLst.Add(Subst("KNNImputer(missing_values = &1, weights = '&2')", ynull, cmbcatnulstrategy.Text))
-    Else If cmbcatnullmethod.Text = "IterativeImputer" Then
-      $libprocess.Add("from sklearn.impute import IterativeImputer")
-      catgXLst.Add(Subst("IterativeImputer(missing_values = &1, initial_strategy = '&2')", ynull, cmbcatnulstrategy.Text))
-    Endif
-  Endif
+  ''encoding
   If chkcategencode.Value = True Then
+    TerminalInput("#Add Categorical Encoding function to pipeline")
     If cmbencoding.Text = "OrdinalEncoder" Then
       $libprocess.Add("from sklearn.preprocessing import OrdinalEncoder, LabelEncoder")
       catgXLst.Add("OrdinalEncoder()")
       $catYStr = "cat_encode = LabelEncoder()"
     Else If cmbencoding.Text = "OneHotEncoder" Then
       $libprocess.Add("from sklearn.preprocessing import OneHotEncoder")
-      If $isOldVersion = True Then
-        catgXLst.Add("OneHotEncoder(sparse = False, drop = 'first')")
-        $catYStr = "cat_encode = OneHotEncoder(sparse = False, drop = 'first')"
-      Else
-        catgXLst.Add("OneHotEncoder(sparse_output = False, drop = 'first')")
-        $catYStr = "cat_encode = OneHotEncoder(sparse_output = False, drop = 'first')"
-      Endif
+      catgXLst.Add("OneHotEncoder(sparse_output = False, drop = 'first')")
+      $catYStr = "cat_encode = OneHotEncoder(sparse_output = False, drop = 'first')"
     Endif
   Endif
+  ''categorical pipeline
   If catgXLst.Count Then
     $catXStr = "cat_pipeline = make_pipeline(" & catgXLst.Join(", ") & ")"
   Endif
 
   ''----------numerical preprocessing ---------------------------
-  If cmbnullval.Text = "Null" Then
-    xnull = "numpy.nan"
-  Else
-    xnull = "0"
-  Endif
-
-  If chknullnumber.Value = True Then
-    If cmbnullmethod.Text = "SimpleImputer" Then
-      $libprocess.Add("from sklearn.impute import SimpleImputer")
-      If cmbnulstrategy.Text = "constant" Then
-        numXLst.Add(Subst("SimpleImputer(missing_values = &1, strategy = '&2', fill_value = -9999)", xnull, cmbnulstrategy.Text))
-      Else
-        numXLst.Add(Subst("SimpleImputer(missing_values = &1, strategy = '&2')", xnull, cmbnulstrategy.Text))
-      Endif
-    Else If cmbnullmethod.Text = "KNNImputer" Then
-      $libprocess.Add("from sklearn.impute import KNNImputer")
-      numXLst.Add(Subst("KNNImputer(missing_values = &1, weights = '&2')", xnull, cmbnulstrategy.Text))
-    Else If cmbnullmethod.Text = "IterativeImputer" Then
-      $libprocess.Add("from sklearn.impute import IterativeImputer")
-      numXLst.Add(Subst("IterativeImputer(missing_values = &1, initial_strategy = '&2')", xnull, cmbnulstrategy.Text))
-    Endif
-  Endif
-
+  ''polynomial features
   If chkpolynomial.Value = True Then
+    TerminalInput("#Add Polynomial Feature function to pipeline")
     $libprocess.Add("from sklearn.preprocessing import PolynomialFeatures")
     numXLst.Add(Subst("PolynomialFeatures(degree = &1, include_bias = False)", txtpolynomial.Value))
   Endif
+  ''Normalization
   If chkscaling.Value = True Then
+    TerminalInput("#Add Normalization function to pipeline")
     If cmbscaling.Text = "MinMaxScaler" Then
       $libprocess.Add("from sklearn.preprocessing import MinMaxScaler")
       If txtscalerange.Text Then
@@ -1102,6 +1259,7 @@ Private Sub GetPreprocessing()
       Endif
     Endif
   Endif
+  ''numerical pipeline
   If numXLst.Count Then
     $numXStr = "num_pipeline = make_pipeline(" & numXLst.Join(", ") & ")"
   Endif
@@ -1109,40 +1267,12 @@ Private Sub GetPreprocessing()
 End
 
 ''====================== Text Processing ===============================
-Public Sub btndownstop_Click()
-
-  TerminalInput("nltk.download('stopwords')")
-
-End
-
-Public Sub btnenchant_Click()
-
-  Dim xList As String[]
-
-  xList = New String[]
-  If $pyShell Then
-    TerminalInput("pip install pyenchant")
-  Else
-    xList.Add("python3-enchant")
-    xList.Add("libenchant-2-2")
-    modMain.InstallSelectedApplication(xList)
-  Endif
-
-End
-
-Public Sub btntokendown_Click()
-
-  TerminalInput("nltk.download('punkt')")
-  TerminalInput("nltk.download('punkt_tab')")
-  TerminalInput("nltk.download('wordnet')")
-
-End
-
 Private Sub DefineTextProcessing()
 
   Dim cmdLst As String[]
 
   If chkstopword.Value = True Then
+    TerminalInput("#Define Stop words removal function")
     cmdLst = New String[]
     cmdLst.Add("def stopword_removal(tokens):")
     cmdLst.Add("from nltk.corpus import stopwords")
@@ -1155,6 +1285,7 @@ Private Sub DefineTextProcessing()
   Endif
 
   If cmbstemming.Text Then
+    TerminalInput("#Define Stemming function")
     cmdLst = New String[]
     cmdLst.Add("def stemming(tokens):")
     Select cmbstemming.Text
@@ -1178,6 +1309,7 @@ Private Sub DefineTextProcessing()
   Endif
 
   If cmblemmatize.Text Then
+    TerminalInput("#Define Lemmatization function")
     cmdLst = New String[]
     cmdLst.Add("def lemmatization(tokens):")
     Select cmblemmatize.Text
@@ -1192,6 +1324,7 @@ Private Sub DefineTextProcessing()
   Endif
 
   If chklowercase.Value = True Then
+    TerminalInput("#Define function to chnage to lower case")
     cmdLst = New String[]
     cmdLst.Add("def lower_case(tokens):")
     cmdLst.Add("nlp_tokens = [word.lower() for word in tokens]")
@@ -1201,6 +1334,7 @@ Private Sub DefineTextProcessing()
   Endif
 
   If chkrepeatchar.Value = True Then
+    TerminalInput("#Define function to remove rpetition")
     cmdLst = New String[]
     cmdLst.Add("def remove_repeatition(tokens):")
     cmdLst.Add("import enchant")
@@ -1213,6 +1347,7 @@ Private Sub DefineTextProcessing()
   Endif
 
   If chkspelcorrect.Value = True Then
+    TerminalInput("#Define spelling correction function")
     cmdLst = New String[]
     cmdLst.Add("def spelling_correction(tokens):")
     cmdLst.Add("import enchant")
@@ -1230,6 +1365,7 @@ Private Sub GetTextProcessing()
 
   Dim cmdLst As String[]
 
+  TerminalInput("#Apply selected NLP functions")
   cmdLst = New String[]
   cmdLst.Add("def word_process(tokens):")
   If chkstopword.Value = True Then
@@ -1261,6 +1397,7 @@ Private Sub TrainVocabulary()
 
   Dim cmdLst As String[]
 
+  TerminalInput("#Create corpus")
   cmdLst = New String[]
   cmdLst.Add("token_corpus = []")
   cmdLst.Add("for col in para_columns:")
@@ -1319,41 +1456,13 @@ Public Sub txthuburl_Click()
 
 End
 
-Public Sub btninstallmodel_Click()
-
-  Dim xList As String[]
-
-  If cmbtextvector.Text Then
-    xList = New String[]
-    Select cmbtextvector.Text
-      Case "word2vec", "model2vec"
-        If $pyShell Then
-          TerminalInput("pip install gensim")
-        Else
-          xList.Add("python3-gensim")
-          modMain.InstallSelectedApplication(xList)
-        Endif
-
-      Case "modernbert"
-        If $pyShell Then
-          TerminalInput("pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu")
-          TerminalInput("pip install transformers")
-          TerminalInput("pip install sentence-transformers")
-          TerminalInput("pip install datasets")
-        Else
-        Endif
-    End Select
-
-  Endif
-
-End
-
-Private Sub DefineTextVectorization()
+Private Sub LoadVectorizers()
 
   Dim cmdLst As String[]
   Dim xmodel As String
 
   If cmbtextvector.Text = "word2vec" Then
+    TerminalInput("#Load word2vec vectorization")
     TerminalInput("from gensim.models import Word2Vec")
     If chkusetextmodel.Value Then
       xmodel = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/ModelPath")
@@ -1370,6 +1479,7 @@ Private Sub DefineTextVectorization()
     TerminalInput("word_vectors = nlp_model.wv")
 
   Else If cmbtextvector.Text = "model2vec" Then
+    TerminalInput("#Load model2vec vectorization")
     TerminalInput("from model2vec import StaticModel")
     If chkusetextmodel.Value Then
       xmodel = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/ModelPath")
@@ -1377,6 +1487,7 @@ Private Sub DefineTextVectorization()
     Endif
 
   Else If cmbtextvector.Text = "modernbert" Then
+    TerminalInput("#Load BERT vectorization")
     If chkusetextmodel.Value Then
       xmodel = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/ModelPath")
       cmdLst = New String[]
@@ -1402,6 +1513,26 @@ Private Sub DefineTextVectorization()
 
   Endif
 
+End
+
+Private Sub ModelTorchOutput()
+
+  Dim cmdLst As String[]
+
+  cmdLst = New String[]
+  cmdLst.Add("def get_nlp_outputs(nlp_model, nlp_inputs):")
+  cmdLst.Add("with torch.no_grad():")
+  cmdLst.Add("return nlp_model(**nlp_inputs)")
+  TerminalInputList(cmdLst)
+  PressEnterKey()
+
+End
+
+Private Sub DefineVectorizers()
+
+  Dim cmdLst As String[]
+
+  TerminalInput("#Define Text Vectorization function")
   cmdLst = New String[]
   cmdLst.Add("def vectorize_text(tokens):")
   If cmbtextvector.Text = "word2vec" Then
@@ -1429,23 +1560,11 @@ Private Sub DefineTextVectorization()
 
 End
 
-Private Sub ModelTorchOutput()
-
-  Dim cmdLst As String[]
-
-  cmdLst = New String[]
-  cmdLst.Add("def get_nlp_outputs(nlp_model, nlp_inputs):")
-  cmdLst.Add("with torch.no_grad():")
-  cmdLst.Add("return nlp_model(**nlp_inputs)")
-  TerminalInputList(cmdLst)
-  PressEnterKey()
-
-End
-
 Private Sub GetTextVectorization()
 
   Dim cmdLst As String[]
 
+  TerminalInput("#Generate Text Vector embeddings")
   cmdLst = New String[]
   cmdLst.Add("all_vectors = []")
   cmdLst.Add("for col in para_columns:")
@@ -1467,20 +1586,46 @@ Private Sub TextProcessingPipeline()
     GetTextProcessing()
   Endif
 
-  DefineTextVectorization()
+  LoadVectorizers()
+  DefineVectorizers()
   GetTextVectorization()
 
 End
 
-''==================================== Split data and process =======================
-Private Sub GetProcessedDataSet()
+''========================= Fine Tune Language Model ========================
+Private Sub GetDataSetFineTune()
+
+  If txtdeptype.Text = "object" Or If txtdeptype.Text = "str" Then
+    GetEncodings()
+    TerminalInputList($libprocess)
+
+    If $catYStr Then
+      TerminalInput("para_col = para_columns[0]")
+      TerminalInput($catYStr)
+      TerminalInput("Y_processed = cat_encode.fit_transform(Y_data.values.tolist())")
+      TerminalInput(Subst("para_data['labels'] = pandas.DataFrame(Y_processed, columns=['&1'])", cmbdependent.Text))
+      TerminalInput("cat_labels = cat_encode.classes_")
+    Else
+      TerminalInput("para_data['labels'] = Y_data")
+    Endif
+  Endif
+
+  If $paraCol.Count Then
+    TerminalInput("para_data.rename(columns={para_col: 'text'}, inplace=True)")
+    TerminalInput("para_data.columns")
+  Endif
+
+End
+
+''========================== Regression/Classification/Unsupervised ==========================
+Private Sub GetDataSetTraining()
 
   Dim xList As New String[]
   Dim aList As New String[]
   Dim cmdLst As String[]
 
   ''for X_data
-  GetPreprocessing()
+  GetEncodings()
   TerminalInputList($libprocess)
   If $catgCol.Count Then
     TerminalInput($catXStr)
@@ -1491,6 +1636,7 @@ Private Sub GetProcessedDataSet()
     aList.Add("(num_pipeline, num_columns)")
   Endif
 
+  TerminalInput("#Prepare data for training")
   If aList.Count Then
     $preProcess = aList
     xList.Add("preprocess_X = make_column_transformer(" & aList.Join(", ") & ")")
@@ -1544,30 +1690,7 @@ Private Sub GetProcessedDataSet()
 
 End
 
-Private Sub GetDataSetFineTune()
-
-  If txtdeptype.Text = "object" Or If txtdeptype.Text = "str" Then
-    GetPreprocessing()
-    TerminalInputList($libprocess)
-
-    If $catYStr Then
-      TerminalInput("para_col = para_columns[0]")
-      TerminalInput($catYStr)
-      TerminalInput("Y_processed = cat_encode.fit_transform(Y_data.values.tolist())")
-      TerminalInput(Subst("para_data['labels'] = pandas.DataFrame(Y_processed, columns=['&1'])", cmbdependent.Text))
-      TerminalInput("cat_labels = cat_encode.classes_")
-    Else
-      TerminalInput("para_data['labels'] = Y_data")
-    Endif
-  Endif
-
-  If $paraCol.Count Then
-    TerminalInput("para_data.rename(columns={para_col: 'text'}, inplace=True)")
-    TerminalInput("para_data.columns")
-  Endif
-
-End
-
+''==================================== Split data and process =======================
 Public Sub btnsplidata_Click()
 
   Dim cmdLst As New String[]
@@ -1576,6 +1699,7 @@ Public Sub btnsplidata_Click()
   trainval = valtrain.Value / 100
   If rbfinetune.Value = True Then
     If cmbdependent.Text Then
+      TerminalInput("#Prepare data for Fine Tuning")
       If $Columns.Count Then
         GetDataSetFineTune()
       Else
@@ -1600,10 +1724,10 @@ Public Sub btnsplidata_Click()
       btnsavemodel.Enabled = True
       btnsaveProcess.Enabled = True
     Endif
-  Else
 
+  Else
     If rbunsupervis.Value = True Then
-      GetProcessedDataSet()
+      GetDataSetTraining()
       cmdLst.Add("X_train = X_processed")
       TerminalInputList(cmdLst)
       btnmodeltrain.Enabled = True
@@ -1611,7 +1735,7 @@ Public Sub btnsplidata_Click()
       btnsaveProcess.Enabled = True
     Else
       If cmbdependent.Text Then
-        GetProcessedDataSet()
+        GetDataSetTraining()
         cmdLst.Add("from sklearn.model_selection import train_test_split")
         cmdLst.Add(Subst("X_train, X_test, Y_train, Y_test = train_test_split(X_processed, Y_processed, train_size = &1, random_state = 42)", trainval))
         TerminalInputList(cmdLst)
@@ -1625,20 +1749,19 @@ Public Sub btnsplidata_Click()
 
 End
 
-Public Sub btnsplitshow_Click()
+''PCA
+Public Sub chkPCA_Click()
 
-  If cmbsplitdata.Text Then
-    TerminalInput(cmbsplitdata.Text)
-  Endif
+  chkpolynomial.Visible = chkPCA.Value
 
 End
 
-''PCA
 Public Sub btnpca_Click()
 
   Dim cmdLst As New String[]
 
   If txtpca.Value Then
+    TerminalInput("#Apply PCA to training data")
     cmdLst.Add("from sklearn.decomposition import PCA")
     cmdLst.Add(Subst("pca = PCA(n_components = &1)", txtpca.Value))
     cmdLst.Add("X_train_pca = pca.fit_transform(X_train)")
@@ -1846,7 +1969,21 @@ Private Function GetParameterList() As String[]
 
 End
 
-''-------------------------- Transfer Learning
+Public Sub btnmodeltrain_Click()
+
+  If cmbmodel.Text Then
+    If cmbmodel.Text = "Transfer Learning" Then
+      TransferLearningModel()
+    Else If cmbmodel.Text = "Pre Training" Then
+      MaskedPreTraining()
+    Else
+      GetPredictionModels()
+    Endif
+  Endif
+
+End
+
+''--------------------- Transfer Learning
 Private Sub TransferLearningModel()
 
   Dim cmdLst As String[]
@@ -1856,6 +1993,7 @@ Private Sub TransferLearningModel()
   Dim xPLst As String[]
 
   If chkusetextmodel.Value Then
+    TerminalInput("#Setup Transfer Learning parameters")
     xmodel = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/ModelPath")
     TerminalInput(Subst("tuned_model = '&1'", User.Home &/ File.BaseName(xmodel) & "_finetuned"))
 
@@ -1923,7 +2061,7 @@ Private Sub TuneComputeMetrics()
 
 End
 
-''------------ Pre training
+''------------------------- Pre training
 Private Sub MaskedPreTraining()
 
   Dim cmdLst As String[]
@@ -1933,6 +2071,7 @@ Private Sub MaskedPreTraining()
   Dim xPLst As String[]
 
   If chkusetextmodel.Value Then
+    TerminalInput("#Setup Pretraining of Masked Language Model parameters")
     xmodel = modSettings.ShowModelsSettingFromFIle(cmbtextvector.Text & "/ModelPath")
     TerminalInput(Subst("tuned_model = '&1'", User.Home &/ File.BaseName(xmodel) & "_finetuned"))
 
@@ -1973,20 +2112,6 @@ Private Sub MaskedPreTraining()
 
 End
 
-Public Sub btnmodeltrain_Click()
-
-  If cmbmodel.Text Then
-    If cmbmodel.Text = "Transfer Learning" Then
-      TransferLearningModel()
-    Else If cmbmodel.Text = "Pre Training" Then
-      MaskedPreTraining()
-    Else
-      GetPredictionModels()
-    Endif
-  Endif
-
-End
-
 ''---------------- Regression/Classification/Clustring
 Private Sub GetPredictionModels()
 
@@ -2021,6 +2146,7 @@ Private Sub GetPredictionModels()
 
   Inc Application.Busy
   If rbregression.Value = True Then
+    TerminalInput("#Setup Regression Model parameters")
     Select cmbmodel.Text
       Case "Linear Regression"
         cmdLst.Add("from sklearn.linear_model import LinearRegression")
@@ -2091,6 +2217,7 @@ Private Sub GetPredictionModels()
     End Select
 
   Else If rbclass.Value = True Then
+    TerminalInput("#Setup Classification Model parameters")
     ''1. Initialize
     Select cmbmodel.Text
       Case "Dummy Classifier"
@@ -2221,6 +2348,7 @@ Private Sub GetPredictionModels()
     End Select
 
   Else If rbunsupervis.Value = True Then
+    TerminalInput("#Setup Unsupervised Model parameters")
     Select cmbmodel.Text
       Case "KMeans Clustering"
         cmdLst.Add("from sklearn.cluster import KMeans")
@@ -2264,6 +2392,7 @@ Public Sub btnsavemodel_Click()
     xDir = Dialog.Path
     xname = modMain.GetNowString()
 
+    TerminalInput("#Save Model parameters to disk")
     Select cmbmodel.Text
       Case "Transfer Learning", "Pre Training"
         tuneModel = xDir &/ "tuned_model_" & xname
@@ -2362,6 +2491,7 @@ Public Sub btnsaveProcess_Click()
     xpath = Dialog.Path &/ "processing_" & modMain.GetNowString() & ".pkl"
 
     Inc Application.Busy
+    TerminalInput("#Save preprocessing parameters to disk")
     cmdLst.Add("import joblib")
     If $preProcess.Count Then
       cmdLst.Add("joblib.dump(preprocess_X, '" & xpath & "')")
@@ -2386,6 +2516,7 @@ Public Sub btnevaluate_Click()
 
   Dim cmdLst As New String[]
 
+  TerminalInput("#Setting Evaluation parameters")
   If rbregression.Value = True Then
     Select cmbmodel.Text
       Case "Linear Regression"
@@ -2520,6 +2651,7 @@ Public Sub btnunsupervised_Click()
   Dim cmdLst As New String[]
   Dim xPath As String
 
+  TerminalInput("#Save updated dataset to disk")
   Select cmbmodel.Text
     Case "KMeans Clustering"
       cmdLst.Add("X_Pred = kmeans.predict(X_processed)")
@@ -2574,20 +2706,6 @@ Public Sub btnshowscatterplot_Click()
     Case "RandomForest Regression", "RandomForest Classifier"
 
   End Select
-
-End
-
-Public Sub btntreeinstal_Click()
-
-  Dim xList As String[]
-
-  xList = New String[]
-  If $pyShell Then
-    TerminalInput("pip install graphviz")
-  Else
-    xList.Add("python3-graphviz")
-    modMain.InstallSelectedApplication(xList)
-  Endif
 
 End
 

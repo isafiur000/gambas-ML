@@ -27,6 +27,9 @@ def resize(image):
     )
 
 
+# ------------------------------------------------------------------
+# ROUTES
+# ------------------------------------------------------------------
 @app.route('/similarity', methods=['POST'])
 def get_similarity():
     data = request.json
@@ -53,7 +56,10 @@ def get_similarity():
 
 
     return jsonify({'similarity': "\n".join(lists)})
-    
+
+# ------------------------------------------------------------------
+# CLIENT CALL
+# ------------------------------------------------------------------      
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5008, debug=False)
             

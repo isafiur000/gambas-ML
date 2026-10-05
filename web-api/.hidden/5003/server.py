@@ -16,6 +16,9 @@ print("Model loaded!")
 # Define label columns (class names)
 label_columns = ['Cardiomegaly', 'Edema', 'Consolidation', 'Pneumonia', 'No Finding']
 
+# ------------------------------------------------------------------
+# ROUTES
+# ------------------------------------------------------------------
 @app.route('/prediction', methods=['POST'])
 def get_prediction():
     data = request.json
@@ -46,6 +49,8 @@ def get_prediction():
     
     return jsonify({'prediction': predicted_class_label})
 
-
+# ------------------------------------------------------------------
+# CLIENT CALL
+# ------------------------------------------------------------------   
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003, debug=False)

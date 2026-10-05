@@ -18,6 +18,9 @@ print("Loading model...")
 classifier = TBClassifier(model_path = model_path, config_path = config_path)
 print("Model loaded!")
 
+# ------------------------------------------------------------------
+# ROUTES
+# ------------------------------------------------------------------
 @app.route('/prediction', methods=['POST'])
 def get_prediction():
     data = request.json
@@ -28,6 +31,9 @@ def get_prediction():
     result = classifier.predict(image)
 
     return jsonify({'prediction': result['prediction']})
-    
+
+# ------------------------------------------------------------------
+# CLIENT CALL
+# ------------------------------------------------------------------      
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5004, debug=False)

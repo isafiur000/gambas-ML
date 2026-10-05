@@ -3,15 +3,52 @@ from flask import Flask, request, jsonify
 from sentence_transformers import SentenceTransformer, util
 import numpy as np
 import json
+import torch
 
 app = Flask(__name__)
-model_path = "/home/safiur/Project/models/BioLord"
+MODEL_PATH = "/home/safiur/Project/models/BioLord"
 
-# Load model immediately when the script starts
-print("Loading model...")
-model = SentenceTransformer(model_path)
+print("Loading BioLORD model...")
+model = SentenceTransformer(MODEL_PATH)
 print("Model loaded!")
 
+# ------------------------------------------------------------------
+# LOAD SYMPTOMS DICTIONARY EMBEDDINGS
+# -----------------------------------------------------------------
+SYMPTOM_DICT_PATH = "/etc/web-api/5001/extract_symptoms/tblsymptoms.json"
+SCORE_THRESHOLD = 0.5
+
+print("Loading symptom definitions...")
+with open(SYMPTOM_DICT_PATH, 'r', encoding='utf-8') as file:
+    symptom_dictionary = json.load(file)
+
+# Filter out incomplete entries
+symptom_dictionary = [
+    s for s in symptom_dictionary
+    if isinstance(s, dict) and s.get("symptom_name") and s.get("symptom_definition")
+]
+print(f"Loaded {len(symptom_dictionary)} symptoms.")
+
+print("Precomputing corpus embeddings from symptom definitions...")
+corpus_texts = [s['symptom_definition'] for s in symptom_dictionary]
+with torch.no_grad():
+    corpus_embeddings = model.encode(
+        corpus_texts,
+        convert_to_tensor=True,
+        normalize_embeddings=True,
+        show_progress_bar=True,
+    )
+print(f"Corpus embeddings ready: shape = {tuple(corpus_embeddings.shape)}")
+
+# Warm-up so the first real request isn't slow
+with torch.no_grad():
+    _ = model.encode("warmup", convert_to_tensor=True, normalize_embeddings=True)
+print("Warm-up complete. Server is ready.")
+
+
+# ------------------------------------------------------------------
+# ROUTES
+# ------------------------------------------------------------------
 @app.route('/similarity', methods=['POST'])
 def get_similarity():
     data = request.json
@@ -48,46 +85,41 @@ def get_compare():
 
 @app.route('/extraction', methods=['POST'])
 def get_extraction():
-    data = request.json
+    data = request.json or {}
     complaint_path = data.get('complaint_path', '')
-    symptom_dict = data.get('symptom_dict', '')
-    
-    #load patient complaints textfile
+
+    # Load patient complaint text file
     with open(complaint_path, 'r', encoding="utf-8") as file:
         patient_complaint = file.read()
-    
-    #load symptoms dict json file
-    with open(symptom_dict, 'r', encoding='utf-8') as file:
-        symptom_dictionary = json.load(file)
-        
-    # Optional: filter out incomplete entries
-    symptom_dictionary = [
-        s for s in symptom_dictionary
-        if isinstance(s, dict) and s.get("symptom_name") and s.get("symptom_definition")
-    ]
-    
-    # 3. Create corpus embeddings from symptom DEFINITIONS only
-    corpus_texts = [s['symptom_definition'] for s in symptom_dictionary]
-    corpus_embeddings = model.encode(corpus_texts, convert_to_tensor=True)
 
-    # 4. Process a patient complaint
-    query_embedding = model.encode(patient_complaint, convert_to_tensor=True)
-    
-    # 5. Compare patient complaint against symptom definitions
-    hits = util.semantic_search(query_embedding, corpus_embeddings, top_k=3)[0]
-    
-    # 6. Return only the symptom_name for each match
-    SCORE_THRESHOLD = 0.5
+    # Encode ONLY the query — corpus embeddings are already in memory
+    with torch.no_grad():
+        query_embedding = model.encode(
+            patient_complaint,
+            convert_to_tensor=True,
+            normalize_embeddings=True,
+        )
+
+    # Compare against ALL symptom definitions so the threshold sees everything
+    hits = util.semantic_search(
+        query_embedding,
+        corpus_embeddings,
+        top_k=len(symptom_dictionary),
+    )[0]
+
     extracted_symptoms = []
     for hit in hits:
         if hit['score'] > SCORE_THRESHOLD:
             symptom = symptom_dictionary[hit['corpus_id']]
-            #extracted_symptoms.append(symptom['symptom_name'])
-            extracted_symptoms.append(f"{symptom['symptom_name']} Score: {hit['score']:.4f}")
-        
-    return jsonify({'extraction': "\n".join(extracted_symptoms)})
-        
+            extracted_symptoms.append(
+                f"{symptom['symptom_name']} Score: {hit['score']:.4f}"
+            )
 
+    return jsonify({'extraction': "\n".join(extracted_symptoms)})
+
+# ------------------------------------------------------------------
+# CLIENT CALL
+# ------------------------------------------------------------------   
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=False)
 

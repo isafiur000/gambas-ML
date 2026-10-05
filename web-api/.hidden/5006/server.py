@@ -15,6 +15,9 @@ print("Loading model...")
 package = load_model()
 print("Model loaded!")
 
+# ------------------------------------------------------------------
+# ROUTES
+# ------------------------------------------------------------------
 @app.route('/prediction', methods=['POST'])
 def get_prediction():
     data = request.json
@@ -42,7 +45,9 @@ def get_prediction():
     
     return jsonify({'prediction': prediction})
     
-
+# ------------------------------------------------------------------
+# CLIENT CALL
+# ------------------------------------------------------------------   
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5006, debug=False)
     
