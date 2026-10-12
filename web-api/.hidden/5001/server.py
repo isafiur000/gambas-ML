@@ -25,22 +25,51 @@ with open(SYMPTOM_DICT_PATH, 'r', encoding='utf-8') as file:
 # Filter out incomplete entries
 symptom_dictionary = [
     s for s in symptom_dictionary
-    if isinstance(s, dict) and s.get("symptom_name") and s.get("symptom_definition")
+    if isinstance(s, dict) and s.get("code") and s.get("definition")
 ]
 print(f"Loaded {len(symptom_dictionary)} symptoms.")
 
 print("Precomputing corpus embeddings from symptom definitions...")
-corpus_texts = [s['symptom_definition'] for s in symptom_dictionary]
+symptom_texts = [s['definition'] for s in symptom_dictionary]
 with torch.no_grad():
-    corpus_embeddings = model.encode(
-        corpus_texts,
+    symptom_embeddings = model.encode(
+        symptom_texts,
         convert_to_tensor=True,
         normalize_embeddings=True,
         show_progress_bar=True,
     )
-print(f"Corpus embeddings ready: shape = {tuple(corpus_embeddings.shape)}")
+print(f"Symptoms embeddings ready: shape = {tuple(symptom_embeddings.shape)}")
 
+# ------------------------------------------------------------------
+# LOAD DIAGNOSIS DICTIONARY EMBEDDINGS
+# -----------------------------------------------------------------
+DIAGNOSIS_DICT_PATH = "/etc/web-api/5001/search_diagnosis/tblicdcomplete.json"
+
+print("Loading diagnosis definitions...")
+with open(DIAGNOSIS_DICT_PATH, 'r', encoding='utf-8') as file:
+    diagnosis_dictionary = json.load(file)
+
+# Filter out incomplete entries
+diagnosis_dictionary = [
+    s for s in diagnosis_dictionary
+    if isinstance(s, dict) and s.get("code") and s.get("definition")
+]
+print(f"Loaded {len(diagnosis_dictionary)} diagnosis.")
+
+print("Precomputing corpus embeddings from diagnosis definitions...")
+diagnosis_texts = [s['definition'] for s in diagnosis_dictionary]
+with torch.no_grad():
+    diagnosis_embeddings = model.encode(
+        diagnosis_texts,
+        convert_to_tensor=True,
+        normalize_embeddings=True,
+        show_progress_bar=True,
+    )
+print(f"Diagnosis embeddings ready: shape = {tuple(diagnosis_embeddings.shape)}")
+
+# ------------------------------------------------------------------
 # Warm-up so the first real request isn't slow
+# ------------------------------------------------------------------
 with torch.no_grad():
     _ = model.encode("warmup", convert_to_tensor=True, normalize_embeddings=True)
 print("Warm-up complete. Server is ready.")
@@ -49,6 +78,7 @@ print("Warm-up complete. Server is ready.")
 # ------------------------------------------------------------------
 # ROUTES
 # ------------------------------------------------------------------
+# 1. Text Similarity
 @app.route('/similarity', methods=['POST'])
 def get_similarity():
     data = request.json
@@ -60,7 +90,8 @@ def get_similarity():
     sim = model.similarity(emb1, emb2)
     
     return jsonify({'similarity': float(sim.cpu().numpy()[0][0])})
-    
+
+# 2. Compare paragraph with a list of differential diagnosis
 @app.route('/compare', methods=['POST'])
 def get_compare():
     data = request.json
@@ -83,6 +114,7 @@ def get_compare():
             
     return jsonify({'compare': "\n".join(lists)})
 
+# 3. Extract symptoms from paragraph
 @app.route('/extraction', methods=['POST'])
 def get_extraction():
     data = request.json or {}
@@ -103,7 +135,7 @@ def get_extraction():
     # Compare against ALL symptom definitions so the threshold sees everything
     hits = util.semantic_search(
         query_embedding,
-        corpus_embeddings,
+        symptom_embeddings,
         top_k=len(symptom_dictionary),
     )[0]
 
@@ -112,10 +144,41 @@ def get_extraction():
         if hit['score'] > SCORE_THRESHOLD:
             symptom = symptom_dictionary[hit['corpus_id']]
             extracted_symptoms.append(
-                f"{symptom['symptom_name']} Score: {hit['score']:.4f}"
+                f"{symptom['code']} Score: {hit['score']:.4f}"
             )
 
     return jsonify({'extraction': "\n".join(extracted_symptoms)})
+
+# 4. Search appropriate ICD diagnosis from given free text
+@app.route('/search', methods=['POST'])
+def get_search():
+    data = request.json or {}
+    patient_diagnosis = data.get('diagnosis_name', '')
+
+    # Encode ONLY the query
+    with torch.no_grad():
+        diagno_embedding = model.encode(
+            patient_diagnosis,
+            convert_to_tensor=True,
+            normalize_embeddings=True,
+        )
+
+    # Compare against ALL symptom definitions so the threshold sees everything
+    matches = util.semantic_search(
+        diagno_embedding,
+        diagnosis_embeddings,
+        top_k=len(diagnosis_dictionary),
+    )[0]
+
+    matching_diagnosis = []
+    for match in matches:
+        if match['score'] > SCORE_THRESHOLD:
+            diagnosis = diagnosis_dictionary[match['corpus_id']]
+            matching_diagnosis.append(
+                f"{diagnosis['definition']} : {diagnosis['code']} Score: {match['score']:.4f}"
+            )
+
+    return jsonify({'search': "\n".join(matching_diagnosis)})
 
 # ------------------------------------------------------------------
 # CLIENT CALL
